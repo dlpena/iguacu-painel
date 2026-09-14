@@ -110,7 +110,7 @@
   document.getElementById('avisos').innerHTML = R.avisos.map(a => `<div class="aviso-item ${a.nivel}">${a.texto}<div class="meta">${a.curto ? a.curto + ' · ' : ''}${fmtInst(a.quando)} · ${a.regra}${a.fonte ? ' · ' + a.fonte : ''}</div></div>`).join('');
 
   // ---- mini-mapa (espera o leiaute assentar: vetores adicionados a mapa sem tamanho quebram o renderizador do Leaflet)
-  await new Promise(r => requestAnimationFrame(() => setTimeout(r, 60)));
+  await new Promise(r => setTimeout(r, 80)); // (não usar requestAnimationFrame: não dispara em aba oculta e trava o roteiro)
   const mapa = L.map('mapa', { scrollWheelZoom: false, zoomControl: false });
   mapa.setView([-25.7, -52.3], 7);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 14 }).addTo(mapa);
