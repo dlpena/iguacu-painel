@@ -170,10 +170,10 @@ async function iniciar(ativo) {
 function layoutBase(extra = {}) {
   const lay = Object.assign({
     font: { family: 'Questrial, Century Gothic, sans-serif', size: 12, color: '#1F2937' },
-    paper_bgcolor: '#fff', plot_bgcolor: '#fff', margin: { l: 64, r: extra.yaxis2 ? 70 : 16, t: 30, b: 40 },
+    paper_bgcolor: '#fff', plot_bgcolor: '#fff', margin: { l: 64, r: extra.yaxis2 ? 70 : 16, t: extra.showlegend === false ? 24 : 56, b: 40 },
     separators: ',.', // decimal com vírgula, milhar com ponto: 10.000 em vez de 10k
     hovermode: 'x unified', showlegend: true,
-    legend: { orientation: 'h', y: 1.12, x: 0, font: { size: 11 } },
+    legend: { orientation: 'h', y: 1, yanchor: 'bottom', x: 0, font: { size: 11 } }, // legenda na margem superior, fora da área de plotagem
     xaxis: { gridcolor: PAL.grade, zeroline: false, hoverformat: '%d/%m %H:%M' },
     yaxis: { gridcolor: PAL.grade, zeroline: false, fixedrange: false, autorange: true },
   }, extra);
