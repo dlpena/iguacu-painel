@@ -38,7 +38,7 @@
   <div id="g-reguas" class="grafico"></div>
 
   <div id="bloco-usina" hidden>
-    <h2 id="t-niveis">Níveis da usina</h2>
+    <h2 id="t-niveis">Nível de montante</h2>
     <div id="g-niveis" class="grafico"></div>
     <h2>Defluência, turbinada e vertida</h2>
     <div id="g-vazoes" class="grafico"></div>
@@ -159,20 +159,20 @@
     // réguas (vazão) + defluência da usina
     const tv = [], tc = [];
     T.estacoes.forEach((e, i) => {
+      if (e.papel === 'barramento' && U) return; // repete a defluência do ONS; fica no gráfico da usina
       const r = recorte(e.serie.instante, { v: e.serie.vazao, c: e.serie.cota_m }, dias);
       const nome = `${e.curto} (${PAPEL[e.papel]})`;
       if (r.arrays.v.some(x => x !== null)) tv.push(traco(r.x, r.arrays.v, nome, cores[i % cores.length], { line: { color: cores[i % cores.length], width: e.papel === 'afluente' ? 1 : 1.5, dash: e.papel === 'afluente' ? 'dot' : 'solid' } }));
       if (r.arrays.c.some(x => x !== null)) tc.push(traco(r.x, r.arrays.c, nome, cores[i % cores.length]));
     });
     if (U) { const r = recorte(U.horario.instante, { d: U.horario.defluencia }, dias); tv.push(traco(r.x, r.arrays.d, `Defluência ${U.curto} (ONS)`, PAL.limite, { line: { color: PAL.limite, width: 2, dash: 'dash' } })); }
-    const lq = U ? lim(['defluencia'], ['minimo']).map(q => { const l = linhaLimite(q.valor, `mínimo declarado ${fmt(q.valor)}`, PAL.limite); return { s: l.shape, a: l.ann }; }) : [];
-    if (tv.length) Plotly.react('g-reguas', tv, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, ...SA(lq) }), CONFIG_PLOT); else document.getElementById('g-reguas').innerHTML = '<p class="sub">Sem vazão nas réguas do trecho.</p>';
+    if (tv.length) Plotly.react('g-reguas', tv, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, shapes: [], annotations: [] }), CONFIG_PLOT); else document.getElementById('g-reguas').innerHTML = '<p class="sub">Sem vazão nas réguas do trecho.</p>';
     if (tc.length) Plotly.react('g-cotas', tc, layoutBase({ yaxis: { title: 'cota (m)', gridcolor: PAL.grade } }), CONFIG_PLOT); else document.getElementById('g-cotas').innerHTML = '<p class="sub">Sem cota nas réguas do trecho.</p>';
     if (U) {
       const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, nj: H.nivel_jusante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, af: H.afluencia, mo: (U.montante || {}).defluencia }, dias); const x = r.x, A = r.arrays;
       const ln = lim(['nivel_montante'], ['minimo', 'maximo', 'maximo_declarado']).map(q => { const l = linhaLimite(q.valor, `${q.tipo === 'maximo_declarado' ? 'FSAR-H' : 'outorga'} ${fmt(q.valor, 2)} m`, q.tipo === 'maximo_declarado' ? PAL.fsarh : PAL.limite); return { s: l.shape, a: l.ann }; });
-      Plotly.react('g-niveis', [traco(x, A.nm, 'Nível montante', SERIES.nivel_montante), traco(x, A.nj, 'Nível jusante', SERIES.nivel_jusante, { yaxis: 'y2' })],
-        layoutBase({ yaxis: { title: 'montante (m)', gridcolor: PAL.grade }, yaxis2: { title: 'jusante (m)', overlaying: 'y', side: 'right', showgrid: false }, ...SA(ln) }), CONFIG_PLOT);
+      Plotly.react('g-niveis', [traco(x, A.nm, 'Nível montante', SERIES.nivel_montante)],
+        layoutBase({ showlegend: false, yaxis: { title: 'nível montante (m)', gridcolor: PAL.grade, tickformat: ',.2f' }, ...SA(ln) }), CONFIG_PLOT);
       const lv = lim(['defluencia', 'vazao_turbinada'], ['minimo', 'maximo']).map(q => { const l = linhaLimite(q.valor, `${q.variavel === 'defluencia' ? 'defluência' : 'turbinada'} ${q.tipo === 'minimo' ? 'mín.' : 'máx.'} ${fmt(q.valor, 1)}`, PAL.limite); return { s: l.shape, a: l.ann }; });
       Plotly.react('g-vazoes', [traco(x, A.de, 'Defluência', SERIES.defluencia, { line: { color: SERIES.defluencia, width: 2 } }), traco(x, A.tu, 'Turbinada', SERIES.vazao_turbinada), traco(x, A.ve, 'Vertida', SERIES.vazao_vertida)],
         layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, ...SA(lv) }), CONFIG_PLOT);

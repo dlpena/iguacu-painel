@@ -52,9 +52,10 @@
   const pct = (v, ref) => (v && ref) ? `${fmt(v / ref * 100, 0)}% da média de 30 d` : '';
   document.getElementById('cartoes').innerHTML = [
     { r: 'Chuva média na bacia', v: `${fmt(ac.d7, 1)} <small>mm em 7 d</small>`, n: `${fmt(ac.mes_atual, 1)} mm no mês (${ac.dias_mes || 0} dias) contra MLT de ${fmt(ac.mlt_mes, 1)} mm no mês inteiro · MERGE até ${fmtData(ac.ultimo_dia)}`, h: 'chuva.html' },
-    { r: 'Reservatórios de acumulação', v: acum.map(u => `<span title="${u.curto}">${fmt((u.atual || {}).pct_volume_util, 0)}%</span>`).join(' <small>·</small> '), n: acum.map(u => u.curto).join(' · ') + ` · volume útil, ONS ${fmtInst((acum[0].atual || {}).instante)}`, h: 'trecho.html?t=foz-do-areia' },
+    { r: 'Volume útil dos reservatórios de acumulação', v: `<div style="display:flex;gap:18px">${acum.map(u => `<a href="trecho.html?t=${u.slug}" style="color:inherit"><div style="font-size:12px;color:var(--texto-suave)">${u.curto}</div>${fmt((u.atual || {}).pct_volume_util, 0)}%</a>`).join('')}</div>`, n: `ONS ${fmtInst((acum[0].atual || {}).instante)} · clique no nome para abrir o trecho`, h: null },
     { r: 'Chegando às Cataratas', v: `${fmt(hc.vazao)} <small>m³/s</small>`, n: `Hotel Cataratas (Copel) ${fmtInst(hc.ultimo_instante)} · ${pct(hc.vazao, (hc.ref || {}).vazao_media_30d)} · Baixo Iguaçu defluindo ${fmt(bxi.atual.defluencia)} m³/s contra mínimo declarado de 350`, h: 'trecho.html?t=cataratas' },
-  ].map(c => `<a class="cartao" href="${c.h}" style="display:block;color:inherit"><div class="rotulo">${c.r}</div><div class="valor">${c.v}</div><div class="nota">${c.n}</div></a>`).join('');
+  ].map(c => c.h ? `<a class="cartao" href="${c.h}" style="display:block;color:inherit"><div class="rotulo">${c.r}</div><div class="valor">${c.v}</div><div class="nota">${c.n}</div></a>`
+                 : `<div class="cartao"><div class="rotulo">${c.r}</div><div class="valor">${c.v}</div><div class="nota">${c.n}</div></div>`).join('');
 
   // ---- avisos
   const av = B.trechos.flatMap(t => t.avisos.map(a => ({ ...a, trecho_nome: t.nome })));

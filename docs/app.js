@@ -167,14 +167,22 @@ async function iniciar(ativo) {
 
 /* Plotly */
 function layoutBase(extra = {}) {
-  return Object.assign({
+  const lay = Object.assign({
     font: { family: 'Questrial, Century Gothic, sans-serif', size: 12, color: '#1F2937' },
-    paper_bgcolor: '#fff', plot_bgcolor: '#fff', margin: { l: 56, r: 16, t: 30, b: 40 },
+    paper_bgcolor: '#fff', plot_bgcolor: '#fff', margin: { l: 64, r: extra.yaxis2 ? 70 : 16, t: 30, b: 40 },
+    separators: ',.', // decimal com vírgula, milhar com ponto: 10.000 em vez de 10k
     hovermode: 'x unified', showlegend: true,
     legend: { orientation: 'h', y: 1.12, x: 0, font: { size: 11 } },
     xaxis: { gridcolor: PAL.grade, zeroline: false, hoverformat: '%d/%m %H:%M' },
-    yaxis: { gridcolor: PAL.grade, zeroline: false, fixedrange: false },
+    yaxis: { gridcolor: PAL.grade, zeroline: false, fixedrange: false, autorange: true },
   }, extra);
+  // eixos de vazão (m³/s) sem abreviação; título do eixo secundário afastado dos números
+  for (const k of ['yaxis', 'yaxis2']) {
+    const ax = lay[k]; if (!ax) continue;
+    if (ax.title && /m³\/s/.test(String(ax.title.text || ax.title))) { ax.tickformat = ',d'; ax.hoverformat = ',.0f'; }
+    if (ax.title && typeof ax.title === 'string') ax.title = { text: ax.title, standoff: k === 'yaxis2' ? 12 : 8 };
+  }
+  return lay;
 }
 const CONFIG_PLOT = { responsive: true, displaylogo: false, locale: 'pt-BR', modeBarButtonsToRemove: ['lasso2d', 'select2d'],
                       toImageButtonOptions: { format: 'png', scale: 2 } };
