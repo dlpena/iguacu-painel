@@ -82,8 +82,11 @@
     }
   });
   const leg = L.control({ position: 'bottomleft' });
-  leg.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = SVG_TRIANGULO + 'usina<br><i style="background:#2E8B57;border-radius:50%"></i>régua com dado há até 2 h<br><i style="background:#D9A400;border-radius:50%"></i>régua com dado há até 24 h<br><i style="background:#9CA3AF;border-radius:50%"></i>régua sem dado recente<br><span style="color:#6B7280">passe o mouse para o nome e a leitura</span>'; return d; };
+  leg.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = '<b>régua: último dado</b><br><i style="background:#2E8B57;border-radius:50%"></i>há até 2 h<br><i style="background:#D9A400;border-radius:50%"></i>há até 24 h<br><i style="background:#9CA3AF;border-radius:50%"></i>sem dado recente'; return d; };
   leg.addTo(mapa);
+  const simbolos = L.control({ position: 'topright' });
+  simbolos.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = '<i style="background:#0193DE;border-radius:50%"></i>régua (ANA)<br>' + SVG_TRIANGULO + 'usina (ONS)<br><span style="color:#6B7280">passe o mouse para nome e leitura</span>'; return d; };
+  simbolos.addTo(mapa);
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
 </body>

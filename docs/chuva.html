@@ -52,7 +52,7 @@
   ].map(c => `<div class="cartao"><div class="rotulo">${c[0]}</div><div class="valor">${c[1]}</div><div class="nota">${c[2]}</div></div>`).join('');
 
   // ---- mapa de células
-  const mapa = L.map('mapa', { scrollWheelZoom: false });
+  const mapa = L.map('mapa', { zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 14, opacity: .6 }).addTo(mapa);
   let camadaCel = null, legenda = null;
   const G = C.grade;
