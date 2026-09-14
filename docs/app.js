@@ -2,8 +2,9 @@
 const PAL = { escuro: '#294086', medio: '#0193DE', claro: '#80B5E1', marinho: '#000080', limite: '#C0504D',
               fsarh: '#E08A1E', cinza: '#6B7280', chuva: '#80B5E1', grade: '#E5E7EB' };
 // usinas: só a defluência é exibida (a afluência horária do ONS é resíduo de balanço)
-const SERIES = { nivel_montante: PAL.escuro, nivel_jusante: PAL.claro, defluencia: PAL.medio, vazao_turbinada: '#3FB0E8',
-                 vazao_vertida: '#0B6BA8', afluencia: '#8C9BB5', vazao_natural: '#8C9BB5', pct_volume_util: PAL.escuro };
+// cores distinguíveis entre si: defluência azul-escuro (total), turbinada verde-água, vertida laranja
+const SERIES = { nivel_montante: PAL.escuro, nivel_jusante: PAL.claro, defluencia: PAL.escuro, vazao_turbinada: '#1B9E77',
+                 vazao_vertida: '#E6791E', afluencia: '#8C9BB5', vazao_natural: '#8C9BB5', pct_volume_util: PAL.escuro };
 const ROT = { nivel_montante: 'Nível montante', nivel_jusante: 'Nível jusante', defluencia: 'Defluência', vazao_turbinada: 'Turbinada',
               vazao_vertida: 'Vertida', afluencia: 'Afluência (ONS, resíduo de balanço)', vazao_natural: 'Vazão natural (diária)',
               pct_volume_util: 'Volume útil (%)' };
