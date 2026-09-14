@@ -8,7 +8,7 @@ const ROT = { nivel_montante: 'Nível montante', nivel_jusante: 'Nível jusante'
               pct_volume_util: 'Volume útil (%)' };
 const PAGINAS = [['index.html', 'O rio agora'], ['trecho.html?t=cataratas', 'Cataratas'], ['chuva.html', 'Chuva'],
                  ['catalogo.html', 'Catálogo'], ['fontes.html', 'Fontes e método']];
-const PAPEL = { montante: 'régua a montante', afluente: 'afluente', barramento: 'régua de barramento', jusante: 'régua a jusante', pluviometro: 'pluviômetro' };
+const PAPEL = { montante: 'estação fluviométrica a montante', afluente: 'afluente', barramento: 'estação fluviométrica no barramento', jusante: 'estação fluviométrica a jusante', pluviometro: 'pluviômetro' };
 
 /* marcador de usina nos mapas: triângulo azul-escuro; rótulo fixo à direita ou só no hover */
 const SVG_TRIANGULO = '<svg width="18" height="16" viewBox="0 0 18 16"><path d="M9 1 L17 15 L1 15 Z" fill="#294086" stroke="#fff" stroke-width="1.5"/></svg>';
@@ -40,31 +40,32 @@ function desenharEsquema(el, trechos) {
     t._ini = ini; t._fim = cols.length;
   });
   const W = MARG * 2 + cols.length * COL;
-  const x = i => MARG + i * COL + COL / 2;
+  const x = i => W - (MARG + i * COL + COL / 2); // espelhado: cabeceira à direita, foz à esquerda, como no mapa
   const cor = h => ({ ok: '#2E8B57', aviso: '#D9A400', off: '#9CA3AF' }[frescorClasse(h)]);
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;min-width:${Math.min(W, 1100)}px;height:auto" font-family="Questrial, Century Gothic, sans-serif">`;
   // faixas dos trechos
   trechos.forEach((t, k) => {
-    const x0 = MARG + t._ini * COL, x1 = MARG + t._fim * COL;
+    const x1 = W - (MARG + t._ini * COL), x0 = W - (MARG + t._fim * COL);
     if (x1 <= x0) return;
     s += `<a href="trecho.html?t=${t.slug}"><rect x="${x0}" y="0" width="${x1 - x0}" height="${H}" fill="${k % 2 ? '#F1F5FA' : '#FFFFFF'}"><title>${esc(t.nome)}</title></rect>`;
-    s += `<text x="${x0 + 6}" y="16" font-size="11.5" fill="#294086">${esc(t.curto || t.nome)}${t.avisos && t.avisos.length ? ` <tspan fill="#E08A1E">●</tspan>` : ''}</text></a>`;
+    s += `<text x="${x0 + 6}" y="14" font-size="11.5" fill="#294086">${esc(t.curto || t.nome)}${t.avisos && t.avisos.length ? ` <tspan fill="#E08A1E">●</tspan>` : ''}</text></a>`;
   });
   // rio
-  s += `<path d="M${MARG} ${Y} H${W - MARG}" stroke="#80B5E1" stroke-width="6" stroke-linecap="round" fill="none"/>`;
-  s += `<text x="${MARG}" y="${Y + 20}" font-size="10" fill="#6B7280">montante</text><text x="${W - MARG}" y="${Y + 20}" font-size="10" fill="#6B7280" text-anchor="end">jusante</text>`;
+  s += `<path d="M${W - MARG} ${Y} H${MARG}" stroke="#80B5E1" stroke-width="6" stroke-linecap="round" fill="none"/>`;
+  // setas do sentido do rio (leste -> oeste), uma por faixa de trecho
+  trechos.forEach(t => { const xs = W - (MARG + t._fim * COL) + 10; if (t._fim > t._ini) s += `<path d="M${xs + 7} ${Y - 5} L${xs} ${Y} L${xs + 7} ${Y + 5}" fill="none" stroke="#294086" stroke-width="1.6" stroke-linecap="round"/>`; });
+  s += `<text x="${W - MARG}" y="${Y + 22}" font-size="10" fill="#6B7280" text-anchor="end">cabeceira (montante)</text><text x="${MARG}" y="${Y + 22}" font-size="10" fill="#6B7280">← sentido do rio · foz (jusante)</text>`;
   cols.forEach((c, i) => {
     const cx = x(i);
     if (c.tipo === 'vazio') {
       return;
     } else if (c.tipo === 'afluente') {
       const e = c.e, cy = Y - 56;
-      const rotulo = (e.rio_afluente || e.curto).replace(/^rio /i, '');
       s += `<a href="estacao.html?c=${e.codigo}"><path d="M${cx} ${cy} L${x(i + 1) - 4} ${Y - 3}" stroke="#80B5E1" stroke-width="2.5" fill="none" stroke-dasharray="3 3"/>`;
       s += `<circle cx="${cx}" cy="${cy}" r="6" fill="${cor(e.frescor_h)}" stroke="#fff" stroke-width="1.5"/>`;
-      s += `<text x="${cx}" y="${cy - 10}" font-size="11.5" text-anchor="middle" fill="#1F2937">${fmt(e.vazao)}</text>`;
-      s += `<text x="${cx}" y="${cy - 22}" font-size="9.5" text-anchor="middle" fill="#6B7280">${esc(rotulo)}</text>`;
+      s += `<text x="${cx - 9}" y="${cy + 4}" font-size="11.5" text-anchor="end" fill="#1F2937">${fmt(e.vazao)}</text>`;
+      s += `<text transform="translate(${cx + 7} ${cy - 3}) rotate(-35)" font-size="10" fill="#6B7280">${esc(e.curto)}</text>`;
       s += `<title>${esc(e.curto)} (${e.codigo}) · ${PAPEL[e.papel]}${e.rio_afluente ? ' · ' + e.rio_afluente : ''}\n${fmt(e.vazao)} m³/s · ${frescorTexto(e.frescor_h)}</title></a>`;
     } else if (c.tipo === 'regua') {
       const e = c.e;
@@ -79,7 +80,7 @@ function desenharEsquema(el, trechos) {
       s += `<text x="${cx}" y="${Y + 4}" font-size="11.5" text-anchor="middle" fill="#fff">${dentro}</text>`;
       s += `<text x="${cx}" y="${Y - 22}" font-size="12.5" text-anchor="middle" fill="#294086">${fmt(a.defluencia)}</text>`;
       s += `<text transform="translate(${cx + 3} ${Y + 30}) rotate(45)" font-size="11" fill="#294086">${esc(u.curto)}</text>`;
-      s += `<title>${esc(u.nome)} (ONS ${fmtInst(a.instante)})\ndefluência ${fmt(a.defluencia)} m³/s · turbinada ${fmt(a.vazao_turbinada)} · vertida ${fmt(a.vazao_vertida)}\nnível montante ${fmt(a.nivel_montante, 2)} m${u.tipo === 'acumulacao' ? ' · volume útil ' + fmt(a.pct_volume_util_di, 1) + '%' : ''}${c.barr ? '\nrégua de barramento ' + c.barr.codigo + ': ' + fmt(c.barr.vazao) + ' m³/s' : ''}</title></a>`;
+      s += `<title>${esc(u.nome)} (ONS ${fmtInst(a.instante)})\ndefluência ${fmt(a.defluencia)} m³/s · turbinada ${fmt(a.vazao_turbinada)} · vertida ${fmt(a.vazao_vertida)}\nnível montante ${fmt(a.nivel_montante, 2)} m${u.tipo === 'acumulacao' ? ' · volume útil ' + fmt(a.pct_volume_util_di, 1) + '%' : ''}${c.barr ? '\nestação de barramento ' + c.barr.codigo + ': ' + fmt(c.barr.vazao) + ' m³/s' : ''}</title></a>`;
     }
   });
   s += '</svg>';

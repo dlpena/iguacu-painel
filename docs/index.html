@@ -15,13 +15,13 @@
 <header id="topo" class="topo"></header>
 <main>
   <h1>O rio Iguaçu agora</h1>
-  <p class="sub">Da cabeceira às Cataratas, em ordem de rio: usinas do ONS e réguas da ANA com o valor da última hora. Clique em qualquer ponto para abrir o trecho.</p>
+  <p class="sub">Da cabeceira às Cataratas, em ordem de rio: usinas do ONS e estações fluviométricas da ANA com o valor da última hora. O rio corre da direita para a esquerda, como no mapa. Clique em qualquer ponto para abrir o trecho.</p>
 
   <div class="cartao" style="padding:10px 8px 4px">
     <div class="esquema-wrap"><div id="esquema"></div></div>
     <div class="legenda-esquema">
       <span><i class="lg usina"></i>usina (defluência, m³/s)</span>
-      <span><i class="lg regua"></i>régua no rio Iguaçu (vazão, m³/s)</span>
+      <span><i class="lg regua"></i>estação fluviométrica no rio Iguaçu (vazão, m³/s)</span>
       <span><i class="lg afl"></i>afluente</span>
       <span><i class="lg ok"></i>dado há até 2 h</span><span><i class="lg aviso"></i>até 24 h</span><span><i class="lg off"></i>sem dado recente</span>
       <span><i class="lg alerta"></i>há aviso no trecho</span>
@@ -82,10 +82,10 @@
     }
   });
   const leg = L.control({ position: 'bottomleft' });
-  leg.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = '<b>régua: último dado</b><br><i style="background:#2E8B57;border-radius:50%"></i>há até 2 h<br><i style="background:#D9A400;border-radius:50%"></i>há até 24 h<br><i style="background:#9CA3AF;border-radius:50%"></i>sem dado recente'; return d; };
+  leg.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = '<b>estação fluviométrica: último dado</b><br><i style="background:#2E8B57;border-radius:50%"></i>há até 2 h<br><i style="background:#D9A400;border-radius:50%"></i>há até 24 h<br><i style="background:#9CA3AF;border-radius:50%"></i>sem dado recente'; return d; };
   leg.addTo(mapa);
   const simbolos = L.control({ position: 'topright' });
-  simbolos.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = '<i style="background:#0193DE;border-radius:50%"></i>régua (ANA)<br>' + SVG_TRIANGULO + 'usina (ONS)<br><span style="color:#6B7280">passe o mouse para nome e leitura</span>'; return d; };
+  simbolos.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = '<i style="background:#0193DE;border-radius:50%"></i>estação fluviométrica (ANA)<br>' + SVG_TRIANGULO + 'usina (ONS)<br><span style="color:#6B7280">passe o mouse para nome e leitura</span>'; return d; };
   simbolos.addTo(mapa);
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
