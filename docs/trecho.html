@@ -18,7 +18,7 @@
   <div class="controles" id="sel-trecho"></div>
   <h1 id="titulo">Trecho</h1>
   <p class="sub" id="contexto"></p>
-  <div class="cartao" style="padding:6px 8px 2px;margin-bottom:14px"><div class="esquema-wrap"><div id="esquema"></div></div></div>
+  <div class="cartao" style="padding:6px 8px 2px;margin-bottom:14px"><div class="esquema-wrap"><div id="esquema"></div></div><div class="sub" style="font-size:11.5px;margin:2px 6px 4px">Bacia inteira, da cabeceira (direita) à foz (esquerda); o trecho desta página está destacado. Clique em outra faixa para mudar de trecho.</div></div>
 
   <div class="grade" style="grid-template-columns: minmax(280px, 1fr) minmax(300px, 2fr)">
     <div class="mapa-caixa"><div id="mapa" style="height:100%;min-height:320px"></div><div id="situacao" class="situacao" title="situação na bacia"></div></div>
@@ -69,7 +69,7 @@
   document.getElementById('titulo').textContent = T.nome;
   document.getElementById('contexto').textContent = T.contexto;
   const U = T.usina;
-  desenharEsquema(document.getElementById('esquema'), [R]);
+  desenharEsquema(document.getElementById('esquema'), B.trechos, slug); // bacia inteira com o trecho em destaque
 
   // ---- pontos do trecho (usina + réguas, em ordem de rio, cada um com referência)
   const refTxt = (v, r) => (v !== null && v !== undefined && r) ? `${fmt(v / r * 100, 0)}% da média de 30 d (${fmt(r)})` : 'sem referência de 30 d';

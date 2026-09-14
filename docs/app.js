@@ -23,7 +23,7 @@ function marcadorUsina(latlng, nome, rotuloFixo = false) {
 }
 
 /* esquema longitudinal do rio: usinas e réguas em ordem, com o valor da última hora */
-function desenharEsquema(el, trechos) {
+function desenharEsquema(el, trechos, destaque = null) {
   const unico = trechos.length === 1;
   const COL = 56, MARG = unico ? 64 : 28, Y = 150, H = 262;
   const cols = []; // {tipo, x, ...}
@@ -52,8 +52,10 @@ function desenharEsquema(el, trechos) {
   trechos.forEach((t, k) => {
     const x1 = W - (MARG + t._ini * COL), x0 = W - (MARG + t._fim * COL);
     if (x1 <= x0) return;
-    s += `<a href="trecho.html?t=${t.slug}"><rect x="${x0}" y="0" width="${x1 - x0}" height="${H}" fill="${k % 2 ? '#F1F5FA' : '#FFFFFF'}"><title>${esc(t.nome)}</title></rect>`;
-    s += `<text x="${x0 + 6}" y="14" font-size="11.5" fill="#294086">${esc(t.curto || t.nome)}${t.avisos && t.avisos.length ? ` <tspan fill="#E08A1E">●</tspan>` : ''}</text></a>`;
+    const sel = t.slug === destaque;
+    s += `<a href="trecho.html?t=${t.slug}"><rect x="${x0}" y="0" width="${x1 - x0}" height="${H}" fill="${sel ? '#E3EEFB' : (k % 2 ? '#F1F5FA' : '#FFFFFF')}"><title>${esc(t.nome)}</title></rect>`;
+    if (sel) s += `<rect x="${x0 + 1.5}" y="1.5" width="${x1 - x0 - 3}" height="${H - 3}" rx="6" fill="none" stroke="#294086" stroke-width="2.5"/>`;
+    s += `<text x="${x0 + 6}" y="14" font-size="${sel ? 12.5 : 11.5}" fill="#294086" ${sel ? 'font-weight="bold"' : ''}>${esc(t.curto || t.nome)}${t.avisos && t.avisos.length ? ` <tspan fill="#E08A1E">●</tspan>` : ''}</text></a>`;
   });
   // rio
   s += `<path d="M${W - MARG} ${Y} H${MARG}" stroke="#80B5E1" stroke-width="6" stroke-linecap="round" fill="none"/>`;
