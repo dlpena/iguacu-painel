@@ -39,7 +39,7 @@
   <div id="bloco-usina" hidden>
     <h2 id="t-niveis">Níveis da usina</h2>
     <div id="g-niveis" class="grafico"></div>
-    <h2>Afluência, defluência, turbinada e vertida</h2>
+    <h2>Defluência, turbinada e vertida</h2>
     <div id="g-vazoes" class="grafico"></div>
     <div class="grade c2">
       <div><h2>Variação horária (rampa)</h2><p class="sub" style="margin-bottom:6px">Diferença entre médias horárias consecutivas: indício, não medida da rampa instantânea.</p><div id="g-rampa" class="grafico baixo"></div></div>
@@ -95,8 +95,7 @@
       <div class="papel">usina · ${U.tipo === 'acumulacao' ? 'acumulação' : "fio d'água"} · ${U.agente}</div>
       <div class="nome"><span class="ponto ${frescorClasse(a.frescor_h)}"></span>${U.nome} <small>ONS ${fmtInst(a.instante)}</small></div>
       <div class="valores">
-        <div><div class="var" style="color:${COR_AFL}">afluência</div><b style="color:${COR_AFL}">${fmt(a.afluencia)}</b> m³/s<div class="ref">horária ONS, resíduo de balanço: só indicativa</div></div>
-        <div><div class="var" style="color:${COR_DEF}">defluência</div><b style="color:${COR_DEF}">${fmt(a.defluencia)}</b> m³/s${tend(t.defluencia_6h)}<div class="ref">${qCtx}${refTxt(a.defluencia, rf.defluencia_media_30d)}</div></div>
+        <div><div class="var">defluência</div><b>${fmt(a.defluencia)}</b> m³/s${tend(t.defluencia_6h)}<div class="ref">${qCtx}${refTxt(a.defluencia, rf.defluencia_media_30d)}</div></div>
         <div><div class="var">turbinada / vertida</div><b>${fmt(a.vazao_turbinada)}</b> / <b>${fmt(a.vazao_vertida)}</b> m³/s<div class="ref">ONS ${fmtInst(a.instante)}</div></div>
         <div><div class="var">nível montante</div><b>${fmt(a.nivel_montante, 2)}</b> m${tend(t.nivel_montante_6h, 2)}<div class="ref">${nivelCtx}</div></div>
         ${U.tipo === 'acumulacao' ? `<div><div class="var">volume útil</div><b>${fmt(a.pct_volume_util, 1)}</b> %<div class="ref">ONS ${fmtInst(a.instante)}</div></div>` : `<div><div class="var">nível jusante</div><b>${fmt(a.nivel_jusante, 2)}</b> m<div class="ref">ONS ${fmtInst(a.instante)}</div></div>`}
@@ -157,7 +156,7 @@
       Plotly.react('g-niveis', [traco(x, A.nm, 'Nível montante', SERIES.nivel_montante), traco(x, A.nj, 'Nível jusante', SERIES.nivel_jusante, { yaxis: 'y2' })],
         layoutBase({ yaxis: { title: 'montante (m)', gridcolor: PAL.grade }, yaxis2: { title: 'jusante (m)', overlaying: 'y', side: 'right', showgrid: false }, ...SA(ln) }), CONFIG_PLOT);
       const lv = lim(['defluencia', 'vazao_turbinada'], ['minimo', 'maximo']).map(q => { const l = linhaLimite(q.valor, `${q.variavel === 'defluencia' ? 'defluência' : 'turbinada'} ${q.tipo === 'minimo' ? 'mín.' : 'máx.'} ${fmt(q.valor, 1)}`, PAL.limite); return { s: l.shape, a: l.ann }; });
-      Plotly.react('g-vazoes', [traco(x, A.af, 'Afluência (ONS, resíduo de balanço)', SERIES.afluencia, { line: { color: SERIES.afluencia, width: 1.4, dash: 'dot' } }), traco(x, A.de, 'Defluência', SERIES.defluencia, { line: { color: SERIES.defluencia, width: 2 } }), traco(x, A.tu, 'Turbinada', SERIES.vazao_turbinada), traco(x, A.ve, 'Vertida', SERIES.vazao_vertida)],
+      Plotly.react('g-vazoes', [traco(x, A.de, 'Defluência', SERIES.defluencia, { line: { color: SERIES.defluencia, width: 2 } }), traco(x, A.tu, 'Turbinada', SERIES.vazao_turbinada), traco(x, A.ve, 'Vertida', SERIES.vazao_vertida)],
         layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, ...SA(lv) }), CONFIG_PLOT);
       const rr = regras.find(q => q.tipo === 'rampa'); const base = rr && rr.variavel === 'vazao_turbinada' ? A.tu : A.de;
       const dif = base.map((v, i) => (i && v !== null && base[i - 1] !== null) ? v - base[i - 1] : null);

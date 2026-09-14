@@ -1,10 +1,9 @@
 /* Funções compartilhadas do Painel Iguaçu (sem framework, sem build). */
-const PAL = { escuro: '#294086', medio: '#0193DE', claro: '#80B5E1', marinho: '#000080', limite: '#4B5563',
+const PAL = { escuro: '#294086', medio: '#0193DE', claro: '#80B5E1', marinho: '#000080', limite: '#C0504D',
               fsarh: '#E08A1E', cinza: '#6B7280', chuva: '#80B5E1', grade: '#E5E7EB' };
-// convenção das usinas: afluência em azul, defluência em vermelho (esquema, cartões e séries)
-const COR_AFL = '#0193DE', COR_DEF = '#D7263D';
-const SERIES = { nivel_montante: PAL.escuro, nivel_jusante: PAL.claro, defluencia: COR_DEF, vazao_turbinada: '#3FB0E8',
-                 vazao_vertida: '#0B6BA8', afluencia: COR_AFL, vazao_natural: '#8C9BB5', pct_volume_util: PAL.escuro };
+// usinas: só a defluência é exibida (a afluência horária do ONS é resíduo de balanço)
+const SERIES = { nivel_montante: PAL.escuro, nivel_jusante: PAL.claro, defluencia: PAL.medio, vazao_turbinada: '#3FB0E8',
+                 vazao_vertida: '#0B6BA8', afluencia: '#8C9BB5', vazao_natural: '#8C9BB5', pct_volume_util: PAL.escuro };
 const ROT = { nivel_montante: 'Nível montante', nivel_jusante: 'Nível jusante', defluencia: 'Defluência', vazao_turbinada: 'Turbinada',
               vazao_vertida: 'Vertida', afluencia: 'Afluência (ONS, resíduo de balanço)', vazao_natural: 'Vazão natural (diária)',
               pct_volume_util: 'Volume útil (%)' };
@@ -86,10 +85,9 @@ function desenharEsquema(el, trechos) {
       const dentro = u.tipo === 'acumulacao' ? `${fmt(a.pct_volume_util, 0)}%` : '▲';
       s += `<a href="trecho.html?t=${c.t.slug}"><rect x="${cx - 23}" y="${Y - 15}" width="46" height="30" rx="4" fill="#294086" stroke="${cor(a.frescor_h)}" stroke-width="2.5"/>`;
       s += `<text x="${cx}" y="${Y + 4}" font-size="11.5" text-anchor="middle" fill="#fff">${dentro}</text>`;
-      s += `<text x="${cx}" y="${Y - 34}" font-size="12" text-anchor="middle" fill="${COR_AFL}">${fmt(a.afluencia)}</text>`;
-      s += `<text x="${cx}" y="${Y - 21}" font-size="12" text-anchor="middle" fill="${COR_DEF}">${fmt(a.defluencia)}</text>`;
+      s += `<text x="${cx}" y="${Y - 22}" font-size="12.5" text-anchor="middle" fill="#294086">${fmt(a.defluencia)}</text>`;
       s += `<text transform="translate(${cx + 3} ${Y + 30}) rotate(45)" font-size="11" fill="#294086">${esc(u.curto)}</text>`;
-      s += `<title>${esc(u.nome)} (ONS ${fmtInst(a.instante)})\nafluência ${fmt(a.afluencia)} m³/s (resíduo de balanço) · defluência ${fmt(a.defluencia)} m³/s\nturbinada ${fmt(a.vazao_turbinada)} · vertida ${fmt(a.vazao_vertida)}\nnível montante ${fmt(a.nivel_montante, 2)} m${u.tipo === 'acumulacao' ? ' · volume útil ' + fmt(a.pct_volume_util, 1) + '%' : ''}${c.barr ? '\nestação de barramento ' + c.barr.codigo + ': ' + fmt(c.barr.vazao) + ' m³/s' : ''}</title></a>`;
+      s += `<title>${esc(u.nome)} (ONS ${fmtInst(a.instante)})\ndefluência ${fmt(a.defluencia)} m³/s · turbinada ${fmt(a.vazao_turbinada)} · vertida ${fmt(a.vazao_vertida)}\nnível montante ${fmt(a.nivel_montante, 2)} m${u.tipo === 'acumulacao' ? ' · volume útil ' + fmt(a.pct_volume_util, 1) + '%' : ''}${c.barr ? '\nestação de barramento ' + c.barr.codigo + ': ' + fmt(c.barr.vazao) + ' m³/s' : ''}</title></a>`;
     }
   });
   s += '</svg>';
