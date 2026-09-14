@@ -65,12 +65,15 @@
       .bindTooltip(`${fmt(vals[i], 1)} mm`, { sticky: true }))).addTo(mapa);
     if (legenda) legenda.remove();
     legenda = L.control({ position: 'bottomleft' });
-    legenda.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); const passos = [0, .25, .5, .75, 1]; d.innerHTML = `<b>MERGE, mm em ${{ d1: '1 dia', d7: '7 dias', d30: '30 dias' }[k]}</b><br>` + passos.map(p => `<i style="background:${corChuva(p * escala, escala)}"></i>${fmt(p * escala, 0)}`).join('<br>') + `<br><i style="border-radius:50%;background:#0193DE;border:2px solid #C0504D"></i>pluviômetro (cor = medido, mesma escala)<br>${SVG_TRIANGULO}usina`; return d; };
+    legenda.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); const passos = [0, .25, .5, .75, 1]; d.innerHTML = `<b>MERGE, mm em ${{ d1: '1 dia', d7: '7 dias', d30: '30 dias' }[k]}</b><br>` + passos.map(p => `<i style="background:${corChuva(p * escala, escala)}"></i>${fmt(p * escala, 0)}`).join('<br>'); return d; };
     legenda.addTo(mapa);
     document.getElementById('info-grade').textContent = `${G[k + '_dias']} dia(s) de MERGE somados · máximo na bacia ${fmt(max, 1)} mm`;
     document.querySelectorAll('.controles button[data-k]').forEach(b => b.classList.toggle('ativo', b.dataset.k === k));
   }
   try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { style: { color: PAL.escuro, weight: 2, fill: false } }).addTo(mapa); mapa.fitBounds(cam.getBounds(), { paddingTopLeft: [0, 0], paddingBottomRight: [0, 10] }); } catch (e) { mapa.setView([-25.7, -52.3], 7); }
+  const simbolos = L.control({ position: 'topright' });
+  simbolos.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = `<i style="border-radius:50%;background:#0193DE;border:2px solid #C0504D"></i>pluviômetro (cor = medido no período, mesma escala do MERGE)<br>${SVG_TRIANGULO}usina<br><span style="color:#6B7280">passe o mouse para nome e leitura</span>`; return d; };
+  simbolos.addTo(mapa);
   desenharGrade('d1');
   document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => desenharGrade(b.dataset.k)));
   U.usinas.forEach(u => marcadorUsina([u.lat, u.lon], u.curto, true).addTo(mapa));
