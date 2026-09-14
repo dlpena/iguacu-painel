@@ -109,8 +109,10 @@
   // ---- avisos do trecho
   document.getElementById('avisos').innerHTML = R.avisos.map(a => `<div class="aviso-item ${a.nivel}">${a.texto}<div class="meta">${a.curto ? a.curto + ' · ' : ''}${fmtInst(a.quando)} · ${a.regra}${a.fonte ? ' · ' + a.fonte : ''}</div></div>`).join('');
 
-  // ---- mini-mapa
+  // ---- mini-mapa (espera o leiaute assentar: vetores adicionados a mapa sem tamanho quebram o renderizador do Leaflet)
+  await new Promise(r => requestAnimationFrame(() => setTimeout(r, 60)));
   const mapa = L.map('mapa', { scrollWheelZoom: false, zoomControl: false });
+  mapa.setView([-25.7, -52.3], 7);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 14 }).addTo(mapa);
   const pts = [];
   R.estacoes.filter(e => e.lat && e.lon).forEach(e => { pts.push([e.lat, e.lon]); L.circleMarker([e.lat, e.lon], { radius: 6, color: '#fff', weight: 1, fillColor: { ok: '#2E8B57', aviso: '#D9A400', off: '#9CA3AF' }[frescorClasse(e.frescor_h)], fillOpacity: .95 }).addTo(mapa).bindTooltip(`${e.curto}: ${fmt(e.vazao)} m³/s`); });
@@ -138,8 +140,8 @@
     B.trechos.filter(t => t.usina).forEach(t => L.circleMarker([t.usina.lat, t.usina.lon], { radius: 2, color: '#294086', weight: 1, fillColor: '#294086', fillOpacity: 1, interactive: false }).addTo(sit));
     validos.forEach(p => L.circleMarker(p, { radius: 2.5, color: '#C0504D', weight: 1, fillColor: '#C0504D', fillOpacity: 1, interactive: false }).addTo(sit));
     const ret = L.rectangle(mapa.getBounds(), { color: '#C0504D', weight: 1, fillOpacity: .08, dashArray: '3 2', interactive: false }).addTo(sit);
-    const ajustar = () => { sit.invalidateSize(); sit.fitBounds(cam.getBounds(), { padding: [3, 3] }); ret.setBounds(mapa.getBounds()); };
-    mapa.on('move zoom resize', () => ret.setBounds(mapa.getBounds()));
+    const ajustar = () => { try { sit.invalidateSize(); sit.fitBounds(cam.getBounds(), { padding: [3, 3] }); ret.setBounds(mapa.getBounds()); } catch (e) { console.warn('situação', e); } };
+    mapa.on('move zoom', () => { try { ret.setBounds(mapa.getBounds()); } catch (e) {} });
     setTimeout(ajustar, 300); setTimeout(ajustar, 1200);
   } catch (e) { console.warn('situação', e); }
 
