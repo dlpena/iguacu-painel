@@ -19,7 +19,7 @@
   <p class="sub">Duas fontes que se completam: o MERGE do INPE/CPTEC (satélite GPM combinado com pluviômetros, grade de 0,1°, 585 células na bacia) diz onde e quanto choveu em toda a área; os pluviômetros da telemetria da ANA dizem o que foi medido no chão. A média de longo termo (MLT) é a climatologia oficial do MERGE, 1998–2024.</p>
 
   <nav class="indice">
-    <a class="sec" href="#agora">Agora</a><a class="sec" href="#onde">Onde choveu</a><a class="sec" href="#tempo">Mês e ano</a><a class="sec" href="#chao">Satélite × chão</a><a class="sec" href="#dados">Dados</a>
+    <a class="sec" href="#agora">Agora</a><a class="sec" href="#onde">Onde choveu</a><a class="sec" href="#tempo">Mês e ano</a><a class="sec" href="#chao">Satélite vs pluviômetros</a><a class="sec" href="#dados">Dados</a>
   </nav>
 
   <section class="bloco" id="agora">
@@ -50,10 +50,10 @@
   </section>
 
   <section class="bloco" id="chao">
-    <h2><small>4</small>Satélite contra o chão, trecho a trecho</h2>
-    <p class="sub">Cada pluviômetro da telemetria da ANA contra o que o MERGE estimou na célula de 0,1° onde ele está, em ordem de rio. Quando os dois concordam, o mapa acima merece confiança; pluviômetro em zero com o satélite indicando chuva é sensor mudo, não estiagem.</p>
-    <p class="explica">Coluna Leitura, comparando os 7 dias: <b>próximos</b> quando medido e satélite diferem em até 20% do maior dos dois (por exemplo, 82 mm contra 81 mm); <b>chão mediu mais</b> ou <b>satélite estimou mais</b> quando a diferença passa de 20%; <b>sensor mudo?</b> quando o pluviômetro marcou menos de 1 mm e o satélite mais de 15 mm. A diferença é esperada: o pluviômetro mede um ponto, o satélite estima a média de uma célula de cerca de 11 km.</p>
+    <h2><small>4</small>Satélite vs pluviômetros</h2>
+    <p class="sub">Cada pluviômetro da telemetria da ANA contra o que o MERGE estimou na célula de 0,1° onde ele está, agrupados por trecho em ordem de rio. Quando os dois estão próximos, o mapa acima merece confiança.</p>
     <div class="tabela-wrap"><table class="tab" id="tab-comp"><thead><tr><th>Estação</th><th>Tipo</th><th class="num">Medido 7 d (mm)</th><th class="num">MERGE 7 d (mm)</th><th class="num">Diferença</th><th class="num">Medido 30 d</th><th class="num">MERGE 30 d</th><th>Leitura</th><th>Último dado</th></tr></thead><tbody></tbody></table></div>
+    <p class="nota-tabela"><b>Como ler a coluna Leitura</b> (comparação dos 7 dias): <b>próximos</b> quando a discrepância entre o pluviômetro e o MERGE é inferior a 20% do maior dos dois valores (por exemplo, 82 mm no pluviômetro e 81 mm no MERGE); <b>pluviômetro mediu mais</b> ou <b>satélite estimou mais</b> quando a discrepância é de 20% ou mais; <b>sensor mudo?</b> quando o pluviômetro marcou menos de 1 mm e o MERGE mais de 15 mm. Alguma discrepância é esperada: o pluviômetro mede um ponto, o MERGE estima a média de uma célula de cerca de 11 km.</p>
   </section>
 
   <section class="bloco" id="dados">
@@ -140,8 +140,8 @@
   desenharDiaria(90);
   document.querySelectorAll('.controles button[data-d]').forEach(b => b.addEventListener('click', () => desenharDiaria(+b.dataset.d)));
 
-  // ================= 4. Satélite × chão
-  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo? zero medido com satélite acima de 15 mm', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) <= .2) return ['próximos', 'color:#2E8B57']; return [d > 0 ? 'chão mediu mais que o satélite' : 'satélite estimou mais que o chão', 'color:#D9A400']; };
+  // ================= 4. Satélite vs pluviômetros
+  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo?', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) < .2) return ['próximos', 'color:#2E8B57']; return [d > 0 ? 'pluviômetro mediu mais' : 'satélite estimou mais', 'color:#D9A400']; };
   const porTrecho = B.trechos.map(t => ({ t, itens: (C.pluviometros || []).filter(p => p.trecho === t.slug) })).filter(g => g.itens.length);
   document.querySelector('#tab-comp tbody').innerHTML = porTrecho.map(g => `<tr><td colspan="9" style="background:#EEF3FA;color:var(--azul-escuro)"><a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a></td></tr>` + g.itens.map(p => {
     const sat7 = p.merge ? p.merge.d7 : null, sat30 = p.merge ? p.merge.d30 : null, [txt, cor] = leitura(p);
