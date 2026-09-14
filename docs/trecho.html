@@ -134,6 +134,7 @@
   try {
     const sit = L.map('situacao', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
     const cam = L.geoJSON(bacia, { style: { color: PAL.escuro, weight: 1, fillColor: PAL.claro, fillOpacity: .35 } }).addTo(sit);
+    sit.fitBounds(cam.getBounds(), { padding: [3, 3] }); // o mapa precisa de vista definida antes de receber marcadores
     B.trechos.filter(t => t.usina).forEach(t => L.circleMarker([t.usina.lat, t.usina.lon], { radius: 2, color: '#294086', weight: 1, fillColor: '#294086', fillOpacity: 1, interactive: false }).addTo(sit));
     validos.forEach(p => L.circleMarker(p, { radius: 2.5, color: '#C0504D', weight: 1, fillColor: '#C0504D', fillOpacity: 1, interactive: false }).addTo(sit));
     const ret = L.rectangle(mapa.getBounds(), { color: '#C0504D', weight: 1, fillOpacity: .08, dashArray: '3 2', interactive: false }).addTo(sit);
