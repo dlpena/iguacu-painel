@@ -43,7 +43,9 @@ function desenharEsquema(el, trechos) {
   const x = i => W - (MARG + i * COL + COL / 2); // espelhado: cabeceira à direita, foz à esquerda, como no mapa
   const cor = h => ({ ok: '#2E8B57', aviso: '#D9A400', off: '#9CA3AF' }[frescorClasse(h)]);
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;min-width:${Math.min(W, 1100)}px;height:auto" font-family="Questrial, Century Gothic, sans-serif">`;
+  // bacia inteira: ocupa a largura toda (com rolagem no celular); um trecho só: tamanho natural, sem esticar
+  const estilo = trechos.length > 1 ? `width:100%;min-width:${Math.min(W, 1100)}px;height:auto` : `width:${W}px;max-width:100%;height:auto`;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="${estilo}" font-family="Questrial, Century Gothic, sans-serif">`;
   // faixas dos trechos
   trechos.forEach((t, k) => {
     const x1 = W - (MARG + t._ini * COL), x0 = W - (MARG + t._fim * COL);
