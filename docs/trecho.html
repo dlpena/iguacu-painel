@@ -39,14 +39,13 @@
   <div id="bloco-usina" hidden>
     <h2 id="t-niveis">Níveis da usina</h2>
     <div id="g-niveis" class="grafico"></div>
-    <h2>Defluência, turbinada e vertida</h2>
+    <h2>Afluência, defluência, turbinada e vertida</h2>
     <div id="g-vazoes" class="grafico"></div>
     <div class="grade c2">
       <div><h2>Variação horária (rampa)</h2><p class="sub" style="margin-bottom:6px">Diferença entre médias horárias consecutivas: indício, não medida da rampa instantânea.</p><div id="g-rampa" class="grafico baixo"></div></div>
       <div><h2 id="t-mont">Usina de montante × esta usina</h2><p class="sub" style="margin-bottom:6px">O que entrou pela cascata contra o que saiu.</p><div id="g-mont" class="grafico baixo"></div></div>
     </div>
-    <h2>Série diária (ONS)</h2>
-    <div id="g-diario" class="grafico"></div>
+    <div id="bloco-vu" hidden><h2>Volume útil (%)</h2><div id="g-vu" class="grafico baixo"></div></div>
     <h2>Condicionantes e restrições vigentes</h2>
     <div id="regras"></div>
   </div>
@@ -96,11 +95,11 @@
       <div class="papel">usina · ${U.tipo === 'acumulacao' ? 'acumulação' : "fio d'água"} · ${U.agente}</div>
       <div class="nome"><span class="ponto ${frescorClasse(a.frescor_h)}"></span>${U.nome} <small>ONS ${fmtInst(a.instante)}</small></div>
       <div class="valores">
-        <div><div class="var">afluência (diária ONS)</div><b>${fmt(a.afluencia_di)}</b> m³/s<div class="ref">dia ${fmtData(a.dia)} · a horária do ONS é resíduo de balanço e não é exibida</div></div>
-        <div><div class="var">defluência</div><b>${fmt(a.defluencia)}</b> m³/s${tend(t.defluencia_6h)}<div class="ref">${qCtx}${refTxt(a.defluencia, rf.defluencia_media_30d)}</div></div>
-        <div><div class="var">turbinada / vertida</div><b>${fmt(a.vazao_turbinada)}</b> / <b>${fmt(a.vazao_vertida)}</b> m³/s<div class="ref">${U.tipo === 'acumulacao' ? `volume útil ${fmt(a.pct_volume_util_di, 1)}% (${fmtData(a.dia)})` : 'ONS ' + fmtInst(a.instante)}</div></div>
+        <div><div class="var" style="color:${COR_AFL}">afluência</div><b style="color:${COR_AFL}">${fmt(a.afluencia)}</b> m³/s<div class="ref">horária ONS, resíduo de balanço: só indicativa</div></div>
+        <div><div class="var" style="color:${COR_DEF}">defluência</div><b style="color:${COR_DEF}">${fmt(a.defluencia)}</b> m³/s${tend(t.defluencia_6h)}<div class="ref">${qCtx}${refTxt(a.defluencia, rf.defluencia_media_30d)}</div></div>
+        <div><div class="var">turbinada / vertida</div><b>${fmt(a.vazao_turbinada)}</b> / <b>${fmt(a.vazao_vertida)}</b> m³/s<div class="ref">ONS ${fmtInst(a.instante)}</div></div>
         <div><div class="var">nível montante</div><b>${fmt(a.nivel_montante, 2)}</b> m${tend(t.nivel_montante_6h, 2)}<div class="ref">${nivelCtx}</div></div>
-        <div><div class="var">vazão natural (diária ONS)</div><b>${fmt(a.vazao_natural_di)}</b> m³/s<div class="ref">dia ${fmtData(a.dia)}</div></div>
+        ${U.tipo === 'acumulacao' ? `<div><div class="var">volume útil</div><b>${fmt(a.pct_volume_util, 1)}</b> %<div class="ref">ONS ${fmtInst(a.instante)}</div></div>` : `<div><div class="var">nível jusante</div><b>${fmt(a.nivel_jusante, 2)}</b> m<div class="ref">ONS ${fmtInst(a.instante)}</div></div>`}
         ${barr.codigo ? `<div><div class="var">estação de barramento ${barr.codigo}</div><b>${fmt(barr.vazao)}</b> m³/s<div class="ref">${barr.responsavel} ${fmtInst(barr.ultimo_instante)} · cota ${fmt(barr.cota_m, 2)} m · <a href="estacao.html?c=${barr.codigo}">abrir</a></div></div>` : ''}
       </div></div>`;
     const posJus = R.estacoes.filter(e => e.papel !== 'barramento').findIndex(e => e.papel === 'jusante');
@@ -153,12 +152,12 @@
     if (tv.length) Plotly.react('g-reguas', tv, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, ...SA(lq) }), CONFIG_PLOT); else document.getElementById('g-reguas').innerHTML = '<p class="sub">Sem vazão nas réguas do trecho.</p>';
     if (tc.length) Plotly.react('g-cotas', tc, layoutBase({ yaxis: { title: 'cota (m)', gridcolor: PAL.grade } }), CONFIG_PLOT); else document.getElementById('g-cotas').innerHTML = '<p class="sub">Sem cota nas réguas do trecho.</p>';
     if (U) {
-      const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, nj: H.nivel_jusante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, mo: (U.montante || {}).defluencia }, dias); const x = r.x, A = r.arrays;
+      const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, nj: H.nivel_jusante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, af: H.afluencia, mo: (U.montante || {}).defluencia }, dias); const x = r.x, A = r.arrays;
       const ln = lim(['nivel_montante'], ['minimo', 'maximo', 'maximo_declarado']).map(q => { const l = linhaLimite(q.valor, `${q.tipo === 'maximo_declarado' ? 'FSAR-H' : 'outorga'} ${fmt(q.valor, 2)} m`, q.tipo === 'maximo_declarado' ? PAL.fsarh : PAL.limite); return { s: l.shape, a: l.ann }; });
       Plotly.react('g-niveis', [traco(x, A.nm, 'Nível montante', SERIES.nivel_montante), traco(x, A.nj, 'Nível jusante', SERIES.nivel_jusante, { yaxis: 'y2' })],
         layoutBase({ yaxis: { title: 'montante (m)', gridcolor: PAL.grade }, yaxis2: { title: 'jusante (m)', overlaying: 'y', side: 'right', showgrid: false }, ...SA(ln) }), CONFIG_PLOT);
       const lv = lim(['defluencia', 'vazao_turbinada'], ['minimo', 'maximo']).map(q => { const l = linhaLimite(q.valor, `${q.variavel === 'defluencia' ? 'defluência' : 'turbinada'} ${q.tipo === 'minimo' ? 'mín.' : 'máx.'} ${fmt(q.valor, 1)}`, PAL.limite); return { s: l.shape, a: l.ann }; });
-      Plotly.react('g-vazoes', [traco(x, A.de, 'Defluência', SERIES.defluencia, { line: { color: SERIES.defluencia, width: 2 } }), traco(x, A.tu, 'Turbinada', SERIES.vazao_turbinada), traco(x, A.ve, 'Vertida', SERIES.vazao_vertida)],
+      Plotly.react('g-vazoes', [traco(x, A.af, 'Afluência (ONS, resíduo de balanço)', SERIES.afluencia, { line: { color: SERIES.afluencia, width: 1.4, dash: 'dot' } }), traco(x, A.de, 'Defluência', SERIES.defluencia, { line: { color: SERIES.defluencia, width: 2 } }), traco(x, A.tu, 'Turbinada', SERIES.vazao_turbinada), traco(x, A.ve, 'Vertida', SERIES.vazao_vertida)],
         layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, ...SA(lv) }), CONFIG_PLOT);
       const rr = regras.find(q => q.tipo === 'rampa'); const base = rr && rr.variavel === 'vazao_turbinada' ? A.tu : A.de;
       const dif = base.map((v, i) => (i && v !== null && base[i - 1] !== null) ? v - base[i - 1] : null);
@@ -174,11 +173,11 @@
   if (U) {
     document.getElementById('bloco-usina').hidden = false;
     document.getElementById('csv').hidden = false;
-    const Dd = U.diario;
-    const td = [traco(Dd.data, Dd.vazao_natural, 'Vazão natural', SERIES.vazao_natural), traco(Dd.data, Dd.afluencia, 'Afluência (diária)', PAL.claro), traco(Dd.data, Dd.defluencia, 'Defluência (diária)', SERIES.defluencia)];
-    const lay = layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m/%Y' } });
-    if (U.tipo === 'acumulacao') { td.push(traco(Dd.data, Dd.pct_volume_util, 'Volume útil (%)', PAL.escuro, { yaxis: 'y2', line: { color: PAL.escuro, width: 2 } })); lay.yaxis2 = { title: '% volume útil', overlaying: 'y', side: 'right', range: [0, 100], showgrid: false }; }
-    Plotly.newPlot('g-diario', td, lay, CONFIG_PLOT);
+    if (U.tipo === 'acumulacao' && U.horario.pct_volume_util) {
+      document.getElementById('bloco-vu').hidden = false;
+      Plotly.newPlot('g-vu', [traco(U.horario.instante, U.horario.pct_volume_util, 'Volume útil (%)', PAL.escuro, { fill: 'tozeroy', fillcolor: 'rgba(128,181,225,.25)' })],
+        layoutBase({ showlegend: false, yaxis: { title: '%', gridcolor: PAL.grade, range: [0, 100] } }), CONFIG_PLOT);
+    }
     document.getElementById('regras').innerHTML = regras.length ? regras.map(r => `<div class="regra"><div class="v">${r.valor !== null && r.valor !== undefined ? fmt(r.valor, String(r.valor).includes('.') ? 2 : 0) + ' ' + r.unidade : '—'}</div><div>${r.titulo}<span class="chip">${r.vigencia || ''}</span></div><div class="f">${r.fonte}${r.nota ? ' · ' + r.nota : ''}</div></div>`).join('')
       : '<p class="sub">A outorga desta usina ainda não foi lida para o painel; nenhum limite é exibido até isso acontecer (regra: só dados verificáveis).</p>';
     document.getElementById('csv').addEventListener('click', () => {

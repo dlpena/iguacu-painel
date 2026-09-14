@@ -1,8 +1,10 @@
 /* Funções compartilhadas do Painel Iguaçu (sem framework, sem build). */
-const PAL = { escuro: '#294086', medio: '#0193DE', claro: '#80B5E1', marinho: '#000080', limite: '#C0504D',
+const PAL = { escuro: '#294086', medio: '#0193DE', claro: '#80B5E1', marinho: '#000080', limite: '#4B5563',
               fsarh: '#E08A1E', cinza: '#6B7280', chuva: '#80B5E1', grade: '#E5E7EB' };
-const SERIES = { nivel_montante: PAL.escuro, nivel_jusante: PAL.claro, defluencia: PAL.medio, vazao_turbinada: '#3FB0E8',
-                 vazao_vertida: '#0B6BA8', afluencia: '#8C9BB5', vazao_natural: '#8C9BB5', pct_volume_util: PAL.escuro };
+// convenção das usinas: afluência em azul, defluência em vermelho (esquema, cartões e séries)
+const COR_AFL = '#0193DE', COR_DEF = '#D7263D';
+const SERIES = { nivel_montante: PAL.escuro, nivel_jusante: PAL.claro, defluencia: COR_DEF, vazao_turbinada: '#3FB0E8',
+                 vazao_vertida: '#0B6BA8', afluencia: COR_AFL, vazao_natural: '#8C9BB5', pct_volume_util: PAL.escuro };
 const ROT = { nivel_montante: 'Nível montante', nivel_jusante: 'Nível jusante', defluencia: 'Defluência', vazao_turbinada: 'Turbinada',
               vazao_vertida: 'Vertida', afluencia: 'Afluência (ONS, resíduo de balanço)', vazao_natural: 'Vazão natural (diária)',
               pct_volume_util: 'Volume útil (%)' };
@@ -24,7 +26,7 @@ function marcadorUsina(latlng, nome, rotuloFixo = false) {
 /* esquema longitudinal do rio: usinas e réguas em ordem, com o valor da última hora */
 function desenharEsquema(el, trechos) {
   const unico = trechos.length === 1;
-  const COL = 56, MARG = unico ? 64 : 28, Y = 128, H = 244;
+  const COL = 56, MARG = unico ? 64 : 28, Y = 150, H = 262;
   const cols = []; // {tipo, x, ...}
   trechos.forEach(t => {
     const ini = cols.length;
@@ -52,7 +54,7 @@ function desenharEsquema(el, trechos) {
     const x1 = W - (MARG + t._ini * COL), x0 = W - (MARG + t._fim * COL);
     if (x1 <= x0) return;
     s += `<a href="trecho.html?t=${t.slug}"><rect x="${x0}" y="0" width="${x1 - x0}" height="${H}" fill="${k % 2 ? '#F1F5FA' : '#FFFFFF'}"><title>${esc(t.nome)}</title></rect>`;
-    s += `<text x="${x0 + 6}" y="${H - 6}" font-size="11.5" fill="#294086">${esc(t.curto || t.nome)}${t.avisos && t.avisos.length ? ` <tspan fill="#E08A1E">●</tspan>` : ''}</text></a>`;
+    s += `<text x="${x0 + 6}" y="14" font-size="11.5" fill="#294086">${esc(t.curto || t.nome)}${t.avisos && t.avisos.length ? ` <tspan fill="#E08A1E">●</tspan>` : ''}</text></a>`;
   });
   // rio
   s += `<path d="M${W - MARG} ${Y} H${MARG}" stroke="#80B5E1" stroke-width="6" stroke-linecap="round" fill="none"/>`;
@@ -66,11 +68,12 @@ function desenharEsquema(el, trechos) {
     if (c.tipo === 'vazio') {
       return;
     } else if (c.tipo === 'afluente') {
-      const e = c.e, cy = Y - 56;
-      s += `<a href="estacao.html?c=${e.codigo}"><path d="M${cx} ${cy} L${x(i + 1) - 4} ${Y - 3}" stroke="#80B5E1" stroke-width="2.5" fill="none" stroke-dasharray="3 3"/>`;
+      // afluentes vizinhos alternam altura para os nomes (inclinados 20° para cima) não se cruzarem
+      const e = c.e, alto = cols[i + 1] && cols[i + 1].tipo === 'afluente', cy = alto ? Y - 84 : Y - 50;
+      s += `<a href="estacao.html?c=${e.codigo}"><path d="M${cx} ${cy} L${x(i + (alto ? 2 : 1)) - 4} ${Y - 3}" stroke="#80B5E1" stroke-width="2.5" fill="none" stroke-dasharray="3 3"/>`;
       s += `<circle cx="${cx}" cy="${cy}" r="6" fill="${cor(e.frescor_h)}" stroke="#fff" stroke-width="1.5"/>`;
       s += `<text x="${cx - 9}" y="${cy + 4}" font-size="11.5" text-anchor="end" fill="#1F2937">${fmt(e.vazao)}</text>`;
-      s += `<text transform="translate(${cx + 7} ${cy - 3}) rotate(-35)" font-size="10" fill="#6B7280">${esc(e.curto)}</text>`;
+      s += `<text transform="translate(${cx + 8} ${cy - 2}) rotate(-20)" font-size="10" fill="#6B7280">${esc(e.curto)}</text>`;
       s += `<title>${esc(e.curto)} (${e.codigo}) · ${PAPEL[e.papel]}${e.rio_afluente ? ' · ' + e.rio_afluente : ''}\n${fmt(e.vazao)} m³/s · ${frescorTexto(e.frescor_h)}</title></a>`;
     } else if (c.tipo === 'regua') {
       const e = c.e;
@@ -80,12 +83,13 @@ function desenharEsquema(el, trechos) {
       s += `<title>${esc(e.curto)} (${e.codigo}) · ${PAPEL[e.papel]}\n${fmt(e.vazao)} m³/s${e.cota_m !== null && e.cota_m !== undefined ? ' · cota ' + fmt(e.cota_m, 2) + ' m' : ''} · ${frescorTexto(e.frescor_h)}${e.ref && e.ref.vazao_media_30d ? '\nmédia 30 d: ' + fmt(e.ref.vazao_media_30d) + ' m³/s' : ''}</title></a>`;
     } else {
       const u = c.u, a = u.atual || {};
-      const dentro = u.tipo === 'acumulacao' ? `${fmt(a.pct_volume_util_di, 0)}%` : '▲';
+      const dentro = u.tipo === 'acumulacao' ? `${fmt(a.pct_volume_util, 0)}%` : '▲';
       s += `<a href="trecho.html?t=${c.t.slug}"><rect x="${cx - 23}" y="${Y - 15}" width="46" height="30" rx="4" fill="#294086" stroke="${cor(a.frescor_h)}" stroke-width="2.5"/>`;
       s += `<text x="${cx}" y="${Y + 4}" font-size="11.5" text-anchor="middle" fill="#fff">${dentro}</text>`;
-      s += `<text x="${cx}" y="${Y - 22}" font-size="12.5" text-anchor="middle" fill="#294086">${fmt(a.defluencia)}</text>`;
+      s += `<text x="${cx}" y="${Y - 34}" font-size="12" text-anchor="middle" fill="${COR_AFL}">${fmt(a.afluencia)}</text>`;
+      s += `<text x="${cx}" y="${Y - 21}" font-size="12" text-anchor="middle" fill="${COR_DEF}">${fmt(a.defluencia)}</text>`;
       s += `<text transform="translate(${cx + 3} ${Y + 30}) rotate(45)" font-size="11" fill="#294086">${esc(u.curto)}</text>`;
-      s += `<title>${esc(u.nome)} (ONS ${fmtInst(a.instante)})\ndefluência ${fmt(a.defluencia)} m³/s · turbinada ${fmt(a.vazao_turbinada)} · vertida ${fmt(a.vazao_vertida)}\nnível montante ${fmt(a.nivel_montante, 2)} m${u.tipo === 'acumulacao' ? ' · volume útil ' + fmt(a.pct_volume_util_di, 1) + '%' : ''}${c.barr ? '\nestação de barramento ' + c.barr.codigo + ': ' + fmt(c.barr.vazao) + ' m³/s' : ''}</title></a>`;
+      s += `<title>${esc(u.nome)} (ONS ${fmtInst(a.instante)})\nafluência ${fmt(a.afluencia)} m³/s (resíduo de balanço) · defluência ${fmt(a.defluencia)} m³/s\nturbinada ${fmt(a.vazao_turbinada)} · vertida ${fmt(a.vazao_vertida)}\nnível montante ${fmt(a.nivel_montante, 2)} m${u.tipo === 'acumulacao' ? ' · volume útil ' + fmt(a.pct_volume_util, 1) + '%' : ''}${c.barr ? '\nestação de barramento ' + c.barr.codigo + ': ' + fmt(c.barr.vazao) + ' m³/s' : ''}</title></a>`;
     }
   });
   s += '</svg>';

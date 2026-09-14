@@ -32,7 +32,8 @@ from geo import simplificar  # noqa: E402
 SAIDA = DOCS / "data"
 DIAS_HO, DIAS_DI, DIAS_TELE, DIAS_CHUVA = 90, 400, 90, 400
 VARS_HO = {"val_nivelmontante": "nivel_montante", "val_niveljusante": "nivel_jusante", "val_vazaodefluente": "defluencia",
-           "val_vazaoturbinada": "vazao_turbinada", "val_vazaovertida": "vazao_vertida", "val_vazaoafluente": "afluencia"}
+           "val_vazaoturbinada": "vazao_turbinada", "val_vazaovertida": "vazao_vertida", "val_vazaoafluente": "afluencia",
+           "val_volumeutil": "pct_volume_util"}
 VARS_DI = {"val_vazaonatural": "vazao_natural", "val_vazaoafluente": "afluencia", "val_vazaodefluente": "defluencia",
            "val_volumeutilcon": "pct_volume_util", "val_nivelmontante": "nivel_montante"}
 MESES_EN = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
