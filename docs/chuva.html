@@ -34,8 +34,8 @@
   <div id="g-mensal" class="grafico"></div>
 
   <h2>Satélite contra o chão, trecho a trecho</h2>
-  <p class="sub" style="margin-bottom:8px">Cada pluviômetro da telemetria da ANA ao lado do que o MERGE estimou na célula de 0,1° onde ele está, em ordem de rio. Concordância boa dá confiança ao mapa; pluviômetro em zero com o satélite indicando chuva sugere sensor mudo, não estiagem.</p>
-  <div id="plu-trechos" class="grade c3"></div>
+  <p class="sub" style="margin-bottom:8px">Cada pluviômetro da telemetria da ANA contra o que o MERGE estimou na célula de 0,1° onde ele está, em ordem de rio. Quando os dois concordam, o mapa acima merece confiança; pluviômetro em zero com o satélite indicando chuva é sensor mudo, não estiagem.</p>
+  <div class="tabela-wrap"><table class="tab" id="tab-comp"><thead><tr><th>Estação</th><th>Tipo</th><th class="num">Medido 7 d (mm)</th><th class="num">MERGE 7 d (mm)</th><th class="num">Diferença</th><th class="num">Medido 30 d</th><th class="num">MERGE 30 d</th><th>Leitura</th><th>Último dado</th></tr></thead><tbody></tbody></table></div>
 </main>
 <footer id="rodape"></footer>
 <script>
@@ -65,7 +65,7 @@
       .bindTooltip(`${fmt(vals[i], 1)} mm`, { sticky: true }))).addTo(mapa);
     if (legenda) legenda.remove();
     legenda = L.control({ position: 'bottomright' });
-    legenda.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); const passos = [0, .25, .5, .75, 1]; d.innerHTML = `<b>mm em ${{ d1: '1 dia', d7: '7 dias', d30: '30 dias' }[k]}</b><br>` + passos.map(p => `<i style="background:${corChuva(p * escala, escala)}"></i>${fmt(p * escala, 0)}`).join('<br>'); return d; };
+    legenda.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); const passos = [0, .25, .5, .75, 1]; d.innerHTML = `<b>MERGE, mm em ${{ d1: '1 dia', d7: '7 dias', d30: '30 dias' }[k]}</b><br>` + passos.map(p => `<i style="background:${corChuva(p * escala, escala)}"></i>${fmt(p * escala, 0)}`).join('<br>') + `<br><i style="border-radius:50%;background:#0193DE;border:2px solid #C0504D"></i>pluviômetro (cor = medido, mesma escala)<br><i style="border-radius:50%;background:#294086"></i>usina`; return d; };
     legenda.addTo(mapa);
     document.getElementById('info-grade').textContent = `${G[k + '_dias']} dia(s) de MERGE somados · máximo na bacia ${fmt(max, 1)} mm`;
     document.querySelectorAll('.controles button[data-k]').forEach(b => b.classList.toggle('ativo', b.dataset.k === k));
@@ -76,7 +76,8 @@
   U.usinas.forEach(u => L.circleMarker([u.lat, u.lon], { radius: 5, color: '#fff', weight: 1.5, fillColor: PAL.escuro, fillOpacity: 1 }).addTo(mapa).bindTooltip(u.curto, { permanent: true, direction: 'right', className: 'rotulo-usina', offset: [6, 0] }));
   // pluviômetros: círculo pintado com a MESMA escala das células, para comparar satélite e chão de relance
   const marcadores = [];
-  (C.pluviometros || []).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius: 7, color: '#C0504D', weight: 2, fillColor: '#fff', fillOpacity: 1 }).addTo(mapa); marcadores.push([m, p]); });
+  (C.pluviometros || []).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius: 8, color: '#C0504D', weight: 2, fillColor: '#fff', fillOpacity: 1 }).addTo(mapa)
+    .bindTooltip(p.curto || p.nome.replace(/^UHE /, '').toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()), { permanent: true, direction: 'top', className: 'rotulo-plu', offset: [0, -8] }); marcadores.push([m, p]); });
   function pintarPluviometros(k) {
     const vals = G ? G[k] : [], max = Math.max(1, ...vals.filter(v => v !== null));
     const escala = k === 'd1' ? Math.max(10, Math.ceil(max / 10) * 10) : Math.max(20, Math.ceil(max / 20) * 20);
@@ -91,7 +92,7 @@
   desenharGrade = k => { _desenharGrade(k); pintarPluviometros(k); };
   pintarPluviometros('d7');
   document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => pintarPluviometros(b.dataset.k)));
-  const st = document.createElement('style'); st.textContent = '.rotulo-usina{background:transparent;border:0;box-shadow:none;font:11px Questrial,sans-serif;color:#294086;padding:0}.rotulo-usina:before{display:none}'; document.head.appendChild(st);
+  const st = document.createElement('style'); st.textContent = '.rotulo-usina{background:transparent;border:0;box-shadow:none;font:11px Questrial,sans-serif;color:#294086;padding:0}.rotulo-usina:before{display:none}.rotulo-plu{background:rgba(255,255,255,.85);border:0;box-shadow:none;font:10.5px Questrial,sans-serif;color:#7A1F1F;padding:1px 4px;border-radius:3px}.rotulo-plu:before{display:none}'; document.head.appendChild(st);
 
   // ---- diária
   const D = C.diaria || { data: [], mm: [] };
@@ -112,17 +113,14 @@
     { x: rot, y: M.map(m => m.mlt), type: 'scatter', mode: 'lines+markers', name: 'MLT 1998–2024', line: { color: PAL.escuro, width: 2 }, marker: { size: 6 } }],
     layoutBase({ hovermode: 'x', yaxis: { title: 'mm/mês', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade } }), CONFIG_PLOT);
 
-  // ---- pluviômetros por trecho, cada um contra o MERGE da célula
+  // ---- tabela: pluviômetros por trecho, cada um contra o MERGE da célula
+  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo? zero medido com satélite acima de 15 mm', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) <= .2) return ['concordam (até 20%)', 'color:#2E8B57']; return [d > 0 ? 'chão mediu mais que o satélite' : 'satélite estimou mais que o chão', 'color:#D9A400']; };
   const porTrecho = B.trechos.map(t => ({ t, itens: (C.pluviometros || []).filter(p => p.trecho === t.slug) })).filter(g => g.itens.length);
-  const barra = (v, sat) => { const mx = Math.max(v || 0, sat || 0, 1); return `<div class="comp"><div class="b obs" style="width:${(v || 0) / mx * 100}%"></div><div class="b sat" style="width:${(sat || 0) / mx * 100}%"></div></div>`; };
-  document.getElementById('plu-trechos').innerHTML = porTrecho.map(g => `<div class="cartao"><div class="rotulo"><a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a></div>
-    ${g.itens.map(p => { const sat = p.merge ? p.merge.d7 : null; const mudo = (p.mm_7d || 0) < 1 && sat !== null && sat > 15;
-      return `<div class="plu"><div class="n"><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small>${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'régua'} ${p.codigo}</small></div>
-        <div class="v"><b>${fmt(p.mm_7d, 1)}</b> mm medidos em 7 d <span class="ref">· MERGE na célula ${fmt(sat, 1)} mm · 30 d: ${fmt(p.mm_30d, 1)} contra ${fmt(p.merge ? p.merge.d30 : null, 1)}</span></div>
-        ${barra(p.mm_7d, sat)}${mudo ? '<div class="ref" style="color:#C0504D">zero medido com satélite acima de 15 mm: sensor possivelmente mudo</div>' : ''}</div>`; }).join('')}
-    </div>`).join('');
-  const st2 = document.createElement('style'); st2.textContent = '.plu{padding:7px 0;border-bottom:1px dashed var(--borda);font-size:13px}.plu:last-child{border:0}.plu .n a{color:var(--azul-escuro)}.plu .n small{color:var(--texto-suave);font-size:11px}.plu .v b{font-size:16px;font-weight:normal}.plu .ref{font-size:11.5px;color:var(--texto-suave)}.comp{margin-top:4px}.comp .b{height:4px;border-radius:2px;margin:2px 0}.comp .obs{background:#C0504D}.comp .sat{background:var(--azul-medio)}'; document.head.appendChild(st2);
-  document.getElementById('plu-trechos').insertAdjacentHTML('afterend', '<p class="sub" style="margin-top:8px"><span style="display:inline-block;width:22px;height:4px;background:#C0504D;vertical-align:middle"></span> medido no chão &nbsp; <span style="display:inline-block;width:22px;height:4px;background:var(--azul-medio);vertical-align:middle"></span> MERGE na célula (7 dias)</p>');
+  document.querySelector('#tab-comp tbody').innerHTML = porTrecho.map(g => `<tr><td colspan="9" style="background:#EEF3FA;color:var(--azul-escuro)"><a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a></td></tr>` + g.itens.map(p => {
+    const sat7 = p.merge ? p.merge.d7 : null, sat30 = p.merge ? p.merge.d30 : null, [txt, cor] = leitura(p);
+    const dif = (sat7 !== null && p.mm_7d !== null) ? p.mm_7d - sat7 : null;
+    return `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td>${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'régua com pluviômetro'}</td>
+      <td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(sat7, 1)}</td><td class="num">${dif === null ? '–' : (dif > 0 ? '+' : '') + fmt(dif, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td class="num">${fmt(sat30, 1)}</td><td style="${cor}">${txt}</td><td>${fmtInst(p.ultimo_instante)}</td></tr>`; }).join('')).join('');
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
 </body>
