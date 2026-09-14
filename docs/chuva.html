@@ -33,8 +33,9 @@
   <h2>Mensal contra a MLT</h2>
   <div id="g-mensal" class="grafico"></div>
 
-  <h2>Pluviômetros e réguas com chuva (telemetria ANA)</h2>
-  <div class="tabela-wrap"><table class="tab" id="tab-plu"><thead><tr><th>Código</th><th>Nome</th><th>Tipo</th><th class="num">24 h</th><th class="num">7 d</th><th class="num">30 d</th><th>Último dado</th></tr></thead><tbody></tbody></table></div>
+  <h2>Satélite contra o chão, trecho a trecho</h2>
+  <p class="sub" style="margin-bottom:8px">Cada pluviômetro da telemetria da ANA ao lado do que o MERGE estimou na célula de 0,1° onde ele está, em ordem de rio. Concordância boa dá confiança ao mapa; pluviômetro em zero com o satélite indicando chuva sugere sensor mudo, não estiagem.</p>
+  <div id="plu-trechos" class="grade c3"></div>
 </main>
 <footer id="rodape"></footer>
 <script>
@@ -73,8 +74,23 @@
   desenharGrade('d7');
   document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => desenharGrade(b.dataset.k)));
   U.usinas.forEach(u => L.circleMarker([u.lat, u.lon], { radius: 5, color: '#fff', weight: 1.5, fillColor: PAL.escuro, fillOpacity: 1 }).addTo(mapa).bindTooltip(u.curto, { permanent: true, direction: 'right', className: 'rotulo-usina', offset: [6, 0] }));
-  (C.pluviometros || []).forEach(p => L.circleMarker([p.lat, p.lon], { radius: 6, color: PAL.limite, weight: 2, fillColor: '#fff', fillOpacity: .9 }).addTo(mapa)
-    .bindPopup(`<b>${p.codigo}</b> ${p.nome}<br>${p.tipo}<br>24 h: ${fmt(p.mm_24h, 1)} mm · 7 d: ${fmt(p.mm_7d, 1)} mm · 30 d: ${fmt(p.mm_30d, 1)} mm<br><a href="estacao.html?c=${p.codigo}">abrir</a>`));
+  // pluviômetros: círculo pintado com a MESMA escala das células, para comparar satélite e chão de relance
+  const marcadores = [];
+  (C.pluviometros || []).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius: 7, color: '#C0504D', weight: 2, fillColor: '#fff', fillOpacity: 1 }).addTo(mapa); marcadores.push([m, p]); });
+  function pintarPluviometros(k) {
+    const vals = G ? G[k] : [], max = Math.max(1, ...vals.filter(v => v !== null));
+    const escala = k === 'd1' ? Math.max(10, Math.ceil(max / 10) * 10) : Math.max(20, Math.ceil(max / 20) * 20);
+    const chave = { d1: 'mm_24h', d7: 'mm_7d', d30: 'mm_30d' }[k], rot = { d1: '24 h', d7: '7 d', d30: '30 d' }[k];
+    marcadores.forEach(([m, p]) => {
+      const v = p[chave], sat = p.merge ? p.merge[k] : null;
+      m.setStyle({ fillColor: corChuva(v, escala) });
+      m.bindPopup(`<b>${p.curto || p.nome}</b> · ${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'régua com pluviômetro'}<br>${p.codigo}<br>medido em ${rot}: <b>${fmt(v, 1)} mm</b> · MERGE na célula: ${fmt(sat, 1)} mm<br><a href="trecho.html?t=${p.trecho}">trecho</a> · <a href="estacao.html?c=${p.codigo}">estação</a>`);
+    });
+  }
+  const _desenharGrade = desenharGrade;
+  desenharGrade = k => { _desenharGrade(k); pintarPluviometros(k); };
+  pintarPluviometros('d7');
+  document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => pintarPluviometros(b.dataset.k)));
   const st = document.createElement('style'); st.textContent = '.rotulo-usina{background:transparent;border:0;box-shadow:none;font:11px Questrial,sans-serif;color:#294086;padding:0}.rotulo-usina:before{display:none}'; document.head.appendChild(st);
 
   // ---- diária
@@ -96,10 +112,17 @@
     { x: rot, y: M.map(m => m.mlt), type: 'scatter', mode: 'lines+markers', name: 'MLT 1998–2024', line: { color: PAL.escuro, width: 2 }, marker: { size: 6 } }],
     layoutBase({ hovermode: 'x', yaxis: { title: 'mm/mês', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade } }), CONFIG_PLOT);
 
-  // ---- tabela
-  const plu = (C.pluviometros || []).slice().sort((a, b) => (b.mm_7d || 0) - (a.mm_7d || 0));
-  document.querySelector('#tab-plu tbody').innerHTML = plu.map(p => `<tr><td><a href="estacao.html?c=${p.codigo}">${p.codigo}</a></td><td>${p.nome}</td><td>${p.tipo === 'Pluviométrica' ? 'pluvio' : 'fluvio'}</td><td class="num">${fmt(p.mm_24h, 1)}</td><td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td>${fmtInst(p.ultimo_instante)}</td></tr>`).join('');
-  tabelaOrdenavel(document.getElementById('tab-plu'));
+  // ---- pluviômetros por trecho, cada um contra o MERGE da célula
+  const porTrecho = B.trechos.map(t => ({ t, itens: (C.pluviometros || []).filter(p => p.trecho === t.slug) })).filter(g => g.itens.length);
+  const barra = (v, sat) => { const mx = Math.max(v || 0, sat || 0, 1); return `<div class="comp"><div class="b obs" style="width:${(v || 0) / mx * 100}%"></div><div class="b sat" style="width:${(sat || 0) / mx * 100}%"></div></div>`; };
+  document.getElementById('plu-trechos').innerHTML = porTrecho.map(g => `<div class="cartao"><div class="rotulo"><a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a></div>
+    ${g.itens.map(p => { const sat = p.merge ? p.merge.d7 : null; const mudo = (p.mm_7d || 0) < 1 && sat !== null && sat > 15;
+      return `<div class="plu"><div class="n"><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small>${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'régua'} ${p.codigo}</small></div>
+        <div class="v"><b>${fmt(p.mm_7d, 1)}</b> mm medidos em 7 d <span class="ref">· MERGE na célula ${fmt(sat, 1)} mm · 30 d: ${fmt(p.mm_30d, 1)} contra ${fmt(p.merge ? p.merge.d30 : null, 1)}</span></div>
+        ${barra(p.mm_7d, sat)}${mudo ? '<div class="ref" style="color:#C0504D">zero medido com satélite acima de 15 mm: sensor possivelmente mudo</div>' : ''}</div>`; }).join('')}
+    </div>`).join('');
+  const st2 = document.createElement('style'); st2.textContent = '.plu{padding:7px 0;border-bottom:1px dashed var(--borda);font-size:13px}.plu:last-child{border:0}.plu .n a{color:var(--azul-escuro)}.plu .n small{color:var(--texto-suave);font-size:11px}.plu .v b{font-size:16px;font-weight:normal}.plu .ref{font-size:11.5px;color:var(--texto-suave)}.comp{margin-top:4px}.comp .b{height:4px;border-radius:2px;margin:2px 0}.comp .obs{background:#C0504D}.comp .sat{background:var(--azul-medio)}'; document.head.appendChild(st2);
+  document.getElementById('plu-trechos').insertAdjacentHTML('afterend', '<p class="sub" style="margin-top:8px"><span style="display:inline-block;width:22px;height:4px;background:#C0504D;vertical-align:middle"></span> medido no chão &nbsp; <span style="display:inline-block;width:22px;height:4px;background:var(--azul-medio);vertical-align:middle"></span> MERGE na célula (7 dias)</p>');
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
 </body>

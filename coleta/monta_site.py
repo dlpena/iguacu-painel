@@ -205,14 +205,23 @@ def monta_chuva(tele, agora, est_json):
             grade[k + "_dias"] = int(len(sub))
         out["grade"] = grade
     plu = []
+    grade = out.get("grade")
     for e in est_json:
         if e.get("chuva_7d") is None or e["lat"] is None:
             continue
         g = tele[(tele["codigo"] == e["codigo"]) & (tele["instante"] > agora - timedelta(days=30))]
         if g["chuva_mm"].notna().sum() == 0:
             continue
-        plu.append({"codigo": e["codigo"], "nome": e["nome"], "tipo": e["tipo"], "lat": e["lat"], "lon": e["lon"], "trecho": e.get("trecho"),
-                    "mm_24h": e["chuva_24h"], "mm_7d": e["chuva_7d"], "mm_30d": num(g["chuva_mm"].sum(), 1), "ultimo_instante": e.get("ultimo_instante")})
+        item = {"codigo": e["codigo"], "nome": e["nome"], "curto": e.get("curto"), "tipo": e["tipo"], "papel": e.get("papel"), "lat": e["lat"], "lon": e["lon"],
+                "trecho": e.get("trecho"), "ordem_trecho": e.get("ordem_trecho", 99), "frescor_h": e.get("frescor_h"),
+                "mm_24h": e["chuva_24h"], "mm_7d": e["chuva_7d"], "mm_30d": num(g["chuva_mm"].sum(), 1), "ultimo_instante": e.get("ultimo_instante")}
+        if grade:
+            # célula do MERGE mais próxima do pluviômetro (grade de 0,1°): comparação satélite × observado
+            la, lo = np.asarray(grade["lat"]), np.asarray(grade["lon"])
+            k = int(np.argmin((la - e["lat"]) ** 2 + (lo - e["lon"]) ** 2))
+            if (la[k] - e["lat"]) ** 2 + (lo[k] - e["lon"]) ** 2 <= 0.1 ** 2:
+                item["merge"] = {"d1": grade["d1"][k], "d7": grade["d7"][k], "d30": grade["d30"][k], "celula": k}
+        plu.append(item)
     out["pluviometros"] = plu
     return out
 
