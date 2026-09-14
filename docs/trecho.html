@@ -51,7 +51,7 @@
     <div id="regras"></div>
   </div>
 
-  <h2>Cotas das réguas</h2>
+  <h2>Cotas das estações fluviométricas</h2>
   <div id="g-cotas" class="grafico baixo"></div>
 
   <h2 id="t-chuva">Chuva nos pluviômetros do trecho (30 dias)</h2>
@@ -106,7 +106,7 @@
     const posJus = R.estacoes.filter(e => e.papel !== 'barramento').findIndex(e => e.papel === 'jusante');
     if (posJus >= 0) cards.splice(posJus, 0, bloco); else cards.push(bloco);
   }
-  document.getElementById('pontos').innerHTML = cards.join('') || '<p class="sub">Sem réguas cadastradas neste trecho.</p>';
+  document.getElementById('pontos').innerHTML = cards.join('') || '<p class="sub">Sem estações fluviométricas cadastradas neste trecho.</p>';
 
   // ---- avisos do trecho
   document.getElementById('avisos').innerHTML = R.avisos.map(a => `<div class="aviso-item ${a.nivel}">${a.texto}<div class="meta">${a.curto ? a.curto + ' · ' : ''}${fmtInst(a.quando)} · ${a.regra}${a.fonte ? ' · ' + a.fonte : ''}</div></div>`).join('');
@@ -169,8 +169,8 @@
     // só a defluência do ONS (trecho sem régua além do barramento): o gráfico repetiria o da usina, então some
     const soUsina = U && tv.length === 1;
     document.getElementById('t-reguas').hidden = soUsina; document.getElementById('g-reguas').hidden = soUsina;
-    if (tv.length && !soUsina) Plotly.react('g-reguas', tv, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, shapes: [], annotations: [] }), CONFIG_PLOT); else document.getElementById('g-reguas').innerHTML = '<p class="sub">Sem vazão nas réguas do trecho.</p>';
-    if (tc.length) Plotly.react('g-cotas', tc, layoutBase({ yaxis: { title: 'cota (m)', gridcolor: PAL.grade, tickformat: ',.2f' } }), CONFIG_PLOT); else document.getElementById('g-cotas').innerHTML = '<p class="sub">Sem cota nas réguas do trecho.</p>';
+    if (tv.length && !soUsina) Plotly.react('g-reguas', tv, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, shapes: [], annotations: [] }), CONFIG_PLOT); else document.getElementById('g-reguas').innerHTML = '<p class="sub">Sem vazão nas estações fluviométricas do trecho.</p>';
+    if (tc.length) Plotly.react('g-cotas', tc, layoutBase({ yaxis: { title: 'cota (m)', gridcolor: PAL.grade, tickformat: ',.2f' } }), CONFIG_PLOT); else document.getElementById('g-cotas').innerHTML = '<p class="sub">Sem cota nas estações fluviométricas do trecho.</p>';
     if (U) {
       const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, nj: H.nivel_jusante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, af: H.afluencia, mo: (U.montante || {}).defluencia }, dias); const x = r.x, A = r.arrays;
       const ln = lim(['nivel_montante'], ['minimo', 'maximo', 'maximo_declarado']).map(q => { const l = linhaLimite(q.valor, `${q.tipo === 'maximo_declarado' ? 'FSAR-H' : 'outorga'} ${fmt(q.valor, 2)} m`, q.tipo === 'maximo_declarado' ? PAL.fsarh : PAL.limite); return { s: l.shape, a: l.ann }; });
@@ -185,7 +185,7 @@
       Plotly.react('g-rampa', [{ x, y: dif, type: 'bar', name: `Δ ${rr && rr.variavel === 'vazao_turbinada' ? 'turbinada' : 'defluência'} por hora`, marker: { color: dif.map(v => v === null ? PAL.cinza : (Math.abs(v) > (rr ? rr.valor : 1e9) ? PAL.fsarh : PAL.claro)) } }],
         layoutBase({ showlegend: false, yaxis: { title: 'm³/s por hora', gridcolor: PAL.grade }, ...SA(lr) }), CONFIG_PLOT);
       if (U.montante) { document.getElementById('t-mont').textContent = `${U.montante.curto} × ${U.curto} (defluências)`; Plotly.react('g-mont', [traco(x, A.mo, `Defluência ${U.montante.curto}`, PAL.claro), traco(x, A.de, `Defluência ${U.curto}`, SERIES.defluencia)], layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' } }), CONFIG_PLOT); }
-      else { document.getElementById('t-mont').textContent = 'Primeira usina da cascata'; document.getElementById('g-mont').innerHTML = '<p class="sub">Não há usina do ONS a montante; a afluência vem das réguas acima.</p>'; }
+      else { document.getElementById('t-mont').textContent = 'Primeira usina da cascata'; document.getElementById('g-mont').innerHTML = '<p class="sub">Não há usina do ONS a montante; o que chega vem das estações fluviométricas de montante.</p>'; }
     }
     document.querySelectorAll('.controles button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
   }

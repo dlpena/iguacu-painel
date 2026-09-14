@@ -89,7 +89,7 @@
       const v = p[chave], sat = p.merge ? p.merge[k] : null;
       m.setStyle({ fillColor: corChuva(v, escala) });
       m.setTooltipContent(`<b>${p.curto || p.nome.replace(/^UHE /, '')}</b><br>medido em ${rot}: ${fmt(v, 1)} mm · MERGE na célula: ${fmt(sat, 1)} mm`);
-      m.bindPopup(`<b>${p.curto || p.nome}</b> · ${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'régua com pluviômetro'}<br>${p.codigo}<br>medido em ${rot}: <b>${fmt(v, 1)} mm</b> · MERGE na célula: ${fmt(sat, 1)} mm<br><a href="trecho.html?t=${p.trecho}">trecho</a> · <a href="estacao.html?c=${p.codigo}">estação</a>`);
+      m.bindPopup(`<b>${p.curto || p.nome}</b> · ${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'estação fluviométrica com pluviômetro'}<br>${p.codigo}<br>medido em ${rot}: <b>${fmt(v, 1)} mm</b> · MERGE na célula: ${fmt(sat, 1)} mm<br><a href="trecho.html?t=${p.trecho}">trecho</a> · <a href="estacao.html?c=${p.codigo}">estação</a>`);
     });
   }
   const _desenharGrade = desenharGrade;
@@ -122,7 +122,7 @@
   document.querySelector('#tab-comp tbody').innerHTML = porTrecho.map(g => `<tr><td colspan="9" style="background:#EEF3FA;color:var(--azul-escuro)"><a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a></td></tr>` + g.itens.map(p => {
     const sat7 = p.merge ? p.merge.d7 : null, sat30 = p.merge ? p.merge.d30 : null, [txt, cor] = leitura(p);
     const dif = (sat7 !== null && p.mm_7d !== null) ? p.mm_7d - sat7 : null;
-    return `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td>${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'régua com pluviômetro'}</td>
+    return `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td>${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'estação fluviométrica com pluviômetro'}</td>
       <td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(sat7, 1)}</td><td class="num">${dif === null ? '–' : (dif > 0 ? '+' : '') + fmt(dif, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td class="num">${fmt(sat30, 1)}</td><td style="${cor}">${txt}</td><td>${fmtInst(p.ultimo_instante)}</td></tr>`; }).join('')).join('');
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
