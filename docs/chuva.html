@@ -21,7 +21,7 @@
 
   <h2>Onde choveu</h2>
   <div class="controles">
-    <span>Acumulado:</span><button data-k="d1">último dia</button><button data-k="d7" class="ativo">7 dias</button><button data-k="d30">30 dias</button>
+    <span>Acumulado:</span><button data-k="d1" class="ativo">último dia</button><button data-k="d7">7 dias</button><button data-k="d30">30 dias</button>
     <span id="info-grade" class="sub" style="margin:0 0 0 8px"></span>
   </div>
   <div id="mapa"></div>
@@ -71,7 +71,7 @@
     document.querySelectorAll('.controles button[data-k]').forEach(b => b.classList.toggle('ativo', b.dataset.k === k));
   }
   try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { style: { color: PAL.escuro, weight: 2, fill: false } }).addTo(mapa); mapa.fitBounds(cam.getBounds()); } catch (e) { mapa.setView([-25.7, -52.3], 7); }
-  desenharGrade('d7');
+  desenharGrade('d1');
   document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => desenharGrade(b.dataset.k)));
   U.usinas.forEach(u => marcadorUsina([u.lat, u.lon], u.curto, true).addTo(mapa));
   // pluviômetros: círculo pintado com a MESMA escala das células, para comparar satélite e chão de relance
@@ -90,7 +90,7 @@
   }
   const _desenharGrade = desenharGrade;
   desenharGrade = k => { _desenharGrade(k); pintarPluviometros(k); };
-  pintarPluviometros('d7');
+  pintarPluviometros('d1');
   document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => pintarPluviometros(b.dataset.k)));
 
   // ---- diária
