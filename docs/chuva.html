@@ -104,10 +104,10 @@
   }
   try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { style: { color: PAL.escuro, weight: 2, fill: false } }).addTo(mapa); mapa.fitBounds(cam.getBounds(), { paddingBottomRight: [0, 10] }); } catch (e) {}
   const simbolos = L.control({ position: 'topright' });
-  simbolos.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = `<i style="border-radius:50%;background:#0193DE;border:2px solid #C0504D"></i>pluviômetro (cor = medido no período, mesma escala do MERGE)<br>${SVG_TRIANGULO}usina<br>${LEGENDA_HIDRO}<br><span style="color:#6B7280">passe o mouse para nome e leitura</span>`; return d; };
+  simbolos.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = `<i style="border-radius:50%;background:#0193DE;border:2px solid #C0504D"></i>pluviômetro (cor = medido no período, mesma escala do MERGE)<br>${LEGENDA_USINAS}<br>${LEGENDA_HIDRO}<br><span style="color:#6B7280">passe o mouse para nome e leitura</span>`; return d; };
   simbolos.addTo(mapa);
   await desenharHidrografia(mapa, 0.9);
-  U.usinas.forEach(u => marcadorUsina([u.lat, u.lon], u.curto, true).addTo(mapa));
+  U.usinas.forEach(u => marcadorUsina([u.lat, u.lon], u.curto, true, u.tipo).addTo(mapa));
   const marcadores = [];
   (C.pluviometros || []).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius: 8, color: '#C0504D', weight: 2, fillColor: '#fff', fillOpacity: 1 }).addTo(mapa).bindTooltip('', { direction: 'top', offset: [0, -8] }); marcadores.push([m, p]); });
   function pintarPluviometros(k) {

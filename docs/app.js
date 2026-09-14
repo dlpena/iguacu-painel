@@ -13,10 +13,15 @@ function trilha(itens) { return `<nav class="trilha">${itens.map(([h, t]) => h ?
 const PAPEL = { montante: 'estação fluviométrica a montante', afluente: 'afluente', barramento: 'estação fluviométrica no barramento', jusante: 'estação fluviométrica a jusante', pluviometro: 'pluviômetro' };
 
 /* marcador de usina nos mapas: triângulo azul-escuro; rótulo fixo à direita ou só no hover */
-const SVG_TRIANGULO = '<svg width="18" height="16" viewBox="0 0 18 16"><path d="M9 1 L17 15 L1 15 Z" fill="#294086" stroke="#fff" stroke-width="1.5"/></svg>';
-function marcadorUsina(latlng, nome, rotuloFixo = false) {
-  // âncora abaixo do triângulo: ele fica como um pino acima do ponto, sem cobrir a régua de barramento que tem a mesma coordenada
-  const ic = L.divIcon({ className: '', iconSize: [18, 16], iconAnchor: [9, 26], html: SVG_TRIANGULO });
+// convenção do ONS: triângulo = UHE com reservatório de acumulação; círculo = UHE a fio d'água
+const svgUsina = (tipo, cor = '#294086', tam = 18) => tipo === 'acumulacao'
+  ? `<svg width="${tam}" height="${tam * 16 / 18}" viewBox="0 0 18 16"><path d="M9 1 L17 15 L1 15 Z" fill="${cor}" stroke="#fff" stroke-width="1.5"/></svg>`
+  : `<svg width="${tam * 16 / 18}" height="${tam * 16 / 18}" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="${cor}" stroke="#fff" stroke-width="1.5"/></svg>`;
+const SVG_TRIANGULO = svgUsina('acumulacao');
+const LEGENDA_USINAS = `${svgUsina('acumulacao')}UHE com reservatório de acumulação<br>${svgUsina('fio_dagua')}UHE a fio d'água`;
+function marcadorUsina(latlng, nome, rotuloFixo = false, tipo = 'acumulacao') {
+  // âncora abaixo do símbolo: ele fica como um pino acima do ponto, sem cobrir a estação de barramento que tem a mesma coordenada
+  const ic = L.divIcon({ className: '', iconSize: [18, 16], iconAnchor: [9, 26], html: svgUsina(tipo) });
   const m = L.marker(latlng, { icon: ic, zIndexOffset: 500 });
   if (rotuloFixo) m.bindTooltip(nome, { permanent: true, direction: 'right', offset: [8, -18], className: 'rotulo-usina' });
   else m.bindTooltip(nome, { direction: 'top', offset: [0, -26] });
@@ -36,6 +41,21 @@ async function desenharHidrografia(mapa, escala = 1, interativa = true) {
   } catch (e) { console.warn('hidrografia', e); return null; }
 }
 const LEGENDA_HIDRO = '<i style="background:#0B6BA8;height:3px;border-radius:0"></i>rio Iguaçu<br><i style="background:#3FB0E8;height:2px;border-radius:0"></i>afluente monitorado';
+
+/* legenda do esquema longitudinal (início e trecho) */
+function legendaEsquema() {
+  const tri = '<svg width="14" height="16" viewBox="0 0 16 18"><path d="M15 9 L1 1 L1 17 Z" fill="#294086"/></svg>';
+  const cir = '<svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#294086"/></svg>';
+  const pto = c => `<svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="${c}"/></svg>`;
+  return `<div class="legenda-esquema">
+    <span>${tri} UHE com reservatório de acumulação: número acima = defluência (m³/s); <b>VU</b> abaixo = volume útil armazenado (%)</span>
+    <span>${cir} UHE a fio d'água: número acima = defluência (m³/s)</span>
+    <span>${pto('#0193DE')} estação fluviométrica: número = vazão (m³/s)</span>
+    <span><i class="lg afl"></i>afluente (margem direita acima do rio, esquerda abaixo)</span>
+    <span>cor do ponto e do contorno das usinas: ${pto('#2E8B57')} dado há até 2 h ${pto('#D9A400')} até 24 h ${pto('#9CA3AF')} sem dado recente</span>
+    <span>${pto('#E08A1E')} aviso no trecho</span>
+  </div>`;
+}
 
 /* esquema longitudinal do rio: usinas e réguas em ordem, com o valor da última hora */
 function desenharEsquema(el, trechos, destaque = null) {
@@ -106,12 +126,15 @@ function desenharEsquema(el, trechos, destaque = null) {
       s += `<title>${esc(e.curto)} (${e.codigo}) · ${PAPEL[e.papel]}\n${fmt(e.vazao)} m³/s${e.cota_m !== null && e.cota_m !== undefined ? ' · cota ' + fmt(e.cota_m, 2) + ' m' : ''} · ${frescorTexto(e.frescor_h)}${e.ref && e.ref.vazao_media_30d ? '\nmédia 30 d: ' + fmt(e.ref.vazao_media_30d) + ' m³/s' : ''}</title></a>`;
     } else {
       const u = c.u, a = u.atual || {};
-      const dentro = u.tipo === 'acumulacao' ? `${fmt(a.pct_volume_util, 0)}%` : '▲';
-      s += `<a href="trecho.html?t=${c.t.slug}"><rect x="${cx - 23}" y="${Y - 15}" width="46" height="30" rx="4" fill="#294086" stroke="${cor(a.frescor_h)}" stroke-width="2.5"/>`;
-      s += `<text x="${cx}" y="${Y + 4}" font-size="11.5" text-anchor="middle" fill="#fff">${dentro}</text>`;
-      s += `<text x="${cx}" y="${Y - 22}" font-size="12.5" text-anchor="middle" fill="#294086">${fmt(a.defluencia)}</text>`;
-      s += `<text transform="translate(${cx + 3} ${Y + 30}) rotate(45)" font-size="11" fill="#294086">${esc(u.curto)}</text>`;
-      s += `<title>${esc(u.nome)} (ONS ${fmtInst(a.instante)})\ndefluência ${fmt(a.defluencia)} m³/s · turbinada ${fmt(a.vazao_turbinada)} · vertida ${fmt(a.vazao_vertida)}\nnível montante ${fmt(a.nivel_montante, 2)} m${u.tipo === 'acumulacao' ? ' · volume útil ' + fmt(a.pct_volume_util, 1) + '%' : ''}${c.barr ? '\nestação de barramento ' + c.barr.codigo + ': ' + fmt(c.barr.vazao) + ' m³/s' : ''}</title></a>`;
+      const acum = u.tipo === 'acumulacao';
+      s += `<a href="trecho.html?t=${c.t.slug}">`;
+      // triângulo deitado, ponta para montante (direita), contra o sentido do rio no diagrama
+      s += acum ? `<path d="M${cx + 16} ${Y} L${cx - 14} ${Y - 17} L${cx - 14} ${Y + 17} Z" fill="#294086" stroke="${cor(a.frescor_h)}" stroke-width="2.5" stroke-linejoin="round"/>`
+                : `<circle cx="${cx}" cy="${Y}" r="13" fill="#294086" stroke="${cor(a.frescor_h)}" stroke-width="2.5"/>`;
+      s += `<text x="${cx}" y="${Y - (acum ? 24 : 21)}" font-size="12.5" text-anchor="middle" fill="#294086">${fmt(a.defluencia)}</text>`;
+      if (acum) s += `<text x="${cx}" y="${Y + 31}" font-size="10.5" text-anchor="middle" fill="#294086">VU ${fmt(a.pct_volume_util, 0)}%</text>`;
+      s += `<text transform="translate(${cx + 3} ${Y + (acum ? 42 : 30)}) rotate(45)" font-size="11" fill="#294086">${esc(u.curto)}</text>`;
+      s += `<title>${esc(u.nome)} · ${acum ? 'UHE com reservatório de acumulação' : "UHE a fio d'água"} (ONS ${fmtInst(a.instante)})\ndefluência ${fmt(a.defluencia)} m³/s · turbinada ${fmt(a.vazao_turbinada)} · vertida ${fmt(a.vazao_vertida)}\nnível montante ${fmt(a.nivel_montante, 2)} m${u.tipo === 'acumulacao' ? ' · volume útil ' + fmt(a.pct_volume_util, 1) + '%' : ''}${c.barr ? '\nestação de barramento ' + c.barr.codigo + ': ' + fmt(c.barr.vazao) + ' m³/s' : ''}</title></a>`;
     }
   });
   s += '</svg>';

@@ -113,11 +113,11 @@
     await desenharHidrografia(mapa);
     if (trecho) {
       trecho.estacoes.filter(e => e.lat && e.lon && e.codigo !== D.codigo).forEach(e => L.circleMarker([e.lat, e.lon], { radius: 5, color: '#fff', weight: 1, fillColor: '#9CA3AF', fillOpacity: .9 }).addTo(mapa).bindTooltip(`${e.curto} · ${PAPEL[e.papel]}`));
-      if (trecho.usina) marcadorUsina([trecho.usina.lat, trecho.usina.lon], trecho.usina.curto, true).addTo(mapa);
+      if (trecho.usina) marcadorUsina([trecho.usina.lat, trecho.usina.lon], trecho.usina.curto, true, trecho.usina.tipo).addTo(mapa);
     }
     L.circleMarker([D.lat, D.lon], { radius: 9, color: '#fff', weight: 2, fillColor: PAL.limite, fillOpacity: 1 }).addTo(mapa).bindTooltip(`<b>${D.curto || D.nome}</b>`, { permanent: true, direction: 'top', offset: [0, -8] });
     const leg = L.control({ position: 'bottomleft' });
-    leg.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = '<i style="background:#C0504D;border-radius:50%"></i>esta estação<br><i style="background:#9CA3AF;border-radius:50%"></i>outras estações do trecho<br>' + SVG_TRIANGULO + 'usina<br>' + LEGENDA_HIDRO; return d; };
+    leg.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = '<i style="background:#C0504D;border-radius:50%"></i>esta estação<br><i style="background:#9CA3AF;border-radius:50%"></i>outras estações do trecho<br>' + LEGENDA_USINAS + '<br>' + LEGENDA_HIDRO; return d; };
     leg.addTo(mapa);
   } else document.getElementById('mapa').innerHTML = '<p class="sub">Sem coordenadas no cadastro.</p>';
 
