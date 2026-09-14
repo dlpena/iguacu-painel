@@ -1,0 +1,82 @@
+name: Atualiza painel
+
+# Disparo principal: cron-job.org -> repository_dispatch (o schedule nativo do Actions pode atrasar
+# mais de 1 h em repositório gratuito; fica como rede de segurança).
+on:
+  repository_dispatch:
+    types: [atualiza]
+  schedule:
+    - cron: '7 * * * *'
+  workflow_dispatch:
+    inputs:
+      backfill_ons:
+        description: 'Backfill horário do ONS a partir de AAAA-MM (vazio = só mês corrente e anterior)'
+        required: false
+        default: ''
+      dias_telemetria:
+        description: 'Janela da telemetria em dias (padrão 7; máx. 60)'
+        required: false
+        default: '7'
+      merge_desde:
+        description: 'Backfill do MERGE a partir de AAAA-MM-DD (vazio = últimos 10 dias)'
+        required: false
+        default: ''
+
+concurrency:
+  group: atualiza
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  atualiza:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: ONS (horário e diário)
+        continue-on-error: true
+        run: |
+          if [ -n "${{ github.event.inputs.backfill_ons }}" ]; then
+            python coleta/ons.py --desde "${{ github.event.inputs.backfill_ons }}"
+          else
+            python coleta/ons.py
+          fi
+
+      - name: Telemetria ANA
+        continue-on-error: true
+        run: python coleta/telemetria.py --dias "${{ github.event.inputs.dias_telemetria || '7' }}"
+
+      - name: MERGE/INPE
+        continue-on-error: true
+        run: |
+          if [ -n "${{ github.event.inputs.merge_desde }}" ]; then
+            python coleta/merge.py --desde "${{ github.event.inputs.merge_desde }}"
+          else
+            python coleta/merge.py
+          fi
+
+      - name: Montar site
+        run: python coleta/monta_site.py
+
+      - name: Publicar dados
+        run: |
+          git config user.name "painel-iguacu[bot]"
+          git config user.email "painel-iguacu@users.noreply.github.com"
+          git add dados docs/data
+          if git diff --cached --quiet; then
+            echo "sem mudanças"; exit 0
+          fi
+          git commit -m "dados: $(TZ=America/Sao_Paulo date '+%Y-%m-%d %H:%M') BRT"
+          git pull --rebase
+          git push

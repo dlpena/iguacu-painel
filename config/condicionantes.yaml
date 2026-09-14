@@ -1,0 +1,116 @@
+# Condicionantes e restrições declaradas VIGENTES em 14/09/2026, para exibição no painel.
+# Origem: verificação Baixo Iguaçu / Salto Caxias (set/2026), YAML validado contra o texto das outorgas
+# e os formulários FSAR-H lidos em 12/09/2026. Só há valores para as usinas cuja outorga foi lida;
+# as outras quatro ficam sem linha de limite até alguém ler a outorga (regra: só dados verificáveis).
+# O painel exibe a regra e o dado; não conclui descumprimento.
+regras:
+  # ---------------- Baixo Iguaçu (Outorga ANA nº 2.382/2022, Geração Céu Azul S.A.)
+  - id: bxi-qmin
+    usina: baixo-iguacu
+    variavel: defluencia
+    tipo: minimo
+    valor: 350
+    unidade: m³/s
+    titulo: Vazão mínima defluente de 350 m³/s (permanente)
+    fonte: "Outorga ANA nº 2.382/2022, art. 3º, I (350 m³/s no horário de visitação do PNI, em estiagem); FSAR-H 9383/2026: 350 m³/s permanente desde 27/01/2026 11h"
+    vigencia: desde 27/01/2026 11:00
+    tolerancia: 10
+  - id: bxi-na-max
+    usina: baixo-iguacu
+    variavel: nivel_montante
+    tipo: maximo
+    valor: 259.0
+    unidade: m
+    titulo: Nível máximo normal a montante 259,0 m
+    fonte: "Outorga ANA nº 2.382/2022, art. 1º, IV"
+    vigencia: permanente
+  - id: bxi-na-min
+    usina: baixo-iguacu
+    variavel: nivel_montante
+    tipo: minimo
+    valor: 258.0
+    unidade: m
+    titulo: Nível mínimo normal a montante 258,0 m
+    fonte: "Outorga ANA nº 2.382/2022, art. 1º, VI"
+    vigencia: permanente
+  - id: bxi-na-fsarh
+    usina: baixo-iguacu
+    variavel: nivel_montante
+    tipo: maximo_declarado
+    valor: 258.40
+    unidade: m
+    titulo: Nível máximo de 258,40 m declarado ao ONS (não é condicionante da outorga)
+    fonte: "FSAR-H 9382/2026 (Copel), continuidade da FSAR-H 3580/2022: segurança operacional para encaminhamento de cheias"
+    vigencia: desde 07/01/2026
+  - id: bxi-turb-max
+    usina: baixo-iguacu
+    variavel: vazao_turbinada
+    tipo: maximo
+    valor: 2598.6
+    unidade: m³/s
+    titulo: Vazão máxima turbinada 2.598,6 m³/s
+    fonte: "Outorga ANA nº 2.382/2022, art. 1º, IX"
+    vigencia: permanente
+  - id: bxi-rampa
+    usina: baixo-iguacu
+    variavel: vazao_turbinada
+    tipo: rampa
+    valor: 866
+    unidade: m³/s por hora
+    titulo: Variação máxima da vazão turbinada de 866 m³/s por hora (declarada ao ONS)
+    fonte: "FSAR-H 9388/2026 (aumento) e 9389/2026 (redução)"
+    vigencia: desde 07/01/2026
+  - id: bxi-amortecimento
+    usina: baixo-iguacu
+    variavel: defluencia
+    tipo: texto
+    titulo: Amortecimento, para jusante, da operação de ponta da cascata (períodos normais)
+    fonte: "Outorga ANA nº 2.382/2022, art. 3º, II; sem FSAR-H correspondente"
+    vigencia: permanente
+    nota: "Entrada da comparação: defluência de Salto Osório (a afluência horária publicada pelo ONS é resíduo de balanço e não serve para isso)"
+  # ---------------- Salto Caxias (Outorga ANA nº 2.590/2019, Copel)
+  - id: scx-qmin
+    usina: salto-caxias
+    variavel: defluencia
+    tipo: minimo
+    valor: 200
+    unidade: m³/s
+    titulo: Vazão mínima defluente de 200 m³/s (ou a natural, se menor, com piso de 76 m³/s)
+    fonte: "Outorga ANA nº 2.590/2019, art. 1º, X; FSAR-H 403/2018 (200 m³/s, permanente)"
+    vigencia: permanente
+    tolerancia: 10
+    piso_natural: 76
+  - id: scx-na-max
+    usina: salto-caxias
+    variavel: nivel_montante
+    tipo: maximo
+    valor: 325.0
+    unidade: m
+    titulo: Nível máximo normal a montante 325,0 m
+    fonte: "Outorga ANA nº 2.590/2019, art. 1º, V"
+    vigencia: permanente
+  - id: scx-na-min
+    usina: salto-caxias
+    variavel: nivel_montante
+    tipo: minimo
+    valor: 323.0
+    unidade: m
+    titulo: Nível mínimo normal a montante 323,0 m
+    fonte: "Outorga ANA nº 2.590/2019, art. 1º, VII"
+    vigencia: permanente
+  - id: scx-turb-max
+    usina: salto-caxias
+    variavel: vazao_turbinada
+    tipo: maximo
+    valor: 2100
+    unidade: m³/s
+    titulo: Vazão máxima turbinada 2.100 m³/s
+    fonte: "Outorga ANA nº 2.590/2019, art. 1º, XI"
+    vigencia: permanente
+  - id: scx-rampa
+    usina: salto-caxias
+    variavel: defluencia
+    tipo: texto
+    titulo: Taxa máxima de aumento da defluência por tabela (600 m³/s por hora até 2.000 m³/s de defluência; 1.000 m³/s por hora acima)
+    fonte: "FSAR-H 10844/2026, desde 29/08/2026 (substituiu a FSAR-H 238/2018, de 800 m³/s por hora)"
+    vigencia: desde 29/08/2026

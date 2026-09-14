@@ -1,0 +1,117 @@
+/* Painel Iguaçu — identidade inspirada na ANA (azuis do logotipo institucional; a confirmar no manual de marca) */
+:root {
+  --azul-escuro: #294086;
+  --azul-medio: #0193DE;
+  --azul-claro: #80B5E1;
+  --marinho: #000080;
+  --limite: #C0504D;
+  --fsarh: #E08A1E;
+  --ok: #2E8B57;
+  --aviso: #D9A400;
+  --off: #9CA3AF;
+  --texto: #1F2937;
+  --texto-suave: #6B7280;
+  --fundo: #F6F8FB;
+  --cartao: #FFFFFF;
+  --borda: #E3E8F0;
+  --fonte: "Questrial", "Century Gothic", "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: var(--fonte); color: var(--texto); background: var(--fundo); font-size: 15px; line-height: 1.45; }
+a { color: var(--azul-medio); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* cabeçalho */
+.topo { background: var(--cartao); border-top: 5px solid var(--azul-escuro); border-bottom: 1px solid var(--borda); }
+.topo .interno { max-width: 1280px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.marca { display: flex; align-items: center; gap: 10px; color: var(--azul-escuro); font-size: 20px; letter-spacing: .3px; }
+.marca:hover { text-decoration: none; }
+.marca svg { width: 40px; height: 26px; }
+.marca small { display: block; font-size: 11px; color: var(--texto-suave); letter-spacing: .5px; text-transform: uppercase; }
+nav.menu { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+nav.menu a { padding: 8px 12px; border-radius: 6px; color: var(--azul-escuro); font-size: 14px; }
+nav.menu a:hover { background: var(--fundo); text-decoration: none; }
+nav.menu a.ativo { background: var(--azul-escuro); color: #fff; }
+.carimbo { font-size: 12px; color: var(--texto-suave); width: 100%; display: flex; gap: 16px; flex-wrap: wrap; padding-top: 4px; }
+.carimbo b { color: var(--texto); font-weight: normal; }
+
+/* corpo */
+main { max-width: 1280px; margin: 0 auto; padding: 20px; }
+h1 { font-size: 24px; color: var(--azul-escuro); margin: 0 0 4px; font-weight: normal; }
+h2 { font-size: 17px; color: var(--azul-escuro); margin: 28px 0 10px; font-weight: normal; border-bottom: 1px solid var(--borda); padding-bottom: 4px; }
+h3 { font-size: 15px; margin: 16px 0 6px; font-weight: normal; color: var(--marinho); }
+.sub { color: var(--texto-suave); margin: 0 0 18px; }
+.grade { display: grid; gap: 14px; }
+.grade.c2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.grade.c3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.grade.c4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.cartao { background: var(--cartao); border: 1px solid var(--borda); border-radius: 10px; padding: 14px 16px; }
+.cartao .rotulo { font-size: 12px; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .4px; }
+.cartao .valor { font-size: 26px; color: var(--azul-escuro); margin: 2px 0; }
+.cartao .valor small { font-size: 13px; color: var(--texto-suave); }
+.cartao .nota { font-size: 12px; color: var(--texto-suave); }
+.grafico { width: 100%; min-height: 300px; }
+.grafico.baixo { min-height: 220px; }
+
+/* cascata */
+.cascata { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.bloco { background: var(--cartao); border: 1px solid var(--borda); border-left: 5px solid var(--azul-medio); border-radius: 8px; padding: 10px 12px; color: inherit; display: block; position: relative; }
+.bloco:hover { border-color: var(--azul-escuro); text-decoration: none; box-shadow: 0 2px 8px rgba(41,64,134,.12); }
+.bloco.acumulacao { border-left-color: var(--azul-escuro); }
+.bloco .nome { color: var(--azul-escuro); font-size: 15px; }
+.bloco .tipo { font-size: 11px; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .4px; }
+.bloco .linha { display: flex; justify-content: space-between; font-size: 13px; margin-top: 4px; }
+.bloco .linha b { font-weight: normal; color: var(--texto); }
+.bloco .linha span { color: var(--texto-suave); }
+.bloco .seta { position: absolute; right: -12px; top: 45%; color: var(--azul-claro); font-size: 18px; }
+.tend { font-size: 12px; margin-left: 4px; }
+.tend.sobe { color: var(--azul-medio); } .tend.desce { color: var(--limite); } .tend.igual { color: var(--texto-suave); }
+
+/* frescor */
+.ponto { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+.ponto.ok { background: var(--ok); } .ponto.aviso { background: var(--aviso); } .ponto.off { background: var(--off); }
+
+/* avisos */
+.aviso-item { border-left: 4px solid var(--aviso); background: #FFFBEA; padding: 8px 12px; border-radius: 6px; margin: 6px 0; font-size: 14px; }
+.aviso-item.info { border-left-color: var(--azul-claro); background: #F0F7FD; }
+.aviso-item.fonte { border-left-color: var(--off); background: #F5F6F8; }
+.aviso-item .meta { font-size: 12px; color: var(--texto-suave); }
+
+/* tabelas */
+.tabela-wrap { overflow-x: auto; }
+table.tab { border-collapse: collapse; width: 100%; font-size: 13.5px; background: var(--cartao); }
+table.tab th, table.tab td { padding: 7px 9px; border-bottom: 1px solid var(--borda); text-align: left; white-space: nowrap; }
+table.tab th { background: #EEF3FA; color: var(--azul-escuro); font-weight: normal; cursor: pointer; user-select: none; position: sticky; top: 0; }
+table.tab th.num, table.tab td.num { text-align: right; }
+table.tab tr:hover td { background: #F8FAFD; }
+table.tab td.spark svg { vertical-align: middle; }
+
+/* controles */
+.controles { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0 16px; }
+.controles button, .controles select, .controles input { font-family: inherit; font-size: 13px; padding: 6px 12px; border: 1px solid var(--borda); background: var(--cartao); border-radius: 6px; color: var(--azul-escuro); cursor: pointer; }
+.controles button.ativo { background: var(--azul-escuro); color: #fff; border-color: var(--azul-escuro); }
+.chip { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #EEF3FA; color: var(--azul-escuro); margin-left: 6px; }
+
+/* mapa */
+#mapa { height: 480px; border-radius: 10px; border: 1px solid var(--borda); }
+.legenda-mapa { background: #fff; padding: 8px 10px; border-radius: 6px; font-size: 12px; line-height: 1.6; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+.legenda-mapa i { display: inline-block; width: 14px; height: 14px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
+
+/* regras */
+.regra { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; padding: 8px 0; border-bottom: 1px dashed var(--borda); font-size: 13.5px; }
+.regra .v { color: var(--azul-escuro); font-size: 16px; }
+.regra .f { color: var(--texto-suave); font-size: 12.5px; grid-column: 2; }
+
+/* rodapé */
+footer { border-top: 1px solid var(--borda); margin-top: 40px; background: var(--cartao); }
+footer .interno { max-width: 1280px; margin: 0 auto; padding: 18px 20px; font-size: 12.5px; color: var(--texto-suave); }
+footer p { margin: 4px 0; }
+.alerta-fixo { background: #FFF7E6; border: 1px solid #F2D8A0; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin: 14px 0; }
+
+@media (max-width: 700px) {
+  main { padding: 14px; }
+  .cartao .valor { font-size: 22px; }
+  .bloco .seta { display: none; }
+  #mapa { height: 360px; }
+}

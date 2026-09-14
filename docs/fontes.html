@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fontes e método · Painel Iguaçu</title>
+<link href="https://fonts.googleapis.com/css2?family=Questrial&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<script src="app.js"></script>
+<style>main p, main li { max-width: 900px; } main li { margin: 4px 0; }</style>
+</head>
+<body>
+<header id="topo" class="topo"></header>
+<main>
+  <h1>Fontes, método e avisos</h1>
+  <p class="sub">Tudo que aparece no painel vem de fonte pública, sem login, coletada automaticamente a cada hora por um fluxo do GitHub Actions. Esta página diz de onde vem cada número, com que atraso, e o que não se deve concluir a partir dele.</p>
+
+  <h2>Estado da última coleta</h2>
+  <div id="estado" class="grade c3"></div>
+
+  <h2>Fontes</h2>
+  <ul>
+    <li><b>Usinas (nível, defluência, turbinada, vertida, afluência, volume útil, vazão natural).</b> ONS, Dados Abertos, conjuntos "Dados Hidráulicos por Reservatório" em base horária (<a href="https://dados.ons.org.br/dataset/dados_hidrologicos_ho">dados_hidrologicos_ho</a>) e diária (<a href="https://dados.ons.org.br/dataset/dados-hidrologicos-res">dados-hidrologicos-res</a>), lidos direto dos arquivos parquet públicos no S3 do ONS. Bacia <code>IGUACU</code>: G. B. Munhoz, Segredo, Salto Santiago, Salto Osório, Salto Caxias e Baixo Iguaçu. Latência observada do dado horário: 1 a 2 h. O arquivo do mês corrente é reescrito pelo ONS ao longo do dia e pode ser revisado.</li>
+    <li><b>Estações (cota, vazão, chuva).</b> ANA, webservice público de telemetria (<a href="https://telemetriaws1.ana.gov.br/ServiceANA.asmx">telemetriaws1.ana.gov.br</a>), método DadosHidrometeorologicos. Dado bruto transmitido pelas estações, sem consistência; a vazão vem da curva-chave do operador. Catálogo: estações da Resolução Conjunta ANEEL/ANA nº 3/2010 na bacia. Nas estações de barramento o "nível" é a cota do reservatório.</li>
+    <li><b>Chuva.</b> INPE/CPTEC, produto MERGE (precipitação diária, grade de 0,1°, satélite GPM combinado com pluviômetros), arquivos GRIB2 diários em <a href="https://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/">ftp.cptec.inpe.br</a>. O arquivo do dia D tem hora de referência 12 UTC (metadado do GRIB). Média espacial das 585 células dentro do polígono da bacia. MLT: climatologia mensal oficial do MERGE, 1998–2024, na mesma bacia.</li>
+    <li><b>Polígono da bacia.</b> ANA/SNIRH, serviço "Divisões de bacias hidrográficas", camada Meso Região Hidrográfica, código DME_CD 11146 ("Iguaçu"), aproximadamente 72 mil km².</li>
+    <li><b>Limites de outorga e restrições declaradas.</b> Outorga ANA nº 2.382/2022 (Baixo Iguaçu) e nº 2.590/2019 (Salto Caxias), texto lido; formulários FSAR-H do sistema do ONS (9383/2026, 9382/2026, 9388/2026, 9389/2026, 403/2018, 10844/2026), lidos em 12/09/2026. As outras quatro usinas ficam sem linha de limite até que suas outorgas sejam lidas para o painel.</li>
+  </ul>
+
+  <h2>Método</h2>
+  <ul>
+    <li>Fluxo automático: a cada hora, um disparo externo aciona o GitHub Actions, que baixa o parquet do mês corrente do ONS, pede os últimos 7 dias de cada estação ao webservice, completa os dias faltantes do MERGE, gera os JSON das páginas e grava tudo no repositório. As páginas são estáticas e leem esses JSON.</li>
+    <li>Limpeza do ONS: nomes sem espaços de enchimento, valores para número, só instantes no minuto zero, sem duplicatas.</li>
+    <li>Tendência de 6 h: diferença entre o último valor e o valor 6 h antes.</li>
+    <li>Rampa: diferença entre médias horárias consecutivas. Subestima a rampa instantânea; nunca é contagem de descumprimento.</li>
+    <li>"Para olhar": regras vigentes aplicadas às últimas 24 h de dado horário (mínimos com tolerância de 10 m³/s; máximos; rampa declarada; nível declarado ao ONS), mais frescor das fontes. Em Salto Caxias, o mínimo de 200 m³/s é reduzido à vazão natural diária do ONS quando ela é menor, com piso de 76 m³/s, como manda a outorga.</li>
+    <li>Nada aqui aplica as exclusões de dias de teste autorizados nem faz contagem de horas por período: isso é trabalho de verificação, com metodologia própria, fora do painel.</li>
+  </ul>
+
+  <h2>O que não concluir</h2>
+  <ul>
+    <li><b>Afluência horária do ONS é resíduo de balanço</b> (defluência mais variação de volume) e aparece negativa com frequência nesta bacia. Não a leia como afluência real; use a defluência da usina de montante ou a vazão natural diária.</li>
+    <li><b>Zero em série do ONS exige corroboração.</b> Já houve zeros espúrios de defluência em Salto Caxias (06/05/2026 e 27/06/2026) enquanto o agente registrava centenas de m³/s. O painel sinaliza o zero e pede conferência com a estação de barramento.</li>
+    <li><b>Dado bruto pode ser revisado.</b> O ONS reescreve o mês corrente; a telemetria não passa por consistência; o MERGE do dia pode ser reprocessado.</li>
+    <li><b>Estação "ativa" pode estar muda.</b> O cadastro diz que opera, mas o webservice não devolve nada. O painel mostra o frescor de cada uma em vez de esconder o problema.</li>
+    <li><b>Limite exibido não é julgamento.</b> Uma linha de outorga cruzada por uma hora de dado bruto é indício para verificação, não descumprimento.</li>
+  </ul>
+
+  <h2>Citações prontas</h2>
+  <div id="citacoes"></div>
+
+  <h2>Código e dados</h2>
+  <p>Repositório público <a href="https://github.com/dlpena/iguacu-painel">github.com/dlpena/iguacu-painel</a>: coletores em Python, configuração das usinas, estações e regras, histórico em parquet e as páginas. Painel técnico não oficial, desenvolvido por Diego Liz Pena.</p>
+</main>
+<footer id="rodape"></footer>
+<script>
+(async () => {
+  const st = await iniciar('fontes.html');
+  if (!st) return;
+  const o = st.ons || {}, t = st.telemetria || {}, m = st.merge || {};
+  const lista = a => (a && a.length) ? `<ul style="margin:6px 0 0;padding-left:18px">${a.slice(0, 8).map(x => `<li>${x}</li>`).join('')}</ul>` : '';
+  document.getElementById('estado').innerHTML = [
+    ['ONS', o.ok, `último instante ${fmtInst(o.ultimo_instante, true)} · coleta ${fmtInst((o.atualizado_em || '').slice(0, 16))}`, lista(o.erros)],
+    ['Telemetria ANA', t.ok, `${t.com_dado} de ${t.total} estações com dado · coleta ${fmtInst((t.atualizado_em || '').slice(0, 16))}`, lista(t.erros)],
+    ['MERGE/INPE', m.ok, `último dia ${fmtData(m.ultimo_dia)} · coleta ${fmtInst((m.atualizado_em || '').slice(0, 16))}`, lista(m.falhas)],
+  ].map(c => `<div class="cartao"><div class="rotulo"><span class="ponto ${c[1] ? 'ok' : 'off'}"></span>${c[0]}</div><div class="nota" style="font-size:13px;color:var(--texto)">${c[2]}</div><div class="nota">${c[3]}</div></div>`).join('');
+  const c = st.citacoes || {};
+  const hoje = fmtData(st.gerado_em);
+  document.getElementById('citacoes').innerHTML = ['ons_ho', 'ons_di', 'telemetria', 'merge', 'mlt'].filter(k => c[k]).map(k => `<p><code style="font-size:12.5px">${c[k]}, consulta em ${hoje}.</code></p>`).join('');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,352 @@
+# -*- coding: utf-8 -*-
+"""Gera os JSON compactos que as páginas estáticas leem (docs/data/), a partir de dados/ e config/.
+
+Saídas:
+  status.json      frescor e erros de cada fonte, citações
+  usinas.json      catálogo das 6 UHEs com o último valor de cada variável, tendência de 6 h e regras vigentes
+  usina/<slug>.json  séries horárias (90 d), diárias (400 d), estação de barramento e usina de montante
+  estacoes.json    catálogo das estações com último dado, chuva 24 h / 7 d, frescor e sparkline de 7 d
+  estacao/<codigo>.json  série bruta de 90 d (cota, vazão) e chuva diária
+  chuva.json       chuva média da bacia (MERGE) diária e mensal contra a MLT, grade das células, pluviômetros
+  avisos.json      eventos das últimas 24 h que merecem olhar (o painel não conclui descumprimento)
+  bacia.geojson    contorno simplificado da bacia para o mapa
+"""
+from __future__ import annotations
+
+import glob
+import json
+import sys
+from datetime import timedelta
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from comum import CONFIG, DADOS, DOCS, agora_brt, estacoes, ler_status, log, regras, usinas  # noqa: E402
+from geo import simplificar  # noqa: E402
+
+SAIDA = DOCS / "data"
+DIAS_HO, DIAS_DI, DIAS_TELE, DIAS_CHUVA = 90, 400, 90, 400
+VARS_HO = {"val_nivelmontante": "nivel_montante", "val_niveljusante": "nivel_jusante", "val_vazaodefluente": "defluencia",
+           "val_vazaoturbinada": "vazao_turbinada", "val_vazaovertida": "vazao_vertida", "val_vazaoafluente": "afluencia"}
+VARS_DI = {"val_vazaonatural": "vazao_natural", "val_vazaoafluente": "afluencia", "val_vazaodefluente": "defluencia",
+           "val_volumeutilcon": "pct_volume_util", "val_nivelmontante": "nivel_montante"}
+MESES_EN = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+
+
+# ------------------------------------------------------------------ utilitários
+def lista(s, nd=2):
+    return [None if pd.isna(v) else round(float(v), nd) for v in s]
+
+
+def instantes(s, fmt="%Y-%m-%dT%H:%M"):
+    return [t.strftime(fmt) for t in s]
+
+
+def num(v, nd=2):
+    return None if v is None or pd.isna(v) else round(float(v), nd)
+
+
+def gravar(nome: str, obj) -> None:
+    p = SAIDA / nome
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
+
+def concat(padrao: str) -> pd.DataFrame:
+    arqs = sorted(glob.glob(str(DADOS / padrao)))
+    return pd.concat([pd.read_parquet(a) for a in arqs], ignore_index=True) if arqs else pd.DataFrame()
+
+
+def horas_desde(t, agora):
+    return None if t is None or pd.isna(t) else round((agora - t).total_seconds() / 3600, 1)
+
+
+def valor_ha(g: pd.DataFrame, col: str, t_ref, horas: int):
+    """Valor no instante mais próximo (<=) de t_ref - horas."""
+    alvo = t_ref - timedelta(hours=horas)
+    h = g[g["din_instante"] <= alvo]
+    return h[col].iloc[-1] if len(h) else None
+
+
+# ------------------------------------------------------------------ usinas
+def monta_usinas(ho, di, agora, regras_por_usina):
+    saida = []
+    for u in usinas():
+        g = ho[ho["nom_reservatorio"] == u["ons"]].sort_values("din_instante")
+        d = di[di["nom_reservatorio"] == u["ons"]].sort_values("din_instante")
+        atual, tend = {}, {}
+        if len(g):
+            ult = g.iloc[-1]
+            atual = {"instante": ult["din_instante"].strftime("%Y-%m-%dT%H:%M")}
+            for col, var in VARS_HO.items():
+                atual[var] = num(ult.get(col))
+            for col, var in (("val_vazaodefluente", "defluencia"), ("val_nivelmontante", "nivel_montante")):
+                antes = valor_ha(g, col, ult["din_instante"], 6)
+                tend[var + "_6h"] = None if antes is None or pd.isna(antes) or pd.isna(ult[col]) else round(float(ult[col] - antes), 2)
+            atual["frescor_h"] = horas_desde(ult["din_instante"], agora)
+        if len(d):
+            ud = d.iloc[-1]
+            atual["dia"] = ud["din_instante"].strftime("%Y-%m-%d")
+            for col, var in VARS_DI.items():
+                if var != "nivel_montante":
+                    atual[var + "_di"] = num(ud.get(col))
+        saida.append({**{k: u.get(k) for k in ("slug", "ons", "id_ons", "nome", "curto", "tipo", "agente", "lat", "lon", "estacao_barramento")},
+                      "atual": atual, "tendencia": tend, "regras": regras_por_usina.get(u["slug"], [])})
+    return saida
+
+
+def monta_usina_detalhe(u, ho, di, tele, cat, regras_por_usina, montante):
+    g = ho[ho["nom_reservatorio"] == u["ons"]].sort_values("din_instante")
+    d = di[di["nom_reservatorio"] == u["ons"]].sort_values("din_instante")
+    out = {"slug": u["slug"], "nome": u["nome"], "curto": u["curto"], "tipo": u["tipo"], "agente": u["agente"],
+           "regras": regras_por_usina.get(u["slug"], []),
+           "horario": {"instante": instantes(g["din_instante"]), **{var: lista(g[col]) for col, var in VARS_HO.items() if col in g}},
+           "diario": {"data": instantes(d["din_instante"], "%Y-%m-%d"), **{var: lista(d[col]) for col, var in VARS_DI.items() if col in d}}}
+    cod = u.get("estacao_barramento")
+    if cod:
+        e = tele[tele["codigo"] == cod].sort_values("instante")
+        nome = cat.loc[cat["Codigo"] == cod, "Nome"]
+        out["estacao_barramento"] = {"codigo": cod, "nome": nome.iloc[0] if len(nome) else cod,
+                                     "instante": instantes(e["instante"]), "vazao": lista(e["vazao"]), "cota_m": lista(e["cota_cm"] / 100, 3)}
+    if montante is not None and len(g):
+        m = ho[ho["nom_reservatorio"] == montante["ons"]].drop_duplicates("din_instante").set_index("din_instante")["val_vazaodefluente"]
+        out["montante"] = {"slug": montante["slug"], "curto": montante["curto"],
+                           "defluencia": lista(m.reindex(g["din_instante"]).values)}
+    return out
+
+
+# ------------------------------------------------------------------ estações
+def monta_estacoes(tele, cat, agora, barramento_de):
+    saida = []
+    for _, r in cat.iterrows():
+        cod = r["Codigo"]
+        g = tele[tele["codigo"] == cod].sort_values("instante")
+        item = {"codigo": cod, "nome": r["Nome"], "tipo": r["TipoEstacao"], "rio": r["Rio"], "municipio": r["Municipio"],
+                "responsavel": r["ResponsavelSigla"], "operadora": r["OperadoraSigla"], "telemetrica": r["EstacaoTelemetrica"],
+                "area_km2": num(r["AreaDrenagem"], 0), "lat": num(r["Latitude"], 4), "lon": num(r["Longitude"], 4),
+                "barramento_de": barramento_de.get(cod), "descricao": (r["Descricao"] or "")[:200]}
+        if len(g):
+            ult = g.iloc[-1]
+            gc = g.dropna(subset=["cota_cm"])
+            gv = g.dropna(subset=["vazao"])
+            item.update({"ultimo_instante": ult["instante"].strftime("%Y-%m-%dT%H:%M"), "frescor_h": horas_desde(ult["instante"], agora),
+                         "cota_m": num(gc["cota_cm"].iloc[-1] / 100, 3) if len(gc) else None,
+                         "vazao": num(gv["vazao"].iloc[-1]) if len(gv) else None,
+                         "chuva_24h": num(g.loc[g["instante"] > agora - timedelta(hours=24), "chuva_mm"].sum(), 1),
+                         "chuva_7d": num(g.loc[g["instante"] > agora - timedelta(days=7), "chuva_mm"].sum(), 1)})
+            sete = g[g["instante"] > agora - timedelta(days=7)].set_index("instante")
+            if len(sete):
+                if sete["vazao"].notna().any():
+                    sp = sete["vazao"].resample("6h").mean()
+                    item["spark"] = {"var": "vazao", "t": instantes(sp.index), "v": lista(sp)}
+                elif sete["cota_cm"].notna().any():
+                    sp = sete["cota_cm"].resample("6h").mean() / 100
+                    item["spark"] = {"var": "cota_m", "t": instantes(sp.index), "v": lista(sp, 3)}
+                else:
+                    sp = sete["chuva_mm"].resample("1D").sum()
+                    item["spark"] = {"var": "chuva_mm", "t": instantes(sp.index, "%Y-%m-%d"), "v": lista(sp, 1)}
+        saida.append(item)
+    return saida
+
+
+def monta_estacao_detalhe(item, tele):
+    g = tele[tele["codigo"] == item["codigo"]].sort_values("instante")
+    out = dict(item)
+    out.pop("spark", None)
+    out["serie"] = {"instante": instantes(g["instante"]), "cota_m": lista(g["cota_cm"] / 100, 3), "vazao": lista(g["vazao"])}
+    if len(g):
+        ch = g.set_index("instante")["chuva_mm"].resample("1D").sum(min_count=1)
+        out["chuva_diaria"] = {"data": instantes(ch.index, "%Y-%m-%d"), "mm": lista(ch, 1)}
+    return out
+
+
+# ------------------------------------------------------------------ chuva
+def monta_chuva(tele, agora, est_json):
+    pasta = DADOS / "merge"
+    csv = pasta / "chuva_bacia_diaria.csv"
+    out = {"meta": {"produto": "MERGE/INPE, grade 0,1°; o arquivo do dia D tem hora de referência 12 UTC (metadado do GRIB)"}}
+    if not csv.exists():
+        return out
+    s = pd.read_csv(csv, parse_dates=["data"]).sort_values("data")
+    s = s[s["data"] >= pd.Timestamp(agora.date() - timedelta(days=DIAS_CHUVA))]
+    out["diaria"] = {"data": instantes(s["data"], "%Y-%m-%d"), "mm": lista(s["chuva_mm"], 1)}
+    mlt = json.loads((pasta / "mlt.json").read_text(encoding="utf-8")) if (pasta / "mlt.json").exists() else {}
+    mlt_mm = mlt.get("mlt_mm", {})
+    men = s.groupby(s["data"].dt.to_period("M")).agg(mm=("chuva_mm", "sum"), dias=("chuva_mm", "size"))
+    out["mensal"] = [{"mes": str(p), "mm": round(float(r.mm), 1), "dias": int(r.dias), "mlt": mlt_mm.get(MESES_EN[p.month - 1])}
+                     for p, r in men.iterrows()]
+    out["mlt"] = mlt
+    ult = s["data"].max()
+
+    def acum(n):
+        return round(float(s.loc[s["data"] > ult - timedelta(days=n), "chuva_mm"].sum()), 1)
+
+    mes_atual = s[s["data"].dt.to_period("M") == ult.to_period("M")]
+    out["acumulados"] = {"ultimo_dia": ult.strftime("%Y-%m-%d"), "d1": acum(1), "d7": acum(7), "d30": acum(30),
+                         "mes_atual": round(float(mes_atual["chuva_mm"].sum()), 1), "dias_mes": int(len(mes_atual)),
+                         "mlt_mes": mlt_mm.get(MESES_EN[ult.month - 1])}
+    if (pasta / "celulas.parquet").exists() and (pasta / "mascara.npz").exists():
+        z = np.load(pasta / "mascara.npz")
+        c = pd.read_parquet(pasta / "celulas.parquet")
+        c["data"] = pd.to_datetime(c["data"])
+        piv = c.pivot(index="data", columns="celula", values="mm").sort_index()
+        grade = {"lat": lista(z["lat"], 2), "lon": lista(z["lon"], 2), "passo": 0.1}
+        for n, k in ((1, "d1"), (7, "d7"), (30, "d30")):
+            sub = piv[piv.index > ult - timedelta(days=n)]
+            grade[k] = lista(sub.sum(axis=0).reindex(range(len(z["idx"]))), 1)
+            grade[k + "_dias"] = int(len(sub))
+        out["grade"] = grade
+    plu = []
+    for e in est_json:
+        if e.get("chuva_7d") is None or e["lat"] is None:
+            continue
+        g = tele[(tele["codigo"] == e["codigo"]) & (tele["instante"] > agora - timedelta(days=30))]
+        if g["chuva_mm"].notna().sum() == 0:
+            continue
+        plu.append({"codigo": e["codigo"], "nome": e["nome"], "tipo": e["tipo"], "lat": e["lat"], "lon": e["lon"],
+                    "mm_24h": e["chuva_24h"], "mm_7d": e["chuva_7d"], "mm_30d": num(g["chuva_mm"].sum(), 1),
+                    "ultimo_instante": e.get("ultimo_instante")})
+    out["pluviometros"] = plu
+    return out
+
+
+# ------------------------------------------------------------------ avisos
+def monta_avisos(ho, di, est_json, agora, chuva, st):
+    av = []
+    janela = ho[ho["din_instante"] > agora - timedelta(hours=24)] if len(ho) else ho
+    us = {u["slug"]: u for u in usinas()}
+    col_de = {v: k for k, v in VARS_HO.items()}
+    for r in regras():
+        u = us[r["usina"]]
+        g = janela[janela["nom_reservatorio"] == u["ons"]].sort_values("din_instante") if len(janela) else janela
+        col = col_de.get(r["variavel"])
+        if not len(g) or not col or col not in g:
+            continue
+        s = g[col]
+        base = {"usina": u["slug"], "curto": u["curto"], "regra": r["titulo"], "fonte": r["fonte"], "id": r["id"]}
+        var = r["variavel"].replace("_", " ")
+        if r["tipo"] == "minimo":
+            limite = r["valor"]
+            nat = None
+            if r.get("piso_natural") is not None:
+                d = di[di["nom_reservatorio"] == u["ons"]].sort_values("din_instante")
+                if len(d) and pd.notna(d["val_vazaonatural"].iloc[-1]):
+                    nat = float(d["val_vazaonatural"].iloc[-1])
+                    if nat < limite:
+                        limite = max(nat, r["piso_natural"])
+            tol = r.get("tolerancia", 0)
+            zeros = s <= 5
+            abaixo = (s < limite - tol) & ~zeros
+            if zeros.any():
+                av.append({**base, "nivel": "atencao", "quando": g.loc[zeros, "din_instante"].max().strftime("%Y-%m-%dT%H:%M"),
+                           "texto": f"{int(zeros.sum())} h com {var} igual a zero nas últimas 24 h. Zero em série do ONS exige corroboração "
+                                    f"(o ONS já registrou zeros espúrios nesta bacia)."})
+            if abaixo.any():
+                extra = f" (limite reduzido à vazão natural de {nat:.0f} m³/s do dia anterior)" if nat is not None and nat < r["valor"] else ""
+                av.append({**base, "nivel": "atencao", "quando": g.loc[abaixo, "din_instante"].max().strftime("%Y-%m-%dT%H:%M"),
+                           "texto": f"{int(abaixo.sum())} h com {var} abaixo de {limite:.0f} {r['unidade']} nas últimas 24 h "
+                                    f"(mínimo horário {s.min():.0f}){extra}."})
+        elif r["tipo"] in ("maximo", "maximo_declarado"):
+            acima = s > r["valor"]
+            if acima.any():
+                rot = "declarado ao ONS" if r["tipo"] == "maximo_declarado" else "da outorga"
+                av.append({**base, "nivel": "atencao" if r["tipo"] == "maximo" else "info",
+                           "quando": g.loc[acima, "din_instante"].max().strftime("%Y-%m-%dT%H:%M"),
+                           "texto": f"{int(acima.sum())} h com {var} acima de {r['valor']} {r['unidade']} ({rot}) nas últimas 24 h "
+                                    f"(máximo horário {s.max():.2f})."})
+        elif r["tipo"] == "rampa":
+            dif = s.diff().abs()
+            acima = dif > r["valor"]
+            if acima.any():
+                av.append({**base, "nivel": "info", "quando": g.loc[acima, "din_instante"].max().strftime("%Y-%m-%dT%H:%M"),
+                           "texto": f"{int(acima.sum())} variação(ões) horária(s) de {var} acima de {r['valor']} {r['unidade']} "
+                                    f"(máxima {dif.max():.0f}). Diferença de médias horárias é só indício, não mede a rampa instantânea."})
+    for u in usinas():
+        g = ho[ho["nom_reservatorio"] == u["ons"]] if len(ho) else ho
+        h = horas_desde(g["din_instante"].max(), agora) if len(g) else None
+        if h is None or h > 4:
+            av.append({"nivel": "fonte", "usina": u["slug"], "curto": u["curto"], "quando": agora.strftime("%Y-%m-%dT%H:%M"),
+                       "texto": f"ONS sem dado horário de {u['curto']} há {h if h is not None else '?'} h.", "regra": "frescor", "fonte": "ONS dados abertos"})
+    for e in est_json:
+        if e.get("frescor_h") is not None and 6 < e["frescor_h"] <= 24 * 7:
+            av.append({"nivel": "fonte", "estacao": e["codigo"], "curto": e["nome"], "quando": e["ultimo_instante"],
+                       "texto": f"Estação {e['codigo']} ({e['nome']}) sem transmitir há {e['frescor_h']} h.", "regra": "frescor", "fonte": "telemetria ANA"})
+    ud = chuva.get("acumulados", {}).get("ultimo_dia")
+    if ud and (agora.date() - pd.Timestamp(ud).date()).days > 1:
+        av.append({"nivel": "fonte", "quando": ud, "texto": f"MERGE: último dia disponível {ud}.", "regra": "frescor", "fonte": "INPE"})
+    for fonte in ("ons", "telemetria", "merge"):
+        if st.get(fonte) and not st[fonte].get("ok", True):
+            detalhe = "; ".join(map(str, st[fonte].get("erros") or st[fonte].get("falhas") or []))[:200]
+            av.append({"nivel": "fonte", "quando": (st[fonte].get("atualizado_em") or "")[:16], "regra": "coleta",
+                       "texto": f"Coleta {fonte}: falhou na última rodada ({detalhe}).", "fonte": fonte})
+    ordem = {"atencao": 0, "info": 1, "fonte": 2}
+    av.sort(key=lambda a: (ordem[a["nivel"]], a.get("quando", "")))
+    return av
+
+
+# ------------------------------------------------------------------ principal
+def main() -> int:
+    agora = agora_brt().replace(tzinfo=None)
+    ho = concat("ons/ho_*.parquet")
+    di = concat("ons/di_*.parquet")
+    tele = concat("tele/*.parquet")
+    if len(ho):
+        ho = ho[ho["din_instante"] > agora - timedelta(days=DIAS_HO)]
+    if len(di):
+        di = di[di["din_instante"] > agora - timedelta(days=DIAS_DI)]
+    if len(tele):
+        tele = tele[tele["instante"] > agora - timedelta(days=DIAS_TELE)]
+    else:
+        tele = pd.DataFrame(columns=["codigo", "instante", "cota_cm", "vazao", "chuva_mm"])
+    cat = estacoes()
+    us = usinas()
+    regras_por_usina = {}
+    for r in regras():
+        regras_por_usina.setdefault(r["usina"], []).append(
+            {k: r.get(k) for k in ("id", "variavel", "tipo", "valor", "unidade", "titulo", "fonte", "vigencia", "nota", "piso_natural")})
+    barramento_de = {u["estacao_barramento"]: u["slug"] for u in us if u.get("estacao_barramento")}
+    st = {f: ler_status(f) for f in ("ons", "telemetria", "merge")}
+    carimbo = agora.strftime("%Y-%m-%dT%H:%M")
+
+    lista_us = monta_usinas(ho, di, agora, regras_por_usina)
+    gravar("usinas.json", {"gerado_em": carimbo, "usinas": lista_us})
+    for i, u in enumerate(us):
+        gravar(f"usina/{u['slug']}.json", monta_usina_detalhe(u, ho, di, tele, cat, regras_por_usina, us[i - 1] if i else None))
+
+    est_json = monta_estacoes(tele, cat, agora, barramento_de)
+    gravar("estacoes.json", {"gerado_em": carimbo, "estacoes": est_json})
+    for e in est_json:
+        gravar(f"estacao/{e['codigo']}.json", monta_estacao_detalhe(e, tele))
+
+    chuva = monta_chuva(tele, agora, est_json)
+    gravar("chuva.json", {"gerado_em": carimbo, **chuva})
+
+    avisos = monta_avisos(ho, di, est_json, agora, chuva, st)
+    gravar("avisos.json", {"gerado_em": carimbo, "avisos": avisos})
+
+    ult_ons = st["ons"].get("ultimo_instante") or {}
+    gravar("status.json", {
+        "gerado_em": carimbo,
+        "ons": {"ok": st["ons"].get("ok"), "atualizado_em": st["ons"].get("atualizado_em"), "erros": st["ons"].get("erros", []),
+                "ultimo_instante": max(ult_ons.values()) if ult_ons else None},
+        "telemetria": {"ok": st["telemetria"].get("ok"), "atualizado_em": st["telemetria"].get("atualizado_em"),
+                       "com_dado": sum(1 for v in st["telemetria"].get("estacoes", {}).values() if v.get("n")),
+                       "total": len(st["telemetria"].get("estacoes", {})), "erros": st["telemetria"].get("erros", [])},
+        "merge": {"ok": st["merge"].get("ok"), "atualizado_em": st["merge"].get("atualizado_em"), "ultimo_dia": st["merge"].get("ultimo_dia"),
+                  "falhas": st["merge"].get("falhas", [])},
+        "citacoes": {"ons_ho": st["ons"].get("citacao_ho"), "ons_di": st["ons"].get("citacao_di"), "telemetria": st["telemetria"].get("citacao"),
+                     "merge": st["merge"].get("citacao"), "mlt": chuva.get("mlt", {}).get("fonte")},
+    })
+
+    bacia = SAIDA / "bacia.geojson"
+    if not bacia.exists() or bacia.stat().st_mtime < (CONFIG / "bacia_iguacu.geojson").stat().st_mtime:
+        n = simplificar(CONFIG / "bacia_iguacu.geojson", bacia)
+        log(f"bacia.geojson: {n} vértices, {bacia.stat().st_size // 1024} KB")
+    log(f"site montado: {len(lista_us)} usinas, {len(est_json)} estações, {len(avisos)} avisos")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

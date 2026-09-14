@@ -1,0 +1,19 @@
+{
+ "mlt_mm": {
+  "jan": 166.0,
+  "feb": 136.6,
+  "mar": 123.9,
+  "apr": 115.8,
+  "may": 125.6,
+  "jun": 124.9,
+  "jul": 99.6,
+  "aug": 91.3,
+  "sep": 138.5,
+  "oct": 205.7,
+  "nov": 129.3,
+  "dec": 149.1
+ },
+ "n_celulas": 585,
+ "periodo": "1998-2024",
+ "fonte": "INPE/CPTEC, climatologia mensal do MERGE (MERGE_CPTEC_acum_{mes}.nc), 1998-2024"
+}

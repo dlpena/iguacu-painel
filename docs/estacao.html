@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estação · Painel Iguaçu</title>
+<link href="https://fonts.googleapis.com/css2?family=Questrial&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-locale-pt-br-latest.js"></script>
+<script src="app.js"></script>
+</head>
+<body>
+<header id="topo" class="topo"></header>
+<main>
+  <h1 id="titulo">Estação</h1>
+  <p class="sub" id="subtitulo"></p>
+  <div class="controles">
+    <span>Janela:</span>
+    <button data-d="1">24 h</button><button data-d="7" class="ativo">7 d</button><button data-d="30">30 d</button><button data-d="90">90 d</button>
+    <a id="lnk-usina" class="chip" hidden></a>
+  </div>
+  <div id="cartoes" class="grade c4"></div>
+  <h2>Cota e vazão</h2>
+  <div id="g-serie" class="grafico"></div>
+  <h2>Chuva diária</h2>
+  <div id="g-chuva" class="grafico baixo"></div>
+  <p class="sub" id="ficha"></p>
+</main>
+<footer id="rodape"></footer>
+<script>
+(async () => {
+  await iniciar('estacoes.html');
+  const cod = param('c', '65983100');
+  const D = await carregar(`estacao/${cod}.json`);
+  document.title = `${D.codigo} · Painel Iguaçu`;
+  document.getElementById('titulo').textContent = `${D.codigo} · ${D.nome}`;
+  document.getElementById('subtitulo').textContent = `${D.tipo}${D.rio ? ' · ' + D.rio : ''} · ${D.municipio || ''} · responsável ${D.responsavel || '–'}${D.operadora && D.operadora !== D.responsavel ? ' · operadora ' + D.operadora : ''}${D.area_km2 ? ' · ' + fmt(D.area_km2) + ' km²' : ''}`;
+  if (D.barramento_de) { const l = document.getElementById('lnk-usina'); l.hidden = false; l.href = `usina.html?u=${D.barramento_de}`; l.textContent = 'estação de barramento: abrir a usina'; }
+  document.getElementById('cartoes').innerHTML = [
+    ['Último dado', `<span class="ponto ${frescorClasse(D.frescor_h)}"></span>${fmtInst(D.ultimo_instante)}`, frescorTexto(D.frescor_h)],
+    ['Cota', `${fmt(D.cota_m, 2)} <small>m</small>`, D.barramento_de ? 'cota do reservatório (barramento)' : 'leitura da régua'],
+    ['Vazão', `${fmt(D.vazao)} <small>m³/s</small>`, 'curva-chave do operador, sem consistência'],
+    ['Chuva', `${fmt(D.chuva_24h, 1)} <small>mm / 24 h</small>`, `${fmt(D.chuva_7d, 1)} mm em 7 dias`],
+  ].map(c => `<div class="cartao"><div class="rotulo">${c[0]}</div><div class="valor">${c[1]}</div><div class="nota">${c[2]}</div></div>`).join('');
+  document.getElementById('ficha').textContent = D.descricao ? `Descrição no cadastro: ${D.descricao}` : '';
+  let dias = 7;
+  function desenhar() {
+    const r = recorte(D.serie.instante, { c: D.serie.cota_m, v: D.serie.vazao }, dias);
+    const temV = r.arrays.v.some(x => x !== null), temC = r.arrays.c.some(x => x !== null);
+    const tr = [];
+    if (temC) tr.push(traco(r.x, r.arrays.c, 'Cota (m)', PAL.escuro));
+    if (temV) tr.push(traco(r.x, r.arrays.v, 'Vazão (m³/s)', PAL.medio, { yaxis: temC ? 'y2' : 'y' }));
+    if (!tr.length) { document.getElementById('g-serie').innerHTML = '<p class="sub">Sem cota nem vazão na janela.</p>'; }
+    else Plotly.react('g-serie', tr, layoutBase({ yaxis: { title: temC ? 'cota (m)' : 'm³/s', gridcolor: PAL.grade }, yaxis2: { title: 'm³/s', overlaying: 'y', side: 'right', showgrid: false, rangemode: 'tozero' } }), CONFIG_PLOT);
+    document.querySelectorAll('.controles button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
+  }
+  document.querySelectorAll('.controles button[data-d]').forEach(b => b.addEventListener('click', () => { dias = +b.dataset.d; desenhar(); }));
+  desenhar();
+  if (D.chuva_diaria && D.chuva_diaria.mm.some(x => x !== null && x > 0)) {
+    Plotly.newPlot('g-chuva', [{ x: D.chuva_diaria.data, y: D.chuva_diaria.mm, type: 'bar', name: 'chuva (mm/dia)', marker: { color: PAL.claro } }],
+      layoutBase({ showlegend: false, yaxis: { title: 'mm', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m/%Y' } }), CONFIG_PLOT);
+  } else document.getElementById('g-chuva').innerHTML = '<p class="sub">Esta estação não transmite chuva (ou não choveu na janela).</p>';
+})().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
+</script>
+</body>
+</html>

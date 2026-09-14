@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cataratas · Painel Iguaçu</title>
+<link href="https://fonts.googleapis.com/css2?family=Questrial&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-locale-pt-br-latest.js"></script>
+<script src="app.js"></script>
+</head>
+<body>
+<header id="topo" class="topo"></header>
+<main>
+  <h1>Cataratas e jusante de Baixo Iguaçu</h1>
+  <p class="sub">Trecho entre a UHE Baixo Iguaçu e o Parque Nacional do Iguaçu. A outorga da usina (ANA nº 2.382/2022, art. 3º, I) fixa 350 m³/s como mínimo no horário de visitação em estiagem; desde 27/01/2026 o agente declarou ao ONS (FSAR-H 9383/2026) 350 m³/s permanentes. Esta página mostra o dado e a regra; não conclui descumprimento.</p>
+  <div id="cartoes" class="grade c4"></div>
+  <div class="controles"><span>Janela:</span><button data-d="1">24 h</button><button data-d="7" class="ativo">7 d</button><button data-d="30">30 d</button><button data-d="90">90 d</button></div>
+
+  <h2>Defluência de Baixo Iguaçu e vazões a jusante</h2>
+  <div id="g-vazoes" class="grafico"></div>
+
+  <h2>Cota nas réguas de jusante</h2>
+  <div id="g-cotas" class="grafico"></div>
+
+  <h2>Estações do trecho</h2>
+  <div class="tabela-wrap"><table class="tab" id="tab"><thead><tr><th>Código</th><th>Nome</th><th>Resp.</th><th class="num">Área (km²)</th><th>Último dado</th><th class="num">Cota (m)</th><th class="num">Vazão (m³/s)</th></tr></thead><tbody></tbody></table></div>
+  <p class="sub" style="margin-top:14px">Duas estações são operadas por agentes diferentes no mesmo local (Porto Capanema: Itaipu 65987000 e Copel 65987001; Hotel Cataratas: Itaipu 65992500 e Copel 65992502). Diferenças entre elas refletem curvas-chave distintas, não erro de leitura. As séries longas consistidas do HIDRO não entram no painel automático (exigem login); os percentis históricos ficam para uma carga manual.</p>
+</main>
+<footer id="rodape"></footer>
+<script>
+(async () => {
+  await iniciar('cataratas.html');
+  const CODS = ['65983100', '65984000', '65987001', '65987000', '65992502', '65992500', '65993000'];
+  const [U, E, B] = await Promise.all([carregar('usinas.json'), carregar('estacoes.json'), carregar('usina/baixo-iguacu.json')]);
+  const det = Object.fromEntries(await Promise.all(CODS.map(async c => [c, await carregar(`estacao/${c}.json`).catch(() => null)])));
+  const porCod = Object.fromEntries(E.estacoes.map(e => [e.codigo, e]));
+  const bxi = U.usinas.find(u => u.slug === 'baixo-iguacu') || { atual: {} };
+  const hc = porCod['65992502'] || {}, pc = porCod['65987001'] || {}, ju = porCod['65984000'] || {};
+  document.getElementById('cartoes').innerHTML = [
+    ['Defluência Baixo Iguaçu (ONS)', `${fmt(bxi.atual.defluencia)} <small>m³/s</small>`, `${fmtInst(bxi.atual.instante)} · mínimo declarado 350 m³/s`],
+    ['Jusante da usina (65984000)', `${fmt(ju.vazao)} <small>m³/s</small>`, `${fmtInst(ju.ultimo_instante)} · cota ${fmt(ju.cota_m, 2)} m`],
+    ['Porto Capanema (Copel)', `${fmt(pc.vazao)} <small>m³/s</small>`, `${fmtInst(pc.ultimo_instante)} · cota ${fmt(pc.cota_m, 2)} m`],
+    ['Hotel Cataratas (Copel)', `${fmt(hc.vazao)} <small>m³/s</small>`, `${fmtInst(hc.ultimo_instante)} · cota ${fmt(hc.cota_m, 2)} m`],
+  ].map(c => `<div class="cartao"><div class="rotulo">${c[0]}</div><div class="valor">${c[1]}</div><div class="nota">${c[2]}</div></div>`).join('');
+
+  const cores = { '65984000': '#3FB0E8', '65987001': PAL.escuro, '65987000': '#8C9BB5', '65992502': PAL.limite, '65992500': '#E08A1E', '65993000': '#6B7280' };
+  let dias = 7;
+  function desenhar() {
+    const r = recorte(B.horario.instante, { de: B.horario.defluencia }, dias);
+    const tv = [traco(r.x, r.arrays.de, 'Defluência Baixo Iguaçu (ONS)', PAL.medio, { line: { color: PAL.medio, width: 2.2 } })];
+    const tc = [];
+    for (const c of CODS.slice(1)) {
+      const d = det[c]; if (!d || !d.serie.instante.length) continue;
+      const rr = recorte(d.serie.instante, { v: d.serie.vazao, c: d.serie.cota_m }, dias);
+      if (rr.arrays.v.some(x => x !== null)) tv.push(traco(rr.x, rr.arrays.v, `${d.nome} (${c})`, cores[c], { line: { color: cores[c], width: 1.3 } }));
+      if (rr.arrays.c.some(x => x !== null)) tc.push(traco(rr.x, rr.arrays.c, `${d.nome} (${c})`, cores[c]));
+    }
+    const l = linhaLimite(350, 'mínimo declarado 350 m³/s', PAL.limite);
+    Plotly.react('g-vazoes', tv, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, shapes: [l.shape], annotations: [l.ann] }), CONFIG_PLOT);
+    Plotly.react('g-cotas', tc, layoutBase({ yaxis: { title: 'cota (m)', gridcolor: PAL.grade } }), CONFIG_PLOT);
+    document.querySelectorAll('.controles button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
+  }
+  document.querySelectorAll('.controles button[data-d]').forEach(b => b.addEventListener('click', () => { dias = +b.dataset.d; desenhar(); }));
+  desenhar();
+  document.querySelector('#tab tbody').innerHTML = CODS.map(c => porCod[c]).filter(Boolean).map(e => `<tr><td><a href="estacao.html?c=${e.codigo}">${e.codigo}</a></td><td>${e.nome}</td><td>${e.responsavel}</td><td class="num">${fmt(e.area_km2)}</td><td><span class="ponto ${frescorClasse(e.frescor_h)}"></span>${fmtInst(e.ultimo_instante)}</td><td class="num">${fmt(e.cota_m, 2)}</td><td class="num">${fmt(e.vazao)}</td></tr>`).join('');
+})().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+# Usinas da bacia do Iguaçu no conjunto "dados_hidrologicos_ho" do ONS (nom_bacia = IGUACU), de montante para jusante.
+# Nomes e ids lidos do parquet DADOS_HIDROLOGICOS_HO_2026_05 (verificação de 14/09/2026).
+# Coordenadas: as da estação fluviométrica de barramento da própria usina no catálogo da
+# Resolução Conjunta ANEEL/ANA nº 3 (config/estacoes.csv), para serem rastreáveis.
+usinas:
+  - slug: foz-do-areia
+    ons: G. B. MUNHOZ
+    id_ons: IGGBMU
+    cod_usina: 74
+    nome: Gov. Bento Munhoz da Rocha Neto (Foz do Areia)
+    curto: Foz do Areia
+    tipo: acumulacao
+    agente: Copel
+    lat: -26.0094
+    lon: -51.6647
+    estacao_barramento: "65774400"
+    estacoes_montante: ["65365801", "65310001", "65220001", "65060001", "65035001"]
+  - slug: segredo
+    ons: SEGREDO
+    id_ons: IGSEGR
+    cod_usina: 76
+    nome: Gov. Ney Aminthas de Barros Braga (Segredo)
+    curto: Segredo
+    tipo: acumulacao
+    agente: Copel
+    lat: -25.7883
+    lon: -52.1147
+    estacao_barramento: "65803001"
+    estacoes_montante: []
+  - slug: salto-santiago
+    ons: SALTO SANTIAGO
+    id_ons: IGSSAN
+    cod_usina: 77
+    nome: Salto Santiago
+    curto: Salto Santiago
+    tipo: acumulacao
+    agente: Engie
+    lat: -25.6103
+    lon: -52.6164
+    estacao_barramento: "65883051"
+    estacoes_montante: []
+  - slug: salto-osorio
+    ons: SALTO OSORIO
+    id_ons: IGSOSO
+    cod_usina: 78
+    nome: Salto Osório
+    curto: Salto Osório
+    tipo: fio_dagua
+    agente: Engie
+    lat: -25.5331
+    lon: -53.0106
+    estacao_barramento: "65894991"
+    estacoes_montante: ["65889700"]
+  - slug: salto-caxias
+    ons: SALTO CAXIAS
+    id_ons: IGSCAX
+    cod_usina: 82
+    nome: Gov. José Richa (Salto Caxias)
+    curto: Salto Caxias
+    tipo: fio_dagua
+    agente: Copel
+    lat: -25.5419
+    lon: -53.4844
+    estacao_barramento: "65973501"
+    estacoes_montante: ["65960001", "65970700", "65971500"]
+  - slug: baixo-iguacu
+    ons: BAIXO IGUACU
+    id_ons: IGUHBI
+    cod_usina: 83
+    nome: Baixo Iguaçu
+    curto: Baixo Iguaçu
+    tipo: fio_dagua
+    agente: Geração Céu Azul (Copel / Neoenergia)
+    lat: -25.5042
+    lon: -53.6722
+    estacao_barramento: "65983100"
+    estacoes_montante: ["65975300", "65980200"]
+    estacoes_jusante: ["65984000", "65987001", "65987000", "65992502", "65992500", "65993000"]

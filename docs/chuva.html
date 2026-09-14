@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chuva · Painel Iguaçu</title>
+<link href="https://fonts.googleapis.com/css2?family=Questrial&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="estilo.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-locale-pt-br-latest.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</head>
+<body>
+<header id="topo" class="topo"></header>
+<main>
+  <h1>Chuva na bacia</h1>
+  <p class="sub">Produto MERGE do INPE/CPTEC: satélite GPM combinado com pluviômetros, grade de 0,1° (585 células na bacia, ~72 mil km²). Média espacial da bacia e distribuição por célula. Média de longo termo (MLT) da climatologia oficial 1998–2024.</p>
+  <div id="cartoes" class="grade c4"></div>
+
+  <h2>Onde choveu</h2>
+  <div class="controles">
+    <span>Acumulado:</span><button data-k="d1">último dia</button><button data-k="d7" class="ativo">7 dias</button><button data-k="d30">30 dias</button>
+    <span id="info-grade" class="sub" style="margin:0 0 0 8px"></span>
+  </div>
+  <div id="mapa"></div>
+
+  <h2>Chuva média diária na bacia</h2>
+  <div class="controles"><span>Janela:</span><button data-d="30">30 d</button><button data-d="90" class="ativo">90 d</button><button data-d="365">365 d</button></div>
+  <div id="g-diaria" class="grafico"></div>
+
+  <h2>Mensal contra a MLT</h2>
+  <div id="g-mensal" class="grafico"></div>
+
+  <h2>Pluviômetros e réguas com chuva (telemetria ANA)</h2>
+  <div class="tabela-wrap"><table class="tab" id="tab-plu"><thead><tr><th>Código</th><th>Nome</th><th>Tipo</th><th class="num">24 h</th><th class="num">7 d</th><th class="num">30 d</th><th>Último dado</th></tr></thead><tbody></tbody></table></div>
+</main>
+<footer id="rodape"></footer>
+<script>
+(async () => {
+  await iniciar('chuva.html');
+  const [C, U] = await Promise.all([carregar('chuva.json'), carregar('usinas.json')]);
+  const ac = C.acumulados || {};
+  document.getElementById('cartoes').innerHTML = [
+    ['Último dia', `${fmt(ac.d1, 1)} <small>mm</small>`, `MERGE de ${fmtData(ac.ultimo_dia)} (referência 12 UTC)`],
+    ['7 dias', `${fmt(ac.d7, 1)} <small>mm</small>`, 'média da bacia'],
+    ['30 dias', `${fmt(ac.d30, 1)} <small>mm</small>`, 'média da bacia'],
+    [`Mês em curso (${ac.dias_mes || 0} dias)`, `${fmt(ac.mes_atual, 1)} <small>mm</small>`, `MLT do mês inteiro: ${fmt(ac.mlt_mes, 1)} mm${ac.mlt_mes ? ' · ' + fmt(ac.mes_atual / ac.mlt_mes * 100, 0) + '% da MLT' : ''}`],
+  ].map(c => `<div class="cartao"><div class="rotulo">${c[0]}</div><div class="valor">${c[1]}</div><div class="nota">${c[2]}</div></div>`).join('');
+
+  // ---- mapa de células
+  const mapa = L.map('mapa', { scrollWheelZoom: false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 14, opacity: .6 }).addTo(mapa);
+  let camadaCel = null, legenda = null;
+  const G = C.grade;
+  function desenharGrade(k) {
+    if (!G) return;
+    const vals = G[k], max = Math.max(1, ...vals.filter(v => v !== null));
+    const escala = k === 'd1' ? Math.max(10, Math.ceil(max / 10) * 10) : Math.max(20, Math.ceil(max / 20) * 20);
+    if (camadaCel) camadaCel.remove();
+    camadaCel = L.layerGroup(G.lat.map((la, i) => L.rectangle([[la - .05, G.lon[i] - .05], [la + .05, G.lon[i] + .05]], { stroke: false, fillColor: corChuva(vals[i], escala), fillOpacity: .75, interactive: true })
+      .bindTooltip(`${fmt(vals[i], 1)} mm`, { sticky: true }))).addTo(mapa);
+    if (legenda) legenda.remove();
+    legenda = L.control({ position: 'bottomright' });
+    legenda.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); const passos = [0, .25, .5, .75, 1]; d.innerHTML = `<b>mm em ${{ d1: '1 dia', d7: '7 dias', d30: '30 dias' }[k]}</b><br>` + passos.map(p => `<i style="background:${corChuva(p * escala, escala)}"></i>${fmt(p * escala, 0)}`).join('<br>'); return d; };
+    legenda.addTo(mapa);
+    document.getElementById('info-grade').textContent = `${G[k + '_dias']} dia(s) de MERGE somados · máximo na bacia ${fmt(max, 1)} mm`;
+    document.querySelectorAll('.controles button[data-k]').forEach(b => b.classList.toggle('ativo', b.dataset.k === k));
+  }
+  try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { style: { color: PAL.escuro, weight: 2, fill: false } }).addTo(mapa); mapa.fitBounds(cam.getBounds()); } catch (e) { mapa.setView([-25.7, -52.3], 7); }
+  desenharGrade('d7');
+  document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => desenharGrade(b.dataset.k)));
+  U.usinas.forEach(u => L.circleMarker([u.lat, u.lon], { radius: 5, color: '#fff', weight: 1.5, fillColor: PAL.escuro, fillOpacity: 1 }).addTo(mapa).bindTooltip(u.curto, { permanent: true, direction: 'right', className: 'rotulo-usina', offset: [6, 0] }));
+  (C.pluviometros || []).forEach(p => L.circleMarker([p.lat, p.lon], { radius: 6, color: PAL.limite, weight: 2, fillColor: '#fff', fillOpacity: .9 }).addTo(mapa)
+    .bindPopup(`<b>${p.codigo}</b> ${p.nome}<br>${p.tipo}<br>24 h: ${fmt(p.mm_24h, 1)} mm · 7 d: ${fmt(p.mm_7d, 1)} mm · 30 d: ${fmt(p.mm_30d, 1)} mm<br><a href="estacao.html?c=${p.codigo}">abrir</a>`));
+  const st = document.createElement('style'); st.textContent = '.rotulo-usina{background:transparent;border:0;box-shadow:none;font:11px Questrial,sans-serif;color:#294086;padding:0}.rotulo-usina:before{display:none}'; document.head.appendChild(st);
+
+  // ---- diária
+  const D = C.diaria || { data: [], mm: [] };
+  function desenharDiaria(dias) {
+    const r = recorte(D.data, { y: D.mm }, dias);
+    Plotly.react('g-diaria', [{ x: r.x, y: r.arrays.y, type: 'bar', name: 'mm/dia', marker: { color: PAL.medio } }],
+      layoutBase({ showlegend: false, yaxis: { title: 'mm/dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m/%Y' } }), CONFIG_PLOT);
+    document.querySelectorAll('.controles button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
+  }
+  desenharDiaria(90);
+  document.querySelectorAll('.controles button[data-d]').forEach(b => b.addEventListener('click', () => desenharDiaria(+b.dataset.d)));
+
+  // ---- mensal
+  const M = C.mensal || [];
+  const rot = M.map(m => { const [a, mm] = m.mes.split('-'); return `${['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+mm - 1]}/${a.slice(2)}`; });
+  Plotly.newPlot('g-mensal', [
+    { x: rot, y: M.map(m => m.mm), type: 'bar', name: 'observado (MERGE)', marker: { color: M.map(m => m.dias < 25 ? PAL.claro : PAL.medio) }, text: M.map(m => m.dias < 25 ? `${m.dias} dias` : ''), textposition: 'outside', textfont: { size: 10 } },
+    { x: rot, y: M.map(m => m.mlt), type: 'scatter', mode: 'lines+markers', name: 'MLT 1998–2024', line: { color: PAL.escuro, width: 2 }, marker: { size: 6 } }],
+    layoutBase({ hovermode: 'x', yaxis: { title: 'mm/mês', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade } }), CONFIG_PLOT);
+
+  // ---- tabela
+  const plu = (C.pluviometros || []).slice().sort((a, b) => (b.mm_7d || 0) - (a.mm_7d || 0));
+  document.querySelector('#tab-plu tbody').innerHTML = plu.map(p => `<tr><td><a href="estacao.html?c=${p.codigo}">${p.codigo}</a></td><td>${p.nome}</td><td>${p.tipo === 'Pluviométrica' ? 'pluvio' : 'fluvio'}</td><td class="num">${fmt(p.mm_24h, 1)}</td><td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td>${fmtInst(p.ultimo_instante)}</td></tr>`).join('');
+  tabelaOrdenavel(document.getElementById('tab-plu'));
+})().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
+</script>
+</body>
+</html>

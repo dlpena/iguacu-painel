@@ -1,0 +1,120 @@
+/* Funções compartilhadas do Painel Iguaçu (sem framework, sem build). */
+const PAL = { escuro: '#294086', medio: '#0193DE', claro: '#80B5E1', marinho: '#000080', limite: '#C0504D',
+              fsarh: '#E08A1E', cinza: '#6B7280', chuva: '#80B5E1', grade: '#E5E7EB' };
+const SERIES = { nivel_montante: PAL.escuro, nivel_jusante: PAL.claro, defluencia: PAL.medio, vazao_turbinada: '#3FB0E8',
+                 vazao_vertida: '#0B6BA8', afluencia: '#8C9BB5', vazao_natural: '#8C9BB5', pct_volume_util: PAL.escuro };
+const ROT = { nivel_montante: 'Nível montante', nivel_jusante: 'Nível jusante', defluencia: 'Defluência', vazao_turbinada: 'Turbinada',
+              vazao_vertida: 'Vertida', afluencia: 'Afluência (ONS, resíduo de balanço)', vazao_natural: 'Vazão natural (diária)',
+              pct_volume_util: 'Volume útil (%)' };
+const PAGINAS = [['index.html', 'Início'], ['usina.html', 'Usinas'], ['estacoes.html', 'Estações'], ['chuva.html', 'Chuva'],
+                 ['cataratas.html', 'Cataratas'], ['fontes.html', 'Fontes e método']];
+
+function fmt(v, nd = 0) { return (v === null || v === undefined || Number.isNaN(v)) ? '–' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: nd, maximumFractionDigits: nd }); }
+function fmtInst(iso, comAno = false) { if (!iso) return '–'; const [d, h] = iso.split('T'); const [a, m, dd] = d.split('-'); return `${dd}/${m}${comAno ? '/' + a : ''}${h ? ' ' + h : ''}`; }
+function fmtData(iso) { if (!iso) return '–'; const [a, m, d] = iso.slice(0, 10).split('-'); return `${d}/${m}/${a}`; }
+function frescorClasse(h) { if (h === null || h === undefined) return 'off'; return h <= 2 ? 'ok' : (h <= 24 ? 'aviso' : 'off'); }
+function frescorTexto(h) { if (h === null || h === undefined) return 'sem dado'; if (h < 1) return 'há menos de 1 h'; if (h < 48) return `há ${Math.round(h)} h`; return `há ${Math.round(h / 24)} d`; }
+function param(nome, padrao) { return new URLSearchParams(location.search).get(nome) || padrao; }
+async function carregar(caminho) {
+  const v = Math.floor(Date.now() / 300000); // cache de 5 min
+  const r = await fetch(`data/${caminho}?v=${v}`);
+  if (!r.ok) throw new Error(`${caminho}: ${r.status}`);
+  return r.json();
+}
+function tend(delta, nd = 0, unidade = '') {
+  if (delta === null || delta === undefined) return '';
+  const cls = Math.abs(delta) < (nd ? 0.005 : 0.5) ? 'igual' : (delta > 0 ? 'sobe' : 'desce');
+  const seta = cls === 'igual' ? '→' : (delta > 0 ? '↑' : '↓');
+  return `<span class="tend ${cls}" title="variação nas últimas 6 h">${seta} ${fmt(Math.abs(delta), nd)}${unidade}</span>`;
+}
+
+/* cabeçalho e rodapé */
+function montarTopo(ativo, status) {
+  const nav = PAGINAS.map(([h, t]) => `<a href="${h}" class="${h === ativo ? 'ativo' : ''}">${t}</a>`).join('');
+  const logo = `<svg viewBox="0 0 60 40"><path d="M2 10 Q15 0 30 10 T58 10" fill="none" stroke="${PAL.claro}" stroke-width="5" stroke-linecap="round"/><path d="M2 20 Q15 10 30 20 T58 20" fill="none" stroke="${PAL.medio}" stroke-width="5" stroke-linecap="round"/><path d="M2 30 Q15 20 30 30 T58 30" fill="none" stroke="${PAL.escuro}" stroke-width="5" stroke-linecap="round"/></svg>`;
+  let carimbo = '';
+  if (status) {
+    const o = status.ons || {}, t = status.telemetria || {}, m = status.merge || {};
+    carimbo = `<div class="carimbo">
+      <span>Gerado <b>${fmtInst(status.gerado_em)}</b></span>
+      <span><span class="ponto ${o.ok ? 'ok' : 'off'}"></span>ONS até <b>${fmtInst(o.ultimo_instante)}</b></span>
+      <span><span class="ponto ${t.ok ? 'ok' : 'off'}"></span>Telemetria: <b>${t.com_dado || 0}</b> de ${t.total || 0} estações</span>
+      <span><span class="ponto ${m.ok ? 'ok' : 'off'}"></span>MERGE até <b>${fmtData(m.ultimo_dia)}</b></span></div>`;
+  }
+  document.getElementById('topo').innerHTML = `<div class="interno"><a class="marca" href="index.html">${logo}<div>Painel Iguaçu<small>acompanhamento hidrológico da bacia</small></div></a><nav class="menu">${nav}</nav>${carimbo}</div>`;
+}
+function montarRodape(status) {
+  const c = (status && status.citacoes) || {};
+  document.getElementById('rodape').innerHTML = `<div class="interno">
+    <p><b>Painel técnico não oficial</b>, desenvolvido por Diego Liz Pena. Não é produto da Agência Nacional de Águas e Saneamento Básico nem do ONS. Os dados são brutos, sem consistência, e podem ser revisados pelas fontes. O painel exibe dado e regra; não conclui descumprimento.</p>
+    <p>Fontes: ${c.ons_ho || 'ONS, Dados Abertos (base horária)'}; ${c.ons_di || 'ONS, Dados Abertos (base diária)'}; ${c.telemetria || 'ANA, webservice de telemetria'}; ${c.merge || 'INPE/CPTEC, MERGE'}; ${c.mlt || ''}.</p>
+    <p>Limites de outorga e de FSAR-H lidos nos documentos primários (outorgas ANA nº 2.382/2022 e nº 2.590/2019; formulários FSAR-H lidos em 12/09/2026). Código e dados: <a href="https://github.com/dlpena/iguacu-painel">github.com/dlpena/iguacu-painel</a>.</p></div>`;
+}
+async function iniciar(ativo) {
+  let status = null;
+  try { status = await carregar('status.json'); } catch (e) { console.warn(e); }
+  montarTopo(ativo, status);
+  montarRodape(status);
+  return status;
+}
+
+/* Plotly */
+function layoutBase(extra = {}) {
+  return Object.assign({
+    font: { family: 'Questrial, Century Gothic, sans-serif', size: 12, color: '#1F2937' },
+    paper_bgcolor: '#fff', plot_bgcolor: '#fff', margin: { l: 56, r: 16, t: 30, b: 40 },
+    hovermode: 'x unified', showlegend: true,
+    legend: { orientation: 'h', y: 1.12, x: 0, font: { size: 11 } },
+    xaxis: { gridcolor: PAL.grade, zeroline: false, hoverformat: '%d/%m %H:%M' },
+    yaxis: { gridcolor: PAL.grade, zeroline: false, fixedrange: false },
+  }, extra);
+}
+const CONFIG_PLOT = { responsive: true, displaylogo: false, locale: 'pt-BR', modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+                      toImageButtonOptions: { format: 'png', scale: 2 } };
+function linhaLimite(y, texto, cor = PAL.limite, tracado = 'dash') {
+  return { shape: { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: y, y1: y, line: { color: cor, width: 1.5, dash: tracado } },
+           ann: { xref: 'paper', x: 1, y: y, text: texto, showarrow: false, xanchor: 'right', yanchor: 'bottom', font: { size: 10, color: cor }, bgcolor: 'rgba(255,255,255,.7)' } };
+}
+function traco(x, y, nome, cor, extra = {}) { return Object.assign({ x, y, name: nome, type: 'scatter', mode: 'lines', line: { color: cor, width: 1.6 }, connectgaps: false }, extra); }
+function recorte(x, arrays, dias) {
+  if (!dias || !x.length) return { x, arrays };
+  const lim = new Date(x[x.length - 1]); lim.setDate(lim.getDate() - dias);
+  const i0 = Math.max(0, x.findIndex(t => new Date(t) >= lim));
+  const c = a => a ? a.slice(i0) : a;
+  const out = {}; for (const k in arrays) out[k] = c(arrays[k]);
+  return { x: x.slice(i0), arrays: out };
+}
+
+/* sparkline SVG */
+function spark(vals, cor = PAL.medio, w = 110, h = 26) {
+  const v = vals.filter(x => x !== null);
+  if (v.length < 2) return '';
+  const mn = Math.min(...v), mx = Math.max(...v), r = (mx - mn) || 1;
+  const pts = vals.map((x, i) => x === null ? null : `${(i / (vals.length - 1) * w).toFixed(1)},${(h - 2 - (x - mn) / r * (h - 4)).toFixed(1)}`).filter(Boolean).join(' ');
+  return `<svg width="${w}" height="${h}"><polyline points="${pts}" fill="none" stroke="${cor}" stroke-width="1.5"/></svg>`;
+}
+
+/* tabela ordenável */
+function tabelaOrdenavel(tabela) {
+  const ths = tabela.querySelectorAll('th');
+  ths.forEach((th, i) => th.addEventListener('click', () => {
+    const asc = th.dataset.ord !== 'asc';
+    ths.forEach(t => delete t.dataset.ord); th.dataset.ord = asc ? 'asc' : 'desc';
+    const linhas = Array.from(tabela.tBodies[0].rows);
+    const val = tr => { const c = tr.cells[i]; const bruto = c.dataset.v ?? c.textContent; const n = parseFloat(bruto.replace(/\./g, '').replace(',', '.')); return Number.isNaN(n) ? bruto.toLowerCase() : n; };
+    linhas.sort((a, b) => { const va = val(a), vb = val(b); if (va === vb) return 0; if (va === '' || va === '–') return 1; if (vb === '' || vb === '–') return -1; return (va > vb ? 1 : -1) * (asc ? 1 : -1); });
+    linhas.forEach(l => tabela.tBodies[0].appendChild(l));
+  }));
+}
+
+/* escala de cores para chuva (mm) */
+function corChuva(mm, max) {
+  if (mm === null || mm === undefined) return '#ddd';
+  const t = Math.min(1, mm / (max || 1));
+  const paradas = [[0, [246, 248, 251]], [.15, [128, 181, 225]], [.4, [1, 147, 222]], [.7, [41, 64, 134]], [1, [0, 0, 80]]];
+  let a = paradas[0], b = paradas[paradas.length - 1];
+  for (let i = 0; i < paradas.length - 1; i++) if (t >= paradas[i][0] && t <= paradas[i + 1][0]) { a = paradas[i]; b = paradas[i + 1]; break; }
+  const f = (t - a[0]) / ((b[0] - a[0]) || 1);
+  const c = a[1].map((x, i) => Math.round(x + (b[1][i] - x) * f));
+  return `rgb(${c.join(',')})`;
+}
