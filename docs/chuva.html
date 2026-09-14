@@ -40,7 +40,8 @@
 <script>
 (async () => {
   await iniciar('chuva.html');
-  const [C, U] = await Promise.all([carregar('chuva.json'), carregar('usinas.json')]);
+  const [C, B] = await Promise.all([carregar('chuva.json'), carregar('bacia.json')]);
+  const U = { usinas: B.trechos.filter(t => t.usina).map(t => t.usina) };
   const ac = C.acumulados || {};
   document.getElementById('cartoes').innerHTML = [
     ['Último dia', `${fmt(ac.d1, 1)} <small>mm</small>`, `MERGE de ${fmtData(ac.ultimo_dia)} (referência 12 UTC)`],
