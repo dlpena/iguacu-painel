@@ -7,8 +7,8 @@ const SERIES = { nivel_montante: PAL.escuro, nivel_jusante: PAL.claro, defluenci
 const ROT = { nivel_montante: 'Nível montante', nivel_jusante: 'Nível jusante', defluencia: 'Defluência', vazao_turbinada: 'Turbinada',
               vazao_vertida: 'Vertida', afluencia: 'Afluência (ONS, resíduo de balanço)', vazao_natural: 'Vazão natural (diária)',
               pct_volume_util: 'Volume útil (%)' };
-const PAGINAS = [['index.html', 'O rio agora'], ['trecho.html?t=cataratas', 'Cataratas'], ['chuva.html', 'Chuva'],
-                 ['catalogo.html', 'Catálogo'], ['fontes.html', 'Fontes e método']];
+const PAGINAS = [['index.html', 'O rio agora'], ['chuva.html', 'Chuva'], ['catalogo.html', 'Catálogo'], ['fontes.html', 'Fontes e método']];
+function trilha(itens) { return `<nav class="trilha">${itens.map(([h, t]) => h ? `<a href="${h}">${t}</a>` : `<span>${t}</span>`).join('<span class="sep">›</span>')}</nav>`; }
 const PAPEL = { montante: 'estação fluviométrica a montante', afluente: 'afluente', barramento: 'estação fluviométrica no barramento', jusante: 'estação fluviométrica a jusante', pluviometro: 'pluviômetro' };
 
 /* marcador de usina nos mapas: triângulo azul-escuro; rótulo fixo à direita ou só no hover */

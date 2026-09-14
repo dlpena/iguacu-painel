@@ -15,6 +15,7 @@
 <body>
 <header id="topo" class="topo"></header>
 <main>
+  <div id="trilha"></div>
   <div class="controles" id="sel-trecho"></div>
   <h1 id="titulo">Trecho</h1>
   <p class="sub" id="contexto"></p>
@@ -67,6 +68,7 @@
   const R = B.trechos.find(t => t.slug === slug) || { estacoes: [], pluviometros: [], avisos: [] };
   document.title = `${T.nome} · Painel Iguaçu`;
   document.getElementById('titulo').textContent = T.nome;
+  document.getElementById('trilha').innerHTML = trilha([['index.html', '← O rio agora'], [null, `Trecho ${T.nome}`]]);
   document.getElementById('contexto').textContent = T.contexto;
   const U = T.usina;
   desenharEsquema(document.getElementById('esquema'), B.trechos, slug); // bacia inteira com o trecho em destaque

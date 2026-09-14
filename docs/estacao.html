@@ -13,6 +13,7 @@
 <body>
 <header id="topo" class="topo"></header>
 <main>
+  <div id="trilha"></div>
   <h1 id="titulo">Estação</h1>
   <p class="sub" id="subtitulo"></p>
   <div class="controles">
@@ -35,6 +36,7 @@
   const D = await carregar(`estacao/${cod}.json`);
   document.title = `${D.codigo} · Painel Iguaçu`;
   document.getElementById('titulo').textContent = `${D.codigo} · ${D.nome}`;
+  document.getElementById('trilha').innerHTML = trilha([['index.html', '← O rio agora'], D.trecho ? [`trecho.html?t=${D.trecho}`, `Trecho ${D.trecho_nome}`] : ['catalogo.html', 'Catálogo'], [null, `Estação ${D.codigo}`]]);
   document.getElementById('subtitulo').innerHTML = `${D.trecho ? `<a href="trecho.html?t=${D.trecho}">Trecho ${D.trecho_nome}</a> · <b>${PAPEL[D.papel] || D.papel || ''}</b>${D.rio_afluente ? ' (' + D.rio_afluente + ')' : ''} · ` : ''}${D.tipo}${D.rio ? ' · ' + D.rio : ''} · ${D.municipio || ''} · responsável ${D.responsavel || '–'}${D.operadora && D.operadora !== D.responsavel ? ' · operadora ' + D.operadora : ''}${D.area_km2 ? ' · ' + fmt(D.area_km2) + ' km²' : ''}`;
   if (D.trecho) { const l = document.getElementById('lnk-usina'); l.hidden = false; l.href = `trecho.html?t=${D.trecho}`; l.textContent = `ver no trecho ${D.trecho_nome}`; }
   document.getElementById('cartoes').innerHTML = [
