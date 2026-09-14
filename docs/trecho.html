@@ -18,9 +18,10 @@
   <div class="controles" id="sel-trecho"></div>
   <h1 id="titulo">Trecho</h1>
   <p class="sub" id="contexto"></p>
+  <div class="cartao" style="padding:6px 8px 2px;margin-bottom:14px"><div class="esquema-wrap"><div id="esquema"></div></div></div>
 
   <div class="grade" style="grid-template-columns: minmax(280px, 1fr) minmax(300px, 2fr)">
-    <div><div id="mapa" style="height:100%;min-height:300px"></div></div>
+    <div class="mapa-caixa"><div id="mapa" style="height:100%;min-height:320px"></div><div id="situacao" class="situacao" title="situação na bacia"></div></div>
     <div id="pontos"></div>
   </div>
 
@@ -62,13 +63,14 @@
   await iniciar('index.html');
   const B = await carregar('bacia.json');
   const slug = param('t', 'baixo-iguacu');
-  document.getElementById('sel-trecho').innerHTML = B.trechos.map(t => `<a href="trecho.html?t=${t.slug}"><button class="${t.slug === slug ? 'ativo' : ''}">${t.curto || t.nome}</button></a>`).join('<span style="color:var(--azul-claro)">›</span>');
+  document.getElementById('sel-trecho').innerHTML = '<span class="sub" style="margin:0 6px 0 0">foz</span>' + B.trechos.slice().reverse().map(t => `<a href="trecho.html?t=${t.slug}"><button class="${t.slug === slug ? 'ativo' : ''}">${t.curto || t.nome}</button></a>`).join('<span style="color:var(--azul-claro)">‹</span>') + '<span class="sub" style="margin:0 0 0 6px">cabeceira</span>';
   const T = await carregar(`trecho/${slug}.json`);
   const R = B.trechos.find(t => t.slug === slug) || { estacoes: [], pluviometros: [], avisos: [] };
   document.title = `${T.nome} · Painel Iguaçu`;
   document.getElementById('titulo').textContent = T.nome;
   document.getElementById('contexto').textContent = T.contexto;
   const U = T.usina;
+  desenharEsquema(document.getElementById('esquema'), [R]);
 
   // ---- pontos do trecho (usina + réguas, em ordem de rio, cada um com referência)
   const refTxt = (v, r) => (v !== null && v !== undefined && r) ? `${fmt(v / r * 100, 0)}% da média de 30 d (${fmt(r)})` : 'sem referência de 30 d';
@@ -78,8 +80,8 @@
     cards.push(`<a class="ponto-trecho ${e.papel}" href="estacao.html?c=${e.codigo}">
       <div class="papel">${PAPEL[e.papel]}${e.rio_afluente ? ' · ' + e.rio_afluente : ''}${e.area_km2 ? ' · ' + fmt(e.area_km2) + ' km²' : ''}</div>
       <div class="nome"><span class="ponto ${frescorClasse(e.frescor_h)}"></span>${e.curto} <small>${e.codigo}</small></div>
-      <div class="valores">${e.vazao !== null && e.vazao !== undefined ? `<div><b>${fmt(e.vazao)}</b> m³/s${tend(e.vazao_6h)}<div class="ref">${refTxt(e.vazao, (e.ref || {}).vazao_media_30d)}</div></div>` : ''}
-        ${e.cota_m !== null && e.cota_m !== undefined ? `<div><b>${fmt(e.cota_m, 2)}</b> m<div class="ref">cota${(e.ref || {}).cota_media_30d ? ' · média 30 d ' + fmt(e.ref.cota_media_30d, 2) : ''}</div></div>` : ''}
+      <div class="valores">${e.vazao !== null && e.vazao !== undefined ? `<div><div class="var">vazão</div><b>${fmt(e.vazao)}</b> m³/s${tend(e.vazao_6h)}<div class="ref">${refTxt(e.vazao, (e.ref || {}).vazao_media_30d)}</div></div>` : ''}
+        ${e.cota_m !== null && e.cota_m !== undefined ? `<div><div class="var">cota</div><b>${fmt(e.cota_m, 2)}</b> m<div class="ref">${(e.ref || {}).cota_media_30d ? 'média 30 d ' + fmt(e.ref.cota_media_30d, 2) + ' m' : 'sem referência'}</div></div>` : ''}
         ${(e.vazao === null || e.vazao === undefined) && (e.cota_m === null || e.cota_m === undefined) ? '<div class="ref">sem transmissão nos últimos 90 dias (cadastro diz "operando")</div>' : ''}
         <div class="spark">${e.spark ? spark(e.spark.v, PAL.medio, 90, 24) : ''}<div class="ref">${frescorTexto(e.frescor_h)}</div></div></div></a>`);
     if (e.papel === 'afluente' || e.papel === 'montante') return;
@@ -94,11 +96,12 @@
       <div class="papel">usina · ${U.tipo === 'acumulacao' ? 'acumulação' : "fio d'água"} · ${U.agente}</div>
       <div class="nome"><span class="ponto ${frescorClasse(a.frescor_h)}"></span>${U.nome} <small>ONS ${fmtInst(a.instante)}</small></div>
       <div class="valores">
-        <div><b>${fmt(a.defluencia)}</b> m³/s${tend(t.defluencia_6h)}<div class="ref">defluência · ${qCtx}${refTxt(a.defluencia, rf.defluencia_media_30d)}</div></div>
-        <div><b>${fmt(a.nivel_montante, 2)}</b> m${tend(t.nivel_montante_6h, 2)}<div class="ref">nível montante · ${nivelCtx}</div></div>
-        <div><b>${fmt(a.vazao_turbinada)}</b> / <b>${fmt(a.vazao_vertida)}</b><div class="ref">turbinada / vertida m³/s${U.tipo === 'acumulacao' ? ` · volume útil ${fmt(a.pct_volume_util_di, 1)}% (${fmtData(a.dia)})` : ''}</div></div>
-        <div><b>${fmt(a.vazao_natural_di)}</b> m³/s<div class="ref">vazão natural diária ONS (${fmtData(a.dia)})</div></div>
-        ${barr.codigo ? `<div><b>${fmt(barr.vazao)}</b> m³/s<div class="ref">régua de barramento ${barr.codigo} (${barr.responsavel}) ${fmtInst(barr.ultimo_instante)} · cota ${fmt(barr.cota_m, 2)} m · <a href="estacao.html?c=${barr.codigo}">abrir</a></div></div>` : ''}
+        <div><div class="var">afluência (diária ONS)</div><b>${fmt(a.afluencia_di)}</b> m³/s<div class="ref">dia ${fmtData(a.dia)} · a horária do ONS é resíduo de balanço e não é exibida</div></div>
+        <div><div class="var">defluência</div><b>${fmt(a.defluencia)}</b> m³/s${tend(t.defluencia_6h)}<div class="ref">${qCtx}${refTxt(a.defluencia, rf.defluencia_media_30d)}</div></div>
+        <div><div class="var">turbinada / vertida</div><b>${fmt(a.vazao_turbinada)}</b> / <b>${fmt(a.vazao_vertida)}</b> m³/s<div class="ref">${U.tipo === 'acumulacao' ? `volume útil ${fmt(a.pct_volume_util_di, 1)}% (${fmtData(a.dia)})` : 'ONS ' + fmtInst(a.instante)}</div></div>
+        <div><div class="var">nível montante</div><b>${fmt(a.nivel_montante, 2)}</b> m${tend(t.nivel_montante_6h, 2)}<div class="ref">${nivelCtx}</div></div>
+        <div><div class="var">vazão natural (diária ONS)</div><b>${fmt(a.vazao_natural_di)}</b> m³/s<div class="ref">dia ${fmtData(a.dia)}</div></div>
+        ${barr.codigo ? `<div><div class="var">estação de barramento ${barr.codigo}</div><b>${fmt(barr.vazao)}</b> m³/s<div class="ref">${barr.responsavel} ${fmtInst(barr.ultimo_instante)} · cota ${fmt(barr.cota_m, 2)} m · <a href="estacao.html?c=${barr.codigo}">abrir</a></div></div>` : ''}
       </div></div>`;
     const posJus = R.estacoes.filter(e => e.papel !== 'barramento').findIndex(e => e.papel === 'jusante');
     if (posJus >= 0) cards.splice(posJus, 0, bloco); else cards.push(bloco);
@@ -119,6 +122,16 @@
   if (U && R.usina) marcadorUsina([R.usina.lat, R.usina.lon], R.usina.curto, true).addTo(mapa);
   const validos = pts.filter(p => p[0]);
   if (validos.length) mapa.fitBounds(validos, { padding: [30, 30], maxZoom: 10 }); else mapa.setView([-25.7, -52.3], 7);
+  // mapa de situação: bacia inteira com o retângulo do que o mapa grande mostra
+  try {
+    const sit = L.map('situacao', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
+    const b = await carregar('bacia.geojson');
+    const cam = L.geoJSON(b, { style: { color: PAL.escuro, weight: 1, fillColor: PAL.claro, fillOpacity: .35 } }).addTo(sit);
+    sit.fitBounds(cam.getBounds(), { padding: [2, 2] });
+    const ret = L.rectangle(mapa.getBounds(), { color: '#C0504D', weight: 1.5, fillOpacity: .15 }).addTo(sit);
+    mapa.on('move zoom', () => ret.setBounds(mapa.getBounds()));
+    setTimeout(() => { sit.invalidateSize(); sit.fitBounds(cam.getBounds(), { padding: [2, 2] }); ret.setBounds(mapa.getBounds()); }, 300);
+  } catch (e) { console.warn('situação', e); }
 
   // ---- gráficos
   let dias = 7;

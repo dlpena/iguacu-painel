@@ -49,7 +49,7 @@ function desenharEsquema(el, trechos) {
     const x1 = W - (MARG + t._ini * COL), x0 = W - (MARG + t._fim * COL);
     if (x1 <= x0) return;
     s += `<a href="trecho.html?t=${t.slug}"><rect x="${x0}" y="0" width="${x1 - x0}" height="${H}" fill="${k % 2 ? '#F1F5FA' : '#FFFFFF'}"><title>${esc(t.nome)}</title></rect>`;
-    s += `<text x="${x0 + 6}" y="14" font-size="11.5" fill="#294086">${esc(t.curto || t.nome)}${t.avisos && t.avisos.length ? ` <tspan fill="#E08A1E">●</tspan>` : ''}</text></a>`;
+    s += `<text x="${x0 + 6}" y="${H - 6}" font-size="11.5" fill="#294086">${esc(t.curto || t.nome)}${t.avisos && t.avisos.length ? ` <tspan fill="#E08A1E">●</tspan>` : ''}</text></a>`;
   });
   // rio
   s += `<path d="M${W - MARG} ${Y} H${MARG}" stroke="#80B5E1" stroke-width="6" stroke-linecap="round" fill="none"/>`;

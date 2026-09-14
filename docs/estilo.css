@@ -131,6 +131,12 @@ table.tab td.spark svg { vertical-align: middle; }
 .ponto-trecho .ref { font-size: 11.5px; color: var(--texto-suave); }
 .ponto-trecho .spark { margin-left: auto; text-align: right; }
 
+.ponto-trecho .valores > div { min-width: 120px; }
+.ponto-trecho .var { font-size: 11px; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .3px; }
+.mapa-caixa { position: relative; }
+.situacao { position: absolute; right: 8px; bottom: 8px; width: 150px; height: 84px; border: 1px solid var(--azul-escuro); border-radius: 4px; background: #fff; z-index: 800; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+.situacao .leaflet-control-attribution { display: none; }
+
 /* rodapé */
 footer { border-top: 1px solid var(--borda); margin-top: 40px; background: var(--cartao); }
 footer .interno { max-width: 1280px; margin: 0 auto; padding: 18px 20px; font-size: 12.5px; color: var(--texto-suave); }
