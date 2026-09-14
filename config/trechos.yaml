@@ -8,7 +8,7 @@ trechos:
     curto: Foz do Areia
     nome: Cabeceira e Foz do Areia
     usina: foz-do-areia
-    contexto: "Do Alto Iguaçu até o reservatório de Foz do Areia (Gov. Bento Munhoz), o maior de acumulação da cascata. As réguas de Porto Amazonas a Porto Vitória mostram a onda de cheia chegando ao reservatório; União da Vitória é a referência histórica de cheias da cidade."
+    contexto: "Do Alto Iguaçu até o reservatório de Foz do Areia (Gov. Bento Munhoz), o maior de acumulação da cascata. As estações de Porto Amazonas a Porto Vitória mostram a onda de cheia chegando ao reservatório; União da Vitória é a referência histórica de cheias da cidade."
     estacoes:
       - {codigo: "65035001", papel: montante, curto: "Porto Amazonas"}
       - {codigo: "65060001", papel: montante, curto: "São Mateus do Sul"}
@@ -46,7 +46,7 @@ trechos:
     curto: Salto Caxias
     nome: Salto Caxias
     usina: salto-caxias
-    contexto: "Fio d'água com o rio Chopim entrando pela margem esquerda (régua de Águas do Verê). Balsa Jaracatiá e Boa Vista da Aparecida ficam no remanso; a outorga fixa mínimo de 200 m³/s (ou a natural, com piso de 76) e o ONS já publicou zeros espúrios de defluência aqui."
+    contexto: "Fio d'água com o rio Chopim entrando pela margem esquerda (estação de Águas do Verê). Balsa Jaracatiá e Boa Vista da Aparecida ficam no remanso; a outorga fixa mínimo de 200 m³/s (ou a natural, com piso de 76) e o ONS já publicou zeros espúrios de defluência aqui."
     estacoes:
       - {codigo: "65960001", papel: afluente, curto: "Águas do Verê (Chopim)", rio: "rio Chopim", margem: esquerda}
       - {codigo: "65970700", papel: montante, curto: "Balsa Jaracatiá"}
@@ -57,7 +57,7 @@ trechos:
     curto: Baixo Iguaçu
     nome: Baixo Iguaçu
     usina: baixo-iguacu
-    contexto: "Última usina antes do Parque Nacional. Recebe Salto Caxias mais os rios Andrada e Capanema. A régua do barramento publica a defluência total e é o cruzamento natural com o dado do ONS; a de jusante confirma o que efetivamente segue para as Cataratas."
+    contexto: "Última usina antes do Parque Nacional. Recebe Salto Caxias mais os rios Andrada e Capanema. A estação do barramento publica a defluência total e é o cruzamento natural com o dado do ONS; a de jusante confirma o que efetivamente segue para as Cataratas."
     estacoes:
       - {codigo: "65975300", papel: afluente, curto: "Rio Andrada", rio: "rio Andrada", margem: direita}
       - {codigo: "65980200", papel: afluente, curto: "Rio Capanema", rio: "rio Capanema", margem: esquerda}
@@ -68,7 +68,7 @@ trechos:
     curto: Cataratas
     nome: Cataratas e Parque Nacional
     usina: null
-    contexto: "Trecho livre entre Baixo Iguaçu e a foz no rio Paraná. Porto Capanema e Hotel Cataratas têm réguas de dois operadores no mesmo local (Copel e Itaipu); diferenças entre elas são de curva-chave, não de leitura. A regra que importa aqui é o mínimo de 350 m³/s defluído por Baixo Iguaçu."
+    contexto: "Trecho livre entre Baixo Iguaçu e a foz no rio Paraná. Porto Capanema e Hotel Cataratas têm estações fluviométricas de dois operadores no mesmo local (Copel e Itaipu); diferenças entre elas são de curva-chave, não de leitura. A regra que importa aqui é o mínimo de 350 m³/s defluído por Baixo Iguaçu."
     estacoes:
       - {codigo: "65987001", papel: jusante, curto: "Porto Capanema (Copel)"}
       - {codigo: "65987000", papel: jusante, curto: "Porto Capanema (Itaipu)", esquema: false}
