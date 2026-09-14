@@ -62,7 +62,7 @@ function desenharEsquema(el, trechos, destaque = null) {
   const unico = trechos.length === 1;
   const temSul = trechos.some(t => t.estacoes.some(e => e.papel === 'afluente' && e.margem === 'esquerda' && e.esquema !== false));
   // margem direita maior: os nomes das estações descem inclinados para a direita e a primeira coluna (cabeceira) fica na borda
-  const COL = 56, MARG = unico ? 64 : 28, MARG_D = unico ? 64 : 128, Y = 150, H = temSul ? 372 : 268;
+  const COL = 56, MARG = unico ? 64 : 28, MARG_D = unico ? 64 : 128, Y = 180, H = temSul ? 402 : 298;
   const cols = []; // {tipo, x, ...}
   trechos.forEach(t => {
     const ini = cols.length;
@@ -119,7 +119,7 @@ function desenharEsquema(el, trechos, destaque = null) {
       // afluentes vizinhos do mesmo lado alternam altura para os nomes não se cruzarem
       const e = c.e, sul = e.margem === 'esquerda';
       const alto = cols[i + 1] && cols[i + 1].tipo === 'afluente' && ((cols[i + 1].e.margem === 'esquerda') === sul);
-      const dist = alto ? 84 : 50, cy = sul ? Y + 150 + (alto ? 34 : 0) : Y - dist;
+      const dist = alto ? 112 : 80, cy = sul ? Y + 150 + (alto ? 34 : 0) : Y - dist;
       const alvo = x(i + (alto ? 2 : 1)) - 4;
       s += `<a href="estacao.html?c=${e.codigo}"><path d="M${cx} ${cy} L${alvo} ${sul ? Y + 3 : Y - 3}" stroke="#80B5E1" stroke-width="2.5" fill="none" stroke-dasharray="3 3"/>`;
       s += `<circle cx="${cx}" cy="${cy}" r="6" fill="${cor(e.frescor_h)}" stroke="#fff" stroke-width="1.5"/>`;
