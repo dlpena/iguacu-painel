@@ -41,7 +41,8 @@ const LEGENDA_HIDRO = '<i style="background:#0B6BA8;height:3px;border-radius:0">
 function desenharEsquema(el, trechos, destaque = null) {
   const unico = trechos.length === 1;
   const temSul = trechos.some(t => t.estacoes.some(e => e.papel === 'afluente' && e.margem === 'esquerda' && e.esquema !== false));
-  const COL = 56, MARG = unico ? 64 : 28, Y = 150, H = temSul ? 330 : 262;
+  // margem direita maior: os nomes das estações descem inclinados para a direita e a primeira coluna (cabeceira) fica na borda
+  const COL = 56, MARG = unico ? 64 : 28, MARG_D = unico ? 64 : 128, Y = 150, H = temSul ? 330 : 262;
   const cols = []; // {tipo, x, ...}
   trechos.forEach(t => {
     const ini = cols.length;
@@ -57,8 +58,8 @@ function desenharEsquema(el, trechos, destaque = null) {
     if (cols.length - ini < 2) cols.push({ tipo: 'vazio', t }); // faixa mínima de 2 colunas para caber o nome
     t._ini = ini; t._fim = cols.length;
   });
-  const W = MARG * 2 + cols.length * COL;
-  const x = i => W - (MARG + i * COL + COL / 2); // espelhado: cabeceira à direita, foz à esquerda, como no mapa
+  const W = MARG + MARG_D + cols.length * COL;
+  const x = i => W - (MARG_D + i * COL + COL / 2); // espelhado: cabeceira à direita, foz à esquerda, como no mapa
   const cor = h => ({ ok: '#2E8B57', aviso: '#D9A400', off: '#9CA3AF' }[frescorClasse(h)]);
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   // bacia inteira: ocupa a largura toda (com rolagem no celular); um trecho só: tamanho natural, sem esticar
@@ -66,7 +67,7 @@ function desenharEsquema(el, trechos, destaque = null) {
   let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="${estilo}" font-family="Questrial, Century Gothic, sans-serif">`;
   // faixas dos trechos
   trechos.forEach((t, k) => {
-    const x1 = W - (MARG + t._ini * COL), x0 = W - (MARG + t._fim * COL);
+    const x1 = W - (MARG_D + t._ini * COL), x0 = W - (MARG_D + t._fim * COL);
     if (x1 <= x0) return;
     const sel = t.slug === destaque;
     s += `<a href="trecho.html?t=${t.slug}"><rect x="${x0}" y="0" width="${x1 - x0}" height="${H}" fill="${sel ? '#E3EEFB' : (k % 2 ? '#F1F5FA' : '#FFFFFF')}"><title>${esc(t.nome)}</title></rect>`;
@@ -74,12 +75,12 @@ function desenharEsquema(el, trechos, destaque = null) {
     s += `<text x="${x0 + 6}" y="14" font-size="${sel ? 12.5 : 11.5}" fill="#294086" ${sel ? 'font-weight="bold"' : ''}>${esc(t.curto || t.nome)}${t.avisos && t.avisos.length ? ` <tspan fill="#E08A1E">●</tspan>` : ''}</text></a>`;
   });
   // rio
-  s += `<path d="M${W - MARG} ${Y} H${MARG}" stroke="#80B5E1" stroke-width="6" stroke-linecap="round" fill="none"/>`;
+  s += `<path d="M${W - MARG_D} ${Y} H${MARG}" stroke="#80B5E1" stroke-width="6" stroke-linecap="round" fill="none"/>`;
   // setas do sentido do rio (leste -> oeste), uma por faixa de trecho
-  trechos.forEach(t => { const xs = W - (MARG + t._fim * COL) + 10; if (t._fim > t._ini) s += `<path d="M${xs + 7} ${Y - 5} L${xs} ${Y} L${xs + 7} ${Y + 5}" fill="none" stroke="#294086" stroke-width="1.6" stroke-linecap="round"/>`; });
+  trechos.forEach(t => { const xs = W - (MARG_D + t._fim * COL) + 10; if (t._fim > t._ini) s += `<path d="M${xs + 7} ${Y - 5} L${xs} ${Y} L${xs + 7} ${Y + 5}" fill="none" stroke="#294086" stroke-width="1.6" stroke-linecap="round"/>`; });
   s += unico
     ? `<text x="${W - 4}" y="${Y + 4}" font-size="10" fill="#6B7280" text-anchor="end">montante</text><text x="${4}" y="${Y + 4}" font-size="10" fill="#6B7280">← jusante</text>`
-    : `<text x="${W - MARG}" y="${Y + 22}" font-size="10" fill="#6B7280" text-anchor="end">cabeceira (montante)</text><text x="${MARG}" y="${Y + 22}" font-size="10" fill="#6B7280">← sentido do rio · foz (jusante)</text>`;
+    : `<text x="${W - MARG_D}" y="${Y + 22}" font-size="10" fill="#6B7280" text-anchor="end">cabeceira (montante)</text><text x="${MARG}" y="${Y + 22}" font-size="10" fill="#6B7280">← sentido do rio · foz (jusante)</text>`;
   cols.forEach((c, i) => {
     const cx = x(i);
     if (c.tipo === 'vazio') {
