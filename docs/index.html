@@ -73,14 +73,17 @@
     t.estacoes.filter(e => e.lat && e.lon).forEach(e => {
       const cor = { ok: '#2E8B57', aviso: '#D9A400', off: '#9CA3AF' }[frescorClasse(e.frescor_h)];
       L.circleMarker([e.lat, e.lon], { radius: 6, color: '#fff', weight: 1, fillColor: cor, fillOpacity: .95 }).addTo(mapa)
+        .bindTooltip(`<b>${e.curto}</b> · ${PAPEL[e.papel] || e.papel}<br>${e.vazao !== null && e.vazao !== undefined ? fmt(e.vazao) + ' m³/s · ' : ''}${e.cota_m !== null && e.cota_m !== undefined ? 'cota ' + fmt(e.cota_m, 2) + ' m · ' : ''}${frescorTexto(e.frescor_h)}`, { direction: 'top', offset: [0, -6] })
         .bindPopup(`<b>${e.curto}</b> · ${PAPEL[e.papel] || e.papel}<br>${e.codigo} ${e.nome}<br>${e.vazao !== null && e.vazao !== undefined ? 'Vazão ' + fmt(e.vazao) + ' m³/s · ' : ''}${frescorTexto(e.frescor_h)}<br><a href="trecho.html?t=${t.slug}">trecho ${t.nome}</a> · <a href="estacao.html?c=${e.codigo}">estação</a>`);
     });
     if (t.usina) {
       const u = t.usina;
-      const ic = L.divIcon({ className: '', html: `<div style="background:${PAL.escuro};color:#fff;border-radius:4px;padding:2px 6px;font:12px Questrial,sans-serif;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.3)">▲ ${u.curto}</div>`, iconAnchor: [8, 10] });
-      L.marker([u.lat, u.lon], { icon: ic }).addTo(mapa).bindPopup(`<b>${u.nome}</b><br>Defluência ${fmt((u.atual || {}).defluencia)} m³/s · nível ${fmt((u.atual || {}).nivel_montante, 2)} m<br><a href="trecho.html?t=${t.slug}">abrir trecho</a>`);
+      marcadorUsina([u.lat, u.lon], u.curto, true).addTo(mapa).bindPopup(`<b>${u.nome}</b><br>Defluência ${fmt((u.atual || {}).defluencia)} m³/s · nível ${fmt((u.atual || {}).nivel_montante, 2)} m<br><a href="trecho.html?t=${t.slug}">abrir trecho</a>`);
     }
   });
+  const leg = L.control({ position: 'bottomleft' });
+  leg.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = SVG_TRIANGULO + 'usina<br><i style="background:#2E8B57;border-radius:50%"></i>régua com dado há até 2 h<br><i style="background:#D9A400;border-radius:50%"></i>régua com dado há até 24 h<br><i style="background:#9CA3AF;border-radius:50%"></i>régua sem dado recente<br><span style="color:#6B7280">passe o mouse para o nome e a leitura</span>'; return d; };
+  leg.addTo(mapa);
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
 </body>

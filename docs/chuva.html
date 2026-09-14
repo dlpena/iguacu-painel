@@ -65,7 +65,7 @@
       .bindTooltip(`${fmt(vals[i], 1)} mm`, { sticky: true }))).addTo(mapa);
     if (legenda) legenda.remove();
     legenda = L.control({ position: 'bottomright' });
-    legenda.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); const passos = [0, .25, .5, .75, 1]; d.innerHTML = `<b>MERGE, mm em ${{ d1: '1 dia', d7: '7 dias', d30: '30 dias' }[k]}</b><br>` + passos.map(p => `<i style="background:${corChuva(p * escala, escala)}"></i>${fmt(p * escala, 0)}`).join('<br>') + `<br><i style="border-radius:50%;background:#0193DE;border:2px solid #C0504D"></i>pluviômetro (cor = medido, mesma escala)<br><i style="border-radius:50%;background:#294086"></i>usina`; return d; };
+    legenda.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); const passos = [0, .25, .5, .75, 1]; d.innerHTML = `<b>MERGE, mm em ${{ d1: '1 dia', d7: '7 dias', d30: '30 dias' }[k]}</b><br>` + passos.map(p => `<i style="background:${corChuva(p * escala, escala)}"></i>${fmt(p * escala, 0)}`).join('<br>') + `<br><i style="border-radius:50%;background:#0193DE;border:2px solid #C0504D"></i>pluviômetro (cor = medido, mesma escala)<br>${SVG_TRIANGULO}usina`; return d; };
     legenda.addTo(mapa);
     document.getElementById('info-grade').textContent = `${G[k + '_dias']} dia(s) de MERGE somados · máximo na bacia ${fmt(max, 1)} mm`;
     document.querySelectorAll('.controles button[data-k]').forEach(b => b.classList.toggle('ativo', b.dataset.k === k));
@@ -73,11 +73,10 @@
   try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { style: { color: PAL.escuro, weight: 2, fill: false } }).addTo(mapa); mapa.fitBounds(cam.getBounds()); } catch (e) { mapa.setView([-25.7, -52.3], 7); }
   desenharGrade('d7');
   document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => desenharGrade(b.dataset.k)));
-  U.usinas.forEach(u => L.circleMarker([u.lat, u.lon], { radius: 5, color: '#fff', weight: 1.5, fillColor: PAL.escuro, fillOpacity: 1 }).addTo(mapa).bindTooltip(u.curto, { permanent: true, direction: 'right', className: 'rotulo-usina', offset: [6, 0] }));
+  U.usinas.forEach(u => marcadorUsina([u.lat, u.lon], u.curto, true).addTo(mapa));
   // pluviômetros: círculo pintado com a MESMA escala das células, para comparar satélite e chão de relance
   const marcadores = [];
-  (C.pluviometros || []).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius: 8, color: '#C0504D', weight: 2, fillColor: '#fff', fillOpacity: 1 }).addTo(mapa)
-    .bindTooltip(p.curto || p.nome.replace(/^UHE /, '').toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()), { permanent: true, direction: 'top', className: 'rotulo-plu', offset: [0, -8] }); marcadores.push([m, p]); });
+  (C.pluviometros || []).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius: 8, color: '#C0504D', weight: 2, fillColor: '#fff', fillOpacity: 1 }).addTo(mapa).bindTooltip('', { direction: 'top', offset: [0, -8] }); marcadores.push([m, p]); });
   function pintarPluviometros(k) {
     const vals = G ? G[k] : [], max = Math.max(1, ...vals.filter(v => v !== null));
     const escala = k === 'd1' ? Math.max(10, Math.ceil(max / 10) * 10) : Math.max(20, Math.ceil(max / 20) * 20);
@@ -85,6 +84,7 @@
     marcadores.forEach(([m, p]) => {
       const v = p[chave], sat = p.merge ? p.merge[k] : null;
       m.setStyle({ fillColor: corChuva(v, escala) });
+      m.setTooltipContent(`<b>${p.curto || p.nome.replace(/^UHE /, '')}</b><br>medido em ${rot}: ${fmt(v, 1)} mm · MERGE na célula: ${fmt(sat, 1)} mm`);
       m.bindPopup(`<b>${p.curto || p.nome}</b> · ${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'régua com pluviômetro'}<br>${p.codigo}<br>medido em ${rot}: <b>${fmt(v, 1)} mm</b> · MERGE na célula: ${fmt(sat, 1)} mm<br><a href="trecho.html?t=${p.trecho}">trecho</a> · <a href="estacao.html?c=${p.codigo}">estação</a>`);
     });
   }
@@ -92,7 +92,6 @@
   desenharGrade = k => { _desenharGrade(k); pintarPluviometros(k); };
   pintarPluviometros('d7');
   document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => pintarPluviometros(b.dataset.k)));
-  const st = document.createElement('style'); st.textContent = '.rotulo-usina{background:transparent;border:0;box-shadow:none;font:11px Questrial,sans-serif;color:#294086;padding:0}.rotulo-usina:before{display:none}.rotulo-plu{background:rgba(255,255,255,.85);border:0;box-shadow:none;font:10.5px Questrial,sans-serif;color:#7A1F1F;padding:1px 4px;border-radius:3px}.rotulo-plu:before{display:none}'; document.head.appendChild(st);
 
   // ---- diária
   const D = C.diaria || { data: [], mm: [] };

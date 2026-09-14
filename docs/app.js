@@ -10,6 +10,16 @@ const PAGINAS = [['index.html', 'O rio agora'], ['trecho.html?t=cataratas', 'Cat
                  ['catalogo.html', 'Catálogo'], ['fontes.html', 'Fontes e método']];
 const PAPEL = { montante: 'régua a montante', afluente: 'afluente', barramento: 'régua de barramento', jusante: 'régua a jusante', pluviometro: 'pluviômetro' };
 
+/* marcador de usina nos mapas: triângulo azul-escuro; rótulo fixo à direita ou só no hover */
+const SVG_TRIANGULO = '<svg width="18" height="16" viewBox="0 0 18 16"><path d="M9 1 L17 15 L1 15 Z" fill="#294086" stroke="#fff" stroke-width="1.5"/></svg>';
+function marcadorUsina(latlng, nome, rotuloFixo = false) {
+  const ic = L.divIcon({ className: '', iconSize: [18, 16], iconAnchor: [9, 8], html: SVG_TRIANGULO });
+  const m = L.marker(latlng, { icon: ic, zIndexOffset: 500 });
+  if (rotuloFixo) m.bindTooltip(nome, { permanent: true, direction: 'right', offset: [8, 0], className: 'rotulo-usina' });
+  else m.bindTooltip(nome, { direction: 'top', offset: [0, -8] });
+  return m;
+}
+
 /* esquema longitudinal do rio: usinas e réguas em ordem, com o valor da última hora */
 function desenharEsquema(el, trechos) {
   const COL = 56, MARG = 28, Y = 128, H = 244;

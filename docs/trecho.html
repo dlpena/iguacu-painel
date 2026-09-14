@@ -116,7 +116,7 @@
   R.pluviometros.filter(p => p.lat && p.lon).forEach(p => { pts.push([p.lat, p.lon]); L.circleMarker([p.lat, p.lon], { radius: 4, color: PAL.limite, weight: 1.5, fillColor: '#fff', fillOpacity: .9 }).addTo(mapa).bindTooltip(`pluviômetro ${p.codigo}: ${fmt(p.chuva_24h, 1)} mm/24 h`); });
   if (U) { pts.push([U.lat || 0, U.lon || 0]); }
   try { const b = await carregar('bacia.geojson'); L.geoJSON(b, { style: { color: PAL.escuro, weight: 1, fill: false, opacity: .5 } }).addTo(mapa); } catch (e) {}
-  if (U && R.usina) L.marker([R.usina.lat, R.usina.lon], { icon: L.divIcon({ className: '', html: `<div style="background:${PAL.escuro};color:#fff;border-radius:4px;padding:2px 6px;font:12px Questrial,sans-serif;white-space:nowrap">▲ ${R.usina.curto}</div>`, iconAnchor: [8, 10] }) }).addTo(mapa);
+  if (U && R.usina) marcadorUsina([R.usina.lat, R.usina.lon], R.usina.curto, true).addTo(mapa);
   const validos = pts.filter(p => p[0]);
   if (validos.length) mapa.fitBounds(validos, { padding: [30, 30], maxZoom: 10 }); else mapa.setView([-25.7, -52.3], 7);
 

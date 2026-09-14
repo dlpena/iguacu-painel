@@ -97,6 +97,9 @@ table.tab td.spark svg { vertical-align: middle; }
 #mapa { height: 480px; border-radius: 10px; border: 1px solid var(--borda); }
 .legenda-mapa { background: #fff; padding: 8px 10px; border-radius: 6px; font-size: 12px; line-height: 1.6; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
 .legenda-mapa i { display: inline-block; width: 14px; height: 14px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
+.legenda-mapa svg { vertical-align: middle; margin-right: 4px; }
+.rotulo-usina { background: transparent; border: 0; box-shadow: none; font: 11.5px Questrial, "Century Gothic", sans-serif; color: #294086; padding: 0; }
+.rotulo-usina:before { display: none; }
 
 /* regras */
 .regra { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; padding: 8px 0; border-bottom: 1px dashed var(--borda); font-size: 13.5px; }
