@@ -5,10 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Estação · Painel Iguaçu</title>
 <link href="https://fonts.googleapis.com/css2?family=Questrial&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="estilo.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-locale-pt-br-latest.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
+<style>
+  .indice { position: sticky; top: 0; z-index: 900; background: rgba(246,248,251,.96); backdrop-filter: blur(4px); border-bottom: 1px solid var(--borda); margin: 14px -20px 0; padding: 8px 20px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .indice a.sec { padding: 5px 11px; border-radius: 14px; font-size: 13px; color: var(--azul-escuro); background: #EEF3FA; }
+  .indice a.sec:hover { background: var(--azul-claro); color: #fff; text-decoration: none; }
+  .indice .janela { margin-left: auto; display: flex; gap: 4px; align-items: center; font-size: 12.5px; color: var(--texto-suave); }
+  .indice .janela button { font-family: inherit; font-size: 12.5px; padding: 4px 10px; border: 1px solid var(--borda); background: #fff; border-radius: 6px; color: var(--azul-escuro); cursor: pointer; }
+  .indice .janela button.ativo { background: var(--azul-escuro); color: #fff; border-color: var(--azul-escuro); }
+  section.bloco { margin-top: 34px; scroll-margin-top: 64px; }
+  section.bloco > h2 { font-size: 19px; border: 0; padding: 0; margin: 0 0 2px; }
+  section.bloco > h2 small { font-size: 12px; color: var(--texto-suave); letter-spacing: .5px; text-transform: uppercase; margin-right: 8px; }
+  section.bloco > p.sub { margin-bottom: 12px; }
+  section.bloco h3 { font-size: 15px; color: var(--azul-escuro); margin: 22px 0 2px; }
+  section.bloco p.explica { font-size: 13px; color: var(--texto-suave); margin: 0 0 6px; max-width: 900px; }
+  .ficha { display: grid; grid-template-columns: 150px 1fr; gap: 5px 12px; font-size: 13.5px; }
+  .ficha dt { color: var(--texto-suave); } .ficha dd { margin: 0; }
+  @media (max-width: 700px) { .indice { margin: 14px -14px 0; padding: 8px 14px; } .ficha { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
 <header id="topo" class="topo"></header>
@@ -16,53 +35,137 @@
   <div id="trilha"></div>
   <h1 id="titulo">Estação</h1>
   <p class="sub" id="subtitulo"></p>
-  <div class="controles">
-    <span>Janela:</span>
-    <button data-d="1">24 h</button><button data-d="7" class="ativo">7 d</button><button data-d="30">30 d</button><button data-d="90">90 d</button>
-    <a id="lnk-usina" class="chip" hidden></a>
-  </div>
-  <div id="cartoes" class="grade c4"></div>
-  <h2>Cota e vazão</h2>
-  <div id="g-serie" class="grafico"></div>
-  <h2>Chuva diária</h2>
-  <div id="g-chuva" class="grafico baixo"></div>
-  <p class="sub" id="ficha"></p>
+
+  <nav class="indice">
+    <a class="sec" href="#onde">Onde está</a><a class="sec" href="#agora">Agora</a><a class="sec" href="#serie">Cota e vazão</a><a class="sec" href="#chuva" id="lnk-chuva">Chuva</a><a class="sec" href="#dados">Dados</a>
+    <div class="janela"><span>Janela dos gráficos:</span><button data-d="1">24 h</button><button data-d="7" class="ativo">7 d</button><button data-d="30">30 d</button><button data-d="90">90 d</button></div>
+  </nav>
+
+  <section class="bloco" id="onde">
+    <h2><small>1</small>Onde está e o que mede</h2>
+    <p class="sub" id="onde-sub"></p>
+    <div class="grade" style="grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr)">
+      <div class="mapa-caixa"><div id="mapa" style="height:100%;min-height:280px"></div></div>
+      <div class="cartao"><dl class="ficha" id="ficha"></dl></div>
+    </div>
+  </section>
+
+  <section class="bloco" id="agora">
+    <h2><small>2</small>Agora</h2>
+    <p class="sub" id="agora-sub"></p>
+    <div id="cartoes" class="grade c4"></div>
+  </section>
+
+  <section class="bloco" id="serie">
+    <h2><small>3</small>Cota e vazão</h2>
+    <p class="explica" id="e-serie"></p>
+    <div id="g-serie" class="grafico"></div>
+  </section>
+
+  <section class="bloco" id="chuva">
+    <h2><small>4</small>Chuva</h2>
+    <p class="explica" id="e-chuva"></p>
+    <div id="chuva-comp"></div>
+    <div id="g-chuva" class="grafico baixo"></div>
+  </section>
+
+  <section class="bloco" id="dados">
+    <h2><small id="n-dados">5</small>Dados desta página</h2>
+    <p class="sub">Dado bruto transmitido pela estação, sem consistência; a vazão vem da curva-chave do operador. O arquivo traz a citação no cabeçalho.</p>
+    <div class="controles"><button id="csv">Baixar CSV bruto (janela atual)</button></div>
+    <div id="fontes" class="sub" style="font-size:12.5px"></div>
+  </section>
 </main>
 <footer id="rodape"></footer>
 <script>
 (async () => {
-  await iniciar('catalogo.html');
+  const status = await iniciar('catalogo.html');
   const cod = param('c', '65983100');
-  const D = await carregar(`estacao/${cod}.json`);
+  const [D, B, C] = await Promise.all([carregar(`estacao/${cod}.json`), carregar('bacia.json').catch(() => ({ trechos: [] })), carregar('chuva.json').catch(() => ({}))]);
+  const trecho = B.trechos.find(t => t.slug === D.trecho) || null;
+  const papel = PAPEL[D.papel] || (D.tipo === 'Pluviométrica' ? 'pluviômetro' : 'estação');
   document.title = `${D.codigo} · Painel Iguaçu`;
-  document.getElementById('titulo').textContent = `${D.codigo} · ${D.nome}`;
+  document.getElementById('titulo').textContent = `${D.curto && D.curto !== D.nome ? D.curto : D.nome.replace(/^UHE /, '')}`;
   document.getElementById('trilha').innerHTML = trilha([['index.html', '← O rio agora'], D.trecho ? [`trecho.html?t=${D.trecho}`, `Trecho ${D.trecho_nome}`] : ['catalogo.html', 'Catálogo'], [null, `Estação ${D.codigo}`]]);
-  document.getElementById('subtitulo').innerHTML = `${D.trecho ? `<a href="trecho.html?t=${D.trecho}">Trecho ${D.trecho_nome}</a> · <b>${PAPEL[D.papel] || D.papel || ''}</b>${D.rio_afluente ? ' (' + D.rio_afluente + ')' : ''} · ` : ''}${D.tipo}${D.rio ? ' · ' + D.rio : ''} · ${D.municipio || ''} · responsável ${D.responsavel || '–'}${D.operadora && D.operadora !== D.responsavel ? ' · operadora ' + D.operadora : ''}${D.area_km2 ? ' · ' + fmt(D.area_km2) + ' km²' : ''}`;
-  if (D.trecho) { const l = document.getElementById('lnk-usina'); l.hidden = false; l.href = `trecho.html?t=${D.trecho}`; l.textContent = `ver no trecho ${D.trecho_nome}`; }
-  document.getElementById('cartoes').innerHTML = [
-    ['Último dado', `<span class="ponto ${frescorClasse(D.frescor_h)}"></span>${fmtInst(D.ultimo_instante)}`, frescorTexto(D.frescor_h)],
-    ['Cota', `${fmt(D.cota_m, 2)} <small>m</small>`, D.barramento_de ? 'cota do reservatório (barramento)' : 'leitura da régua'],
-    ['Vazão', `${fmt(D.vazao)} <small>m³/s</small>${tend(D.vazao_6h)}`, (D.ref || {}).vazao_media_30d ? `média 30 d ${fmt(D.ref.vazao_media_30d)} · faixa ${fmt(D.ref.vazao_min_30d)} a ${fmt(D.ref.vazao_max_30d)} · curva-chave do operador` : 'curva-chave do operador, sem consistência'],
-    ['Chuva', `${fmt(D.chuva_24h, 1)} <small>mm / 24 h</small>`, `${fmt(D.chuva_7d, 1)} mm em 7 dias · ${fmt((D.ref || {}).chuva_30d, 1)} mm em 30`],
-  ].map(c => `<div class="cartao"><div class="rotulo">${c[0]}</div><div class="valor">${c[1]}</div><div class="nota">${c[2]}</div></div>`).join('');
-  document.getElementById('ficha').textContent = D.descricao ? `Descrição no cadastro: ${D.descricao}` : '';
+  document.getElementById('subtitulo').textContent = `${D.codigo} · ${D.nome} · ${papel}${D.rio_afluente ? ' (' + D.rio_afluente + ')' : ''}${D.trecho ? ' · trecho ' + D.trecho_nome : ''}`;
+  const temChuva = (D.chuva_diaria && D.chuva_diaria.mm.some(x => x !== null && x > 0)) || D.tipo === 'Pluviométrica';
+  if (!temChuva) { document.getElementById('chuva').hidden = true; document.getElementById('lnk-chuva').hidden = true; document.getElementById('n-dados').textContent = '4'; }
+
+  // ================= 1. Onde está
+  const oQueMede = D.tipo === 'Pluviométrica' ? 'mede chuva' : (D.papel === 'barramento' ? 'mede a cota do reservatório junto à barragem e a vazão que a usina solta' : 'mede cota e vazão do rio');
+  document.getElementById('onde-sub').textContent = `${papel.charAt(0).toUpperCase() + papel.slice(1)}${D.trecho ? ' do trecho ' + D.trecho_nome : ''}, ${oQueMede}. ${trecho ? trecho.contexto : ''}`;
+  document.getElementById('ficha').innerHTML = [
+    ['Código', D.codigo], ['Nome no cadastro', D.nome], ['Tipo', D.tipo], ['Papel no trecho', papel + (D.rio_afluente ? ' · ' + D.rio_afluente : '')],
+    ['Rio', D.rio || '–'], ['Município', D.municipio || '–'], ['Responsável', D.responsavel || '–'], ['Operadora', D.operadora || '–'],
+    ['Área de drenagem', D.area_km2 ? fmt(D.area_km2) + ' km²' : '–'], ['Coordenadas', D.lat && D.lon ? `${fmt(D.lat, 4)}, ${fmt(D.lon, 4)}` : '–'],
+    ['Telemétrica', D.telemetrica || '–'], D.descricao ? ['Descrição no cadastro', D.descricao] : null,
+  ].filter(Boolean).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+  await new Promise(r => setTimeout(r, 80));
+  if (D.lat && D.lon) {
+    const mapa = L.map('mapa', { scrollWheelZoom: false, zoomControl: false });
+    mapa.setView([D.lat, D.lon], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 14 }).addTo(mapa);
+    try { const b = await carregar('bacia.geojson'); L.geoJSON(b, { style: { color: PAL.escuro, weight: 2, fill: false, opacity: .8 }, interactive: false }).addTo(mapa); } catch (e) {}
+    await desenharHidrografia(mapa);
+    if (trecho) {
+      trecho.estacoes.filter(e => e.lat && e.lon && e.codigo !== D.codigo).forEach(e => L.circleMarker([e.lat, e.lon], { radius: 5, color: '#fff', weight: 1, fillColor: '#9CA3AF', fillOpacity: .9 }).addTo(mapa).bindTooltip(`${e.curto} · ${PAPEL[e.papel]}`));
+      if (trecho.usina) marcadorUsina([trecho.usina.lat, trecho.usina.lon], trecho.usina.curto, true).addTo(mapa);
+    }
+    L.circleMarker([D.lat, D.lon], { radius: 9, color: '#fff', weight: 2, fillColor: PAL.limite, fillOpacity: 1 }).addTo(mapa).bindTooltip(`<b>${D.curto || D.nome}</b>`, { permanent: true, direction: 'top', offset: [0, -8] });
+    const leg = L.control({ position: 'bottomleft' });
+    leg.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = '<i style="background:#C0504D;border-radius:50%"></i>esta estação<br><i style="background:#9CA3AF;border-radius:50%"></i>outras estações do trecho<br>' + SVG_TRIANGULO + 'usina<br>' + LEGENDA_HIDRO; return d; };
+    leg.addTo(mapa);
+  } else document.getElementById('mapa').innerHTML = '<p class="sub">Sem coordenadas no cadastro.</p>';
+
+  // ================= 2. Agora
+  const rf = D.ref || {};
+  document.getElementById('agora-sub').textContent = D.ultimo_instante ? `Último dado transmitido em ${fmtInst(D.ultimo_instante, true)} (${frescorTexto(D.frescor_h)}). Referências: média, mínimo e máximo dos últimos 30 dias desta própria estação.` : 'Sem transmissão nos últimos 90 dias, embora o cadastro diga "operando".';
+  const cartoes = [];
+  if (D.cota_m !== null && D.cota_m !== undefined) cartoes.push(['Cota', `${fmt(D.cota_m, 2)} <small>m</small>`, `${D.papel === 'barramento' ? 'cota do reservatório' : 'leitura da régua'}${rf.cota_media_30d ? ' · média 30 d ' + fmt(rf.cota_media_30d, 2) + ' m' : ''}`]);
+  if (D.vazao !== null && D.vazao !== undefined) cartoes.push(['Vazão', `${fmt(D.vazao)} <small>m³/s</small>${tend(D.vazao_6h)}`, rf.vazao_media_30d ? `${fmt(D.vazao / rf.vazao_media_30d * 100, 0)}% da média de 30 d (${fmt(rf.vazao_media_30d)}) · faixa ${fmt(rf.vazao_min_30d)} a ${fmt(rf.vazao_max_30d)}` : 'sem referência de 30 d']);
+  if (temChuva) cartoes.push(['Chuva medida', `${fmt(D.chuva_24h, 1)} <small>mm em 24 h</small>`, `${fmt(D.chuva_7d, 1)} mm em 7 d · ${fmt(rf.chuva_30d, 1)} mm em 30 d`]);
+  cartoes.push(['Transmissão', `<span class="ponto ${frescorClasse(D.frescor_h)}"></span>${frescorTexto(D.frescor_h)}`, D.ultimo_instante ? `último dado ${fmtInst(D.ultimo_instante, true)}` : 'sem dado nos últimos 90 dias']);
+  document.getElementById('cartoes').innerHTML = cartoes.map(c => `<div class="cartao"><div class="rotulo">${c[0]}</div><div class="valor">${c[1]}</div><div class="nota">${c[2]}</div></div>`).join('');
+
+  // ================= 3. Cota e vazão
+  const temV = D.serie.vazao.some(x => x !== null), temC = D.serie.cota_m.some(x => x !== null);
+  document.getElementById('e-serie').textContent = !(temV || temC) ? 'Esta estação não transmite cota nem vazão.' : `${temC ? (D.papel === 'barramento' ? 'Cota do reservatório em metros' : 'Cota da régua em metros') : ''}${temC && temV ? ' e ' : ''}${temV ? 'vazão em m³/s pela curva-chave do operador' : ''}, no intervalo de transmissão da estação (15 min a 1 h). Sem consistência.`;
   let dias = 7;
   function desenhar() {
     const r = recorte(D.serie.instante, { c: D.serie.cota_m, v: D.serie.vazao }, dias);
-    const temV = r.arrays.v.some(x => x !== null), temC = r.arrays.c.some(x => x !== null);
     const tr = [];
     if (temC) tr.push(traco(r.x, r.arrays.c, 'Cota (m)', PAL.escuro));
     if (temV) tr.push(traco(r.x, r.arrays.v, 'Vazão (m³/s)', PAL.medio, { yaxis: temC ? 'y2' : 'y' }));
-    if (!tr.length) { document.getElementById('g-serie').innerHTML = '<p class="sub">Sem cota nem vazão na janela.</p>'; }
-    else Plotly.react('g-serie', tr, layoutBase({ yaxis: { title: temC ? 'cota (m)' : 'm³/s', gridcolor: PAL.grade }, yaxis2: { title: 'm³/s', overlaying: 'y', side: 'right', showgrid: false, rangemode: 'tozero' } }), CONFIG_PLOT);
-    document.querySelectorAll('.controles button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
+    if (!tr.length) document.getElementById('g-serie').innerHTML = '';
+    else Plotly.react('g-serie', tr, layoutBase({ yaxis: { title: temC ? 'cota (m)' : 'm³/s', gridcolor: PAL.grade, tickformat: temC ? ',.2f' : ',d' }, ...(temC && temV ? { yaxis2: { title: 'm³/s', overlaying: 'y', side: 'right', showgrid: false, rangemode: 'tozero' } } : {}) }), CONFIG_PLOT);
+    document.querySelectorAll('.indice button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
   }
-  document.querySelectorAll('.controles button[data-d]').forEach(b => b.addEventListener('click', () => { dias = +b.dataset.d; desenhar(); }));
+  document.querySelectorAll('.indice button[data-d]').forEach(b => b.addEventListener('click', () => { dias = +b.dataset.d; desenhar(); }));
   desenhar();
-  if (D.chuva_diaria && D.chuva_diaria.mm.some(x => x !== null && x > 0)) {
-    Plotly.newPlot('g-chuva', [{ x: D.chuva_diaria.data, y: D.chuva_diaria.mm, type: 'bar', name: 'chuva (mm/dia)', marker: { color: PAL.claro } }],
-      layoutBase({ showlegend: false, yaxis: { title: 'mm', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m/%Y' } }), CONFIG_PLOT);
-  } else document.getElementById('g-chuva').innerHTML = '<p class="sub">Esta estação não transmite chuva (ou não choveu na janela).</p>';
+
+  // ================= 4. Chuva
+  if (temChuva) {
+    const p = (C.pluviometros || []).find(x => x.codigo === D.codigo);
+    document.getElementById('e-chuva').textContent = 'Chuva diária medida pelo pluviômetro da estação, contra a estimativa do MERGE (satélite GPM com pluviômetros, INPE) na célula de 0,1° onde ela está.';
+    if (p && p.merge) {
+      const linha = (rot, v, s) => `<tr><td>${rot}</td><td class="num">${fmt(v, 1)}</td><td class="num">${fmt(s, 1)}</td><td class="num">${v !== null && s !== null ? (v - s > 0 ? '+' : '') + fmt(v - s, 1) : '–'}</td></tr>`;
+      document.getElementById('chuva-comp').innerHTML = `<div class="tabela-wrap" style="max-width:520px"><table class="tab"><thead><tr><th>Período</th><th class="num">Medido (mm)</th><th class="num">MERGE na célula (mm)</th><th class="num">Diferença</th></tr></thead><tbody>${linha('24 h / último dia', p.mm_24h, p.merge.d1)}${linha('7 dias', p.mm_7d, p.merge.d7)}${linha('30 dias', p.mm_30d, p.merge.d30)}</tbody></table></div>`;
+    }
+    if (D.chuva_diaria && D.chuva_diaria.mm.some(x => x !== null && x > 0)) {
+      Plotly.newPlot('g-chuva', [{ x: D.chuva_diaria.data, y: D.chuva_diaria.mm, type: 'bar', name: 'chuva medida (mm/dia)', marker: { color: PAL.claro } }],
+        layoutBase({ showlegend: false, yaxis: { title: 'mm por dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m/%Y' } }), CONFIG_PLOT);
+    } else document.getElementById('g-chuva').innerHTML = '<p class="sub">Sem chuva registrada nos últimos 90 dias.</p>';
+  }
+
+  // ================= 5. Dados
+  const c = (status && status.citacoes) || {};
+  document.getElementById('fontes').innerHTML = `<p>${c.telemetria || 'ANA, webservice de telemetria'}, consulta em ${fmtData(status.gerado_em)}.</p>${temChuva && c.merge ? `<p>${c.merge}, consulta em ${fmtData(status.gerado_em)}.</p>` : ''}`;
+  document.getElementById('csv').addEventListener('click', () => {
+    const r = recorte(D.serie.instante, { c: D.serie.cota_m, v: D.serie.vazao }, dias);
+    const linhas = [`# Estação ${D.codigo} ${D.nome} — ${c.telemetria || 'ANA, webservice de telemetria'}; dado bruto`, 'instante;cota_m;vazao_m3s'];
+    r.x.forEach((x, i) => linhas.push([x, r.arrays.c[i], r.arrays.v[i]].map(v => v === null || v === undefined ? '' : v).join(';')));
+    const blob = new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `estacao_${D.codigo}_${dias}d.csv`; a.click();
+  });
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
 </body>
