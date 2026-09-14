@@ -30,18 +30,18 @@
 <footer id="rodape"></footer>
 <script>
 (async () => {
-  await iniciar('estacoes.html');
+  await iniciar('catalogo.html');
   const cod = param('c', '65983100');
   const D = await carregar(`estacao/${cod}.json`);
   document.title = `${D.codigo} · Painel Iguaçu`;
   document.getElementById('titulo').textContent = `${D.codigo} · ${D.nome}`;
-  document.getElementById('subtitulo').textContent = `${D.tipo}${D.rio ? ' · ' + D.rio : ''} · ${D.municipio || ''} · responsável ${D.responsavel || '–'}${D.operadora && D.operadora !== D.responsavel ? ' · operadora ' + D.operadora : ''}${D.area_km2 ? ' · ' + fmt(D.area_km2) + ' km²' : ''}`;
-  if (D.barramento_de) { const l = document.getElementById('lnk-usina'); l.hidden = false; l.href = `usina.html?u=${D.barramento_de}`; l.textContent = 'estação de barramento: abrir a usina'; }
+  document.getElementById('subtitulo').innerHTML = `${D.trecho ? `<a href="trecho.html?t=${D.trecho}">Trecho ${D.trecho_nome}</a> · <b>${PAPEL[D.papel] || D.papel || ''}</b>${D.rio_afluente ? ' (' + D.rio_afluente + ')' : ''} · ` : ''}${D.tipo}${D.rio ? ' · ' + D.rio : ''} · ${D.municipio || ''} · responsável ${D.responsavel || '–'}${D.operadora && D.operadora !== D.responsavel ? ' · operadora ' + D.operadora : ''}${D.area_km2 ? ' · ' + fmt(D.area_km2) + ' km²' : ''}`;
+  if (D.trecho) { const l = document.getElementById('lnk-usina'); l.hidden = false; l.href = `trecho.html?t=${D.trecho}`; l.textContent = `ver no trecho ${D.trecho_nome}`; }
   document.getElementById('cartoes').innerHTML = [
     ['Último dado', `<span class="ponto ${frescorClasse(D.frescor_h)}"></span>${fmtInst(D.ultimo_instante)}`, frescorTexto(D.frescor_h)],
     ['Cota', `${fmt(D.cota_m, 2)} <small>m</small>`, D.barramento_de ? 'cota do reservatório (barramento)' : 'leitura da régua'],
-    ['Vazão', `${fmt(D.vazao)} <small>m³/s</small>`, 'curva-chave do operador, sem consistência'],
-    ['Chuva', `${fmt(D.chuva_24h, 1)} <small>mm / 24 h</small>`, `${fmt(D.chuva_7d, 1)} mm em 7 dias`],
+    ['Vazão', `${fmt(D.vazao)} <small>m³/s</small>${tend(D.vazao_6h)}`, (D.ref || {}).vazao_media_30d ? `média 30 d ${fmt(D.ref.vazao_media_30d)} · faixa ${fmt(D.ref.vazao_min_30d)} a ${fmt(D.ref.vazao_max_30d)} · curva-chave do operador` : 'curva-chave do operador, sem consistência'],
+    ['Chuva', `${fmt(D.chuva_24h, 1)} <small>mm / 24 h</small>`, `${fmt(D.chuva_7d, 1)} mm em 7 dias · ${fmt((D.ref || {}).chuva_30d, 1)} mm em 30`],
   ].map(c => `<div class="cartao"><div class="rotulo">${c[0]}</div><div class="valor">${c[1]}</div><div class="nota">${c[2]}</div></div>`).join('');
   document.getElementById('ficha').textContent = D.descricao ? `Descrição no cadastro: ${D.descricao}` : '';
   let dias = 7;

@@ -103,6 +103,31 @@ table.tab td.spark svg { vertical-align: middle; }
 .regra .v { color: var(--azul-escuro); font-size: 16px; }
 .regra .f { color: var(--texto-suave); font-size: 12.5px; grid-column: 2; }
 
+/* esquema longitudinal */
+.esquema-wrap { overflow-x: auto; }
+.esquema-wrap svg { display: block; }
+.esquema-wrap a:hover circle, .esquema-wrap a:hover rect { filter: brightness(1.15); }
+.legenda-esquema { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: var(--texto-suave); padding: 6px 8px 4px; }
+.legenda-esquema i.lg { display: inline-block; width: 11px; height: 11px; margin-right: 4px; vertical-align: middle; border-radius: 50%; }
+.legenda-esquema i.usina { background: var(--azul-escuro); border-radius: 3px; width: 16px; }
+.legenda-esquema i.regua { background: var(--azul-medio); }
+.legenda-esquema i.afl { background: transparent; border: 2px dashed var(--azul-claro); }
+.legenda-esquema i.ok { background: var(--ok); } .legenda-esquema i.aviso { background: var(--aviso); } .legenda-esquema i.off { background: var(--off); }
+.legenda-esquema i.alerta { background: var(--fsarh); }
+
+/* pontos do trecho */
+.ponto-trecho { display: block; background: var(--cartao); border: 1px solid var(--borda); border-left: 4px solid var(--azul-claro); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; color: inherit; }
+.ponto-trecho:hover { text-decoration: none; border-color: var(--azul-escuro); }
+.ponto-trecho.usina { border-left-color: var(--azul-escuro); background: #F4F7FC; }
+.ponto-trecho.afluente { border-left-style: dashed; margin-left: 24px; }
+.ponto-trecho .papel { font-size: 11px; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .4px; }
+.ponto-trecho .nome { color: var(--azul-escuro); font-size: 15px; margin: 1px 0 4px; }
+.ponto-trecho .nome small { color: var(--texto-suave); font-size: 11.5px; }
+.ponto-trecho .valores { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-start; font-size: 13px; }
+.ponto-trecho .valores b { font-size: 17px; font-weight: normal; color: var(--texto); }
+.ponto-trecho .ref { font-size: 11.5px; color: var(--texto-suave); }
+.ponto-trecho .spark { margin-left: auto; text-align: right; }
+
 /* rodapé */
 footer { border-top: 1px solid var(--borda); margin-top: 40px; background: var(--cartao); }
 footer .interno { max-width: 1280px; margin: 0 auto; padding: 18px 20px; font-size: 12.5px; color: var(--texto-suave); }

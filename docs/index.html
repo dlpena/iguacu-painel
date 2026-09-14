@@ -8,29 +8,30 @@
 <link href="https://fonts.googleapis.com/css2?family=Questrial&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="estilo.css">
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-<script src="https://cdn.plot.ly/plotly-locale-pt-br-latest.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
 </head>
 <body>
 <header id="topo" class="topo"></header>
 <main>
-  <h1>Bacia do rio Iguaçu agora</h1>
-  <p class="sub">Seis usinas do ONS de montante a jusante, réguas telemétricas da ANA e chuva do MERGE/INPE. Última hora publicada; clique numa usina para abrir a série.</p>
+  <h1>O rio Iguaçu agora</h1>
+  <p class="sub">Da cabeceira às Cataratas, em ordem de rio: usinas do ONS e réguas da ANA com o valor da última hora. Clique em qualquer ponto para abrir o trecho.</p>
 
-  <h2>Cascata</h2>
-  <div id="cascata" class="cascata"></div>
+  <div class="cartao" style="padding:10px 8px 4px">
+    <div class="esquema-wrap"><div id="esquema"></div></div>
+    <div class="legenda-esquema">
+      <span><i class="lg usina"></i>usina (defluência, m³/s)</span>
+      <span><i class="lg regua"></i>régua no rio Iguaçu (vazão, m³/s)</span>
+      <span><i class="lg afl"></i>afluente</span>
+      <span><i class="lg ok"></i>dado há até 2 h</span><span><i class="lg aviso"></i>até 24 h</span><span><i class="lg off"></i>sem dado recente</span>
+      <span><i class="lg alerta"></i>há aviso no trecho</span>
+    </div>
+  </div>
 
-  <h2>Síntese</h2>
-  <div id="cartoes" class="grade c4"></div>
+  <div id="cartoes" class="grade c3" style="margin-top:14px"></div>
 
   <h2>Para olhar (últimas 24 h)</h2>
-  <p class="sub" style="margin-bottom:8px">Eventos detectados automaticamente contra as regras vigentes e o frescor das fontes. São indícios para verificação, não conclusões.</p>
   <div id="avisos"></div>
-
-  <h2>Defluência ao longo da cascata (7 dias)</h2>
-  <div id="graf-cascata" class="grafico"></div>
 
   <h2>Mapa</h2>
   <div id="mapa"></div>
@@ -38,67 +39,48 @@
 <footer id="rodape"></footer>
 <script>
 (async () => {
-  const status = await iniciar('index.html');
-  const [U, A, E, C] = await Promise.all([carregar('usinas.json'), carregar('avisos.json'), carregar('estacoes.json'), carregar('chuva.json')]);
-  const porCod = Object.fromEntries(E.estacoes.map(e => [e.codigo, e]));
-
-  // ---- cascata
-  document.getElementById('cascata').innerHTML = U.usinas.map((u, i) => {
-    const a = u.atual || {}, t = u.tendencia || {};
-    const vu = a.pct_volume_util_di !== undefined && a.pct_volume_util_di !== null && u.tipo === 'acumulacao'
-      ? `<div class="linha"><span>Volume útil</span><b>${fmt(a.pct_volume_util_di, 1)} %</b></div>` : '';
-    return `<a class="bloco ${u.tipo}" href="usina.html?u=${u.slug}">
-      <div class="tipo">${u.tipo === 'acumulacao' ? 'acumulação' : "fio d'água"} · ${u.agente.split(' (')[0]}</div>
-      <div class="nome">${u.curto}</div>
-      <div class="linha"><span>Nível montante</span><b>${fmt(a.nivel_montante, 2)} m${tend(t.nivel_montante_6h, 2)}</b></div>
-      ${vu}
-      <div class="linha"><span>Defluência</span><b>${fmt(a.defluencia)} m³/s${tend(t.defluencia_6h)}</b></div>
-      <div class="linha"><span>Turbinada / vertida</span><b>${fmt(a.vazao_turbinada)} / ${fmt(a.vazao_vertida)}</b></div>
-      <div class="linha"><span><span class="ponto ${frescorClasse(a.frescor_h)}"></span>${fmtInst(a.instante)}</span><span>${frescorTexto(a.frescor_h)}</span></div>
-      ${i < U.usinas.length - 1 ? '<span class="seta">›</span>' : ''}</a>`;
-  }).join('');
+  await iniciar('index.html');
+  const [B, C] = await Promise.all([carregar('bacia.json'), carregar('chuva.json')]);
+  desenharEsquema(document.getElementById('esquema'), B.trechos);
 
   // ---- cartões
   const ac = C.acumulados || {};
-  const bxi = U.usinas.find(u => u.slug === 'baixo-iguacu') || { atual: {} };
-  const hc = porCod['65992502'] || {}, pc = porCod['65987001'] || {};
-  const acum = U.usinas.filter(u => u.tipo === 'acumulacao');
-  const cart = [
-    { r: 'Chuva na bacia · 7 dias', v: `${fmt(ac.d7, 1)} <small>mm</small>`, n: `30 dias: ${fmt(ac.d30, 1)} mm · MERGE até ${fmtData(ac.ultimo_dia)}` },
-    { r: `Chuva no mês (${ac.dias_mes || 0} dias)`, v: `${fmt(ac.mes_atual, 1)} <small>mm</small>`, n: `MLT do mês inteiro: ${fmt(ac.mlt_mes, 1)} mm (1998–2024)` },
-    { r: 'Volume útil dos reservatórios', v: acum.map(u => `<span title="${u.curto}">${fmt((u.atual || {}).pct_volume_util_di, 0)}%</span>`).join(' <small>·</small> '), n: acum.map(u => u.curto).join(' · ') + ` (ONS diário, ${fmtData((acum[0].atual || {}).dia)})` },
-    { r: 'Vazão em Hotel Cataratas', v: `${fmt(hc.vazao)} <small>m³/s</small>`, n: `Estação 65992502 (Copel), ${fmtInst(hc.ultimo_instante)} · Porto Capanema: ${fmt(pc.vazao)} m³/s` },
-    { r: 'Defluência de Baixo Iguaçu', v: `${fmt(bxi.atual.defluencia)} <small>m³/s</small>`, n: `Mínimo permanente declarado: 350 m³/s · natural diária ${fmt(bxi.atual.vazao_natural_di)} m³/s` },
-  ];
-  document.getElementById('cartoes').innerHTML = cart.map(c => `<div class="cartao"><div class="rotulo">${c.r}</div><div class="valor">${c.v}</div><div class="nota">${c.n}</div></div>`).join('');
+  const acum = B.trechos.filter(t => t.usina && t.usina.tipo === 'acumulacao').map(t => t.usina);
+  const cat = B.trechos.find(t => t.slug === 'cataratas') || { estacoes: [] };
+  const hc = cat.estacoes.find(e => e.codigo === '65992502') || {};
+  const bxi = (B.trechos.find(t => t.slug === 'baixo-iguacu') || {}).usina || { atual: {}, ref: {} };
+  const pct = (v, ref) => (v && ref) ? `${fmt(v / ref * 100, 0)}% da média de 30 d` : '';
+  document.getElementById('cartoes').innerHTML = [
+    { r: 'Chuva média na bacia', v: `${fmt(ac.d7, 1)} <small>mm em 7 d</small>`, n: `${fmt(ac.mes_atual, 1)} mm no mês (${ac.dias_mes || 0} dias) contra MLT de ${fmt(ac.mlt_mes, 1)} mm no mês inteiro · MERGE até ${fmtData(ac.ultimo_dia)}`, h: 'chuva.html' },
+    { r: 'Reservatórios de acumulação', v: acum.map(u => `<span title="${u.curto}">${fmt((u.atual || {}).pct_volume_util_di, 0)}%</span>`).join(' <small>·</small> '), n: acum.map(u => u.curto).join(' · ') + ` · volume útil no dia ${fmtData((acum[0].atual || {}).dia)} (ONS)`, h: 'trecho.html?t=foz-do-areia' },
+    { r: 'Chegando às Cataratas', v: `${fmt(hc.vazao)} <small>m³/s</small>`, n: `Hotel Cataratas (Copel) ${fmtInst(hc.ultimo_instante)} · ${pct(hc.vazao, (hc.ref || {}).vazao_media_30d)} · Baixo Iguaçu defluindo ${fmt(bxi.atual.defluencia)} m³/s contra mínimo declarado de 350`, h: 'trecho.html?t=cataratas' },
+  ].map(c => `<a class="cartao" href="${c.h}" style="display:block;color:inherit"><div class="rotulo">${c.r}</div><div class="valor">${c.v}</div><div class="nota">${c.n}</div></a>`).join('');
 
   // ---- avisos
-  const av = A.avisos || [];
-  document.getElementById('avisos').innerHTML = av.length ? av.map(a => `<div class="aviso-item ${a.nivel}">${a.texto}<div class="meta">${a.curto ? a.curto + ' · ' : ''}${fmtInst(a.quando)} · ${a.regra}${a.fonte ? ' · ' + a.fonte : ''}</div></div>`).join('')
+  const av = B.trechos.flatMap(t => t.avisos.map(a => ({ ...a, trecho_nome: t.nome })));
+  const A = await carregar('avisos.json');
+  const gerais = (A.avisos || []).filter(a => !a.trecho);
+  const todos = av.concat(gerais);
+  document.getElementById('avisos').innerHTML = todos.length ? todos.map(a => `<div class="aviso-item ${a.nivel}">${a.texto}<div class="meta">${a.trecho ? `<a href="trecho.html?t=${a.trecho}">${a.trecho_nome}</a> · ` : ''}${a.curto ? a.curto + ' · ' : ''}${fmtInst(a.quando)} · ${a.regra}${a.fonte ? ' · ' + a.fonte : ''}</div></div>`).join('')
     : '<div class="aviso-item info">Nada detectado nas últimas 24 h.</div>';
-
-  // ---- gráfico da cascata (7 d)
-  const det = await Promise.all(U.usinas.map(u => carregar(`usina/${u.slug}.json`)));
-  const tracos = det.map((d, i) => { const r = recorte(d.horario.instante, { y: d.horario.defluencia }, 7); return traco(r.x, r.arrays.y, U.usinas[i].curto, ['#294086', '#3C6FB5', '#0193DE', '#3FB0E8', '#80B5E1', '#0B6BA8'][i]); });
-  Plotly.newPlot('graf-cascata', tracos, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' } }), CONFIG_PLOT);
 
   // ---- mapa
   const mapa = L.map('mapa', { scrollWheelZoom: false });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 15 }).addTo(mapa);
   try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { style: { color: PAL.escuro, weight: 1.5, fillOpacity: .06 } }).addTo(mapa); mapa.fitBounds(cam.getBounds()); }
   catch (e) { mapa.setView([-25.7, -52.3], 7); }
-  E.estacoes.filter(e => e.lat && e.lon).forEach(e => {
-    const cor = { ok: '#2E8B57', aviso: '#D9A400', off: '#9CA3AF' }[frescorClasse(e.frescor_h)];
-    const m = L.circleMarker([e.lat, e.lon], { radius: e.tipo === 'Pluviométrica' ? 4 : 6, color: '#fff', weight: 1, fillColor: cor, fillOpacity: .95 }).addTo(mapa);
-    m.bindPopup(`<b>${e.codigo}</b> ${e.nome}<br>${e.tipo}${e.rio ? ' · ' + e.rio : ''}<br>${e.vazao !== null && e.vazao !== undefined ? 'Vazão ' + fmt(e.vazao) + ' m³/s · ' : ''}${e.cota_m !== null && e.cota_m !== undefined ? 'Cota ' + fmt(e.cota_m, 2) + ' m · ' : ''}chuva 24 h ${fmt(e.chuva_24h, 1)} mm<br>${frescorTexto(e.frescor_h)} · <a href="estacao.html?c=${e.codigo}">abrir</a>`);
+  B.trechos.forEach(t => {
+    t.estacoes.filter(e => e.lat && e.lon).forEach(e => {
+      const cor = { ok: '#2E8B57', aviso: '#D9A400', off: '#9CA3AF' }[frescorClasse(e.frescor_h)];
+      L.circleMarker([e.lat, e.lon], { radius: 6, color: '#fff', weight: 1, fillColor: cor, fillOpacity: .95 }).addTo(mapa)
+        .bindPopup(`<b>${e.curto}</b> · ${PAPEL[e.papel] || e.papel}<br>${e.codigo} ${e.nome}<br>${e.vazao !== null && e.vazao !== undefined ? 'Vazão ' + fmt(e.vazao) + ' m³/s · ' : ''}${frescorTexto(e.frescor_h)}<br><a href="trecho.html?t=${t.slug}">trecho ${t.nome}</a> · <a href="estacao.html?c=${e.codigo}">estação</a>`);
+    });
+    if (t.usina) {
+      const u = t.usina;
+      const ic = L.divIcon({ className: '', html: `<div style="background:${PAL.escuro};color:#fff;border-radius:4px;padding:2px 6px;font:12px Questrial,sans-serif;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.3)">▲ ${u.curto}</div>`, iconAnchor: [8, 10] });
+      L.marker([u.lat, u.lon], { icon: ic }).addTo(mapa).bindPopup(`<b>${u.nome}</b><br>Defluência ${fmt((u.atual || {}).defluencia)} m³/s · nível ${fmt((u.atual || {}).nivel_montante, 2)} m<br><a href="trecho.html?t=${t.slug}">abrir trecho</a>`);
+    }
   });
-  U.usinas.forEach(u => {
-    const ic = L.divIcon({ className: '', html: `<div style="background:${PAL.escuro};color:#fff;border-radius:4px;padding:2px 6px;font:12px Questrial,sans-serif;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.3)">▲ ${u.curto}</div>`, iconAnchor: [8, 10] });
-    L.marker([u.lat, u.lon], { icon: ic }).addTo(mapa).bindPopup(`<b>${u.nome}</b><br>Defluência ${fmt((u.atual || {}).defluencia)} m³/s · nível ${fmt((u.atual || {}).nivel_montante, 2)} m<br><a href="usina.html?u=${u.slug}">abrir</a>`);
-  });
-  const leg = L.control({ position: 'bottomleft' });
-  leg.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = '<i style="background:#2E8B57;border-radius:50%"></i>dado há até 2 h<br><i style="background:#D9A400;border-radius:50%"></i>até 24 h<br><i style="background:#9CA3AF;border-radius:50%"></i>sem dado recente<br><i style="background:#294086"></i>usina'; return d; };
-  leg.addTo(mapa);
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
 </body>
