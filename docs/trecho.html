@@ -80,6 +80,7 @@
       <div class="nome"><span class="ponto ${frescorClasse(e.frescor_h)}"></span>${e.curto} <small>${e.codigo}</small></div>
       <div class="valores">${e.vazao !== null && e.vazao !== undefined ? `<div><b>${fmt(e.vazao)}</b> m³/s${tend(e.vazao_6h)}<div class="ref">${refTxt(e.vazao, (e.ref || {}).vazao_media_30d)}</div></div>` : ''}
         ${e.cota_m !== null && e.cota_m !== undefined ? `<div><b>${fmt(e.cota_m, 2)}</b> m<div class="ref">cota${(e.ref || {}).cota_media_30d ? ' · média 30 d ' + fmt(e.ref.cota_media_30d, 2) : ''}</div></div>` : ''}
+        ${(e.vazao === null || e.vazao === undefined) && (e.cota_m === null || e.cota_m === undefined) ? '<div class="ref">sem transmissão nos últimos 90 dias (cadastro diz "operando")</div>' : ''}
         <div class="spark">${e.spark ? spark(e.spark.v, PAL.medio, 90, 24) : ''}<div class="ref">${frescorTexto(e.frescor_h)}</div></div></div></a>`);
     if (e.papel === 'afluente' || e.papel === 'montante') return;
   });
