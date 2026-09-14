@@ -23,7 +23,8 @@ function marcadorUsina(latlng, nome, rotuloFixo = false) {
 
 /* esquema longitudinal do rio: usinas e réguas em ordem, com o valor da última hora */
 function desenharEsquema(el, trechos) {
-  const COL = 56, MARG = 28, Y = 128, H = 244;
+  const unico = trechos.length === 1;
+  const COL = 56, MARG = unico ? 64 : 28, Y = 128, H = 244;
   const cols = []; // {tipo, x, ...}
   trechos.forEach(t => {
     const ini = cols.length;
@@ -57,7 +58,9 @@ function desenharEsquema(el, trechos) {
   s += `<path d="M${W - MARG} ${Y} H${MARG}" stroke="#80B5E1" stroke-width="6" stroke-linecap="round" fill="none"/>`;
   // setas do sentido do rio (leste -> oeste), uma por faixa de trecho
   trechos.forEach(t => { const xs = W - (MARG + t._fim * COL) + 10; if (t._fim > t._ini) s += `<path d="M${xs + 7} ${Y - 5} L${xs} ${Y} L${xs + 7} ${Y + 5}" fill="none" stroke="#294086" stroke-width="1.6" stroke-linecap="round"/>`; });
-  s += `<text x="${W - MARG}" y="${Y + 22}" font-size="10" fill="#6B7280" text-anchor="end">cabeceira (montante)</text><text x="${MARG}" y="${Y + 22}" font-size="10" fill="#6B7280">← sentido do rio · foz (jusante)</text>`;
+  s += unico
+    ? `<text x="${W - 4}" y="${Y + 4}" font-size="10" fill="#6B7280" text-anchor="end">montante</text><text x="${4}" y="${Y + 4}" font-size="10" fill="#6B7280">← jusante</text>`
+    : `<text x="${W - MARG}" y="${Y + 22}" font-size="10" fill="#6B7280" text-anchor="end">cabeceira (montante)</text><text x="${MARG}" y="${Y + 22}" font-size="10" fill="#6B7280">← sentido do rio · foz (jusante)</text>`;
   cols.forEach((c, i) => {
     const cx = x(i);
     if (c.tipo === 'vazio') {
