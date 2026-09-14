@@ -52,9 +52,14 @@
   </section>
 
   <section class="bloco" id="rio">
-    <h2><small>2</small>Rio: o que entra e o que sai do trecho</h2>
+    <h2><small>2</small>Rio: o que chega e o que sai do trecho</h2>
     <p class="sub" id="rio-sub"></p>
     <div id="g-reguas" class="grafico"></div>
+    <div id="bloco-afl" hidden>
+      <h3>Afluentes medidos no trecho</h3>
+      <p class="explica" id="e-afl"></p>
+      <div id="g-afl" class="grafico baixo"></div>
+    </div>
   </section>
 
   <section class="bloco" id="usina" hidden>
@@ -68,7 +73,6 @@
     <div class="grade c2">
       <div><h3>Nível de montante</h3><p class="explica" id="e-niveis"></p><div id="g-niveis" class="grafico baixo"></div></div>
       <div id="bloco-vu" hidden><h3>Volume útil</h3><p class="explica">Percentual do volume útil do reservatório, dado horário do ONS.</p><div id="g-vu" class="grafico baixo"></div></div>
-      <div id="bloco-mont"><h3 id="t-mont">O que entrou pela cascata e o que saiu</h3><p class="explica" id="e-mont"></p><div id="g-mont" class="grafico baixo"></div></div>
     </div>
 
     <h3 id="t-rampa">Variação horária</h3>
@@ -83,6 +87,7 @@
   <section class="bloco" id="chuva">
     <h2><small id="n-chuva">4</small>Chuva no trecho</h2>
     <p class="sub">Pluviômetros da telemetria da ANA neste trecho, cada um contra o que o MERGE (satélite) estimou na célula onde ele está. A chuva média da bacia inteira fica na página <a href="chuva.html">Chuva</a>.</p>
+    <p class="explica">Leitura (7 dias): <b>próximos</b> quando medido e satélite diferem em até 20% do maior dos dois; <b>chão mediu mais</b> ou <b>satélite estimou mais</b> quando a diferença passa disso; <b>sensor mudo?</b> quando o pluviômetro marcou menos de 1 mm e o satélite mais de 15 mm.</p>
     <div id="chuva-tabela"></div>
     <div id="g-chuva" class="grafico baixo"></div>
   </section>
@@ -187,20 +192,15 @@
   const lim = (vars, tipos) => regras.filter(r => vars.includes(r.variavel) && tipos.includes(r.tipo) && r.valor !== null && r.valor !== undefined);
   const SA = rs => ({ shapes: rs.map(r => r.s), annotations: rs.map(r => r.a) });
   const estRio = T.estacoes.filter(e => !(e.papel === 'barramento' && U));
-  const nomes = { montante: [], afluente: [], jusante: [] };
-  estRio.forEach(e => (nomes[e.papel] || (nomes[e.papel] = [])).push(e.curto));
-  const partes = [];
-  if (nomes.montante.length) partes.push(`entra pelo rio Iguaçu (${nomes.montante.join(', ')})`);
-  if (nomes.afluente.length) partes.push(`entra pelos afluentes (${nomes.afluente.join(', ')})`);
-  if (U) partes.push(`sai pela usina (defluência do ONS)`);
-  if (nomes.jusante.length) partes.push(`segue a jusante (${nomes.jusante.join(', ')})`);
-  document.getElementById('rio-sub').textContent = estRio.length ? `Vazões medidas nas estações fluviométricas do trecho, em m³/s: o que ${partes.join('; o que ')}. Dado bruto, curva-chave do operador.` : 'Neste trecho só há a usina do ONS; as vazões estão na seção Usina.';
-  if (!estRio.length) { document.getElementById('g-reguas').hidden = true; }
+  const PCH = T.chega, PSAI = T.sai;
+  const descr = x => x ? (x.tipo === 'usina' ? `a defluência de ${x.rotulo.replace(/^Defluência /, '')} (${x.fonte})` : `a vazão na estação ${x.rotulo} (${x.fonte}${x.area_km2 ? ', ' + fmt(x.area_km2) + ' km²' : ''})`) : 'sem medição';
+  document.getElementById('rio-sub').textContent = `Vazão em m³/s no ponto do rio Iguaçu mais a montante do trecho e no mais a jusante. Chega: ${descr(PCH)}. Sai: ${descr(PSAI)}. Quando a linha que sai fica acima da que chega, o trecho acrescentou água (afluentes e área incremental) ou o reservatório liberou; abaixo, o reservatório reteve. O que sai de um trecho é o que chega ao seguinte.${slug === 'foz-do-areia' ? ' Na cabeceira o ponto de chegada é União da Vitória, e não Porto Amazonas, porque Porto Amazonas drena só 12% da área que chega a Foz do Areia e Porto Vitória não transmite vazão.' : ''}`;
+  const afl = estRio.filter(e => e.papel === 'afluente');
 
   if (U) {
     document.getElementById('usina').hidden = false;
     document.getElementById('csv').hidden = false;
-    document.getElementById('t-usina').textContent = `Usina: o que a ${U.curto} está fazendo`;
+    document.getElementById('t-usina').textContent = `Usina: como a UHE ${U.curto} está sendo operada`;
     document.getElementById('usina-sub').textContent = `Dado operativo horário do ONS da UHE ${U.nome} (${U.agente}). ${regras.length ? 'Os limites desenhados vêm da outorga e das restrições declaradas ao ONS (FSAR-H), listadas no fim da seção.' : 'A outorga desta usina ainda não foi lida para o painel, por isso nenhum limite é desenhado.'}`;
     const lv = lim(['defluencia', 'vazao_turbinada'], ['minimo', 'maximo']);
     document.getElementById('e-vazoes').textContent = 'Defluência é o total que sai da usina; turbinada e vertida são as parcelas.' + (lv.length ? ' Linhas tracejadas: ' + lv.map(q => `${q.variavel === 'defluencia' ? 'defluência' : 'turbinada'} ${q.tipo === 'minimo' ? 'mínima' : 'máxima'} de ${fmt(q.valor, 1)} m³/s (${q.fonte.split(';')[0]})`).join('; ') + '.' : '');
@@ -210,22 +210,28 @@
     const varRampa = rr && rr.variavel === 'vazao_turbinada' ? 'vazão turbinada' : 'defluência';
     document.getElementById('t-rampa').textContent = `Variação horária da ${varRampa} (rampa)`;
     document.getElementById('e-rampa').textContent = `Cada barra é a diferença entre a média de uma hora e a da hora anterior da ${varRampa}, em m³/s por hora: positiva quando a usina aumentou a vazão, negativa quando reduziu. ` + (rr ? `A restrição declarada ao ONS (${rr.fonte.split(';')[0]}) é de ${fmt(rr.valor)} m³/s por hora; barras em laranja passam desse valor. ` : 'Não há limite de rampa lido para esta usina. ') + 'Diferença de médias horárias subestima a rampa instantânea: é indício, não medida.';
-    if (U.montante) { document.getElementById('t-mont').textContent = 'O que entrou pela cascata e o que saiu'; document.getElementById('e-mont').textContent = `Defluência de ${U.montante.curto}, a usina imediatamente a montante, contra a defluência de ${U.curto}. A diferença é o que os afluentes do trecho e o reservatório acrescentaram ou retiveram.`; }
-    else { document.getElementById('t-mont').textContent = 'Primeira usina da cascata'; document.getElementById('e-mont').textContent = 'Não há usina do ONS a montante; o que chega vem das estações fluviométricas de montante, na seção Rio.'; document.getElementById('g-mont').hidden = true; }
     document.getElementById('regras').innerHTML = regras.length ? regras.map(r => `<div class="regra"><div class="v">${r.valor !== null && r.valor !== undefined ? fmt(r.valor, String(r.valor).includes('.') ? 2 : 0) + ' ' + r.unidade : '—'}</div><div>${r.titulo}<span class="chip">${r.vigencia || ''}</span></div><div class="f">${r.fonte}${r.nota ? ' · ' + r.nota : ''}</div></div>`).join('')
       : '<p class="sub">A outorga desta usina ainda não foi lida para o painel; nenhum limite é exibido até isso acontecer (regra: só dados verificáveis).</p>';
   }
 
   function desenhar() {
-    // rio
+    // rio: um ponto que chega e um que sai
     const tv = [];
-    estRio.forEach((e, i) => {
-      const r = recorte(e.serie.instante, { v: e.serie.vazao }, dias);
-      if (r.arrays.v.some(x => x !== null)) tv.push(traco(r.x, r.arrays.v, `${e.curto} (${PAPEL[e.papel]})`, cores[i % cores.length], { line: { color: cores[i % cores.length], width: e.papel === 'afluente' ? 1.2 : 1.8, dash: e.papel === 'afluente' ? 'dot' : 'solid' } }));
-    });
-    if (U && estRio.length) { const r = recorte(U.horario.instante, { d: U.horario.defluencia }, dias); tv.push(traco(r.x, r.arrays.d, `Defluência ${U.curto} (ONS)`, PAL.limite, { line: { color: PAL.limite, width: 2, dash: 'dash' } })); }
+    if (PCH) { const r = recorte(PCH.instante, { v: PCH.vazao }, dias); tv.push(traco(r.x, r.arrays.v, `Chega: ${PCH.rotulo}`, '#80B5E1', { line: { color: '#80B5E1', width: 2.4 } })); }
+    if (PSAI) { const r = recorte(PSAI.instante, { v: PSAI.vazao }, dias); tv.push(traco(r.x, r.arrays.v, `Sai: ${PSAI.rotulo}`, PAL.escuro, { line: { color: PAL.escuro, width: 2.4 } })); }
     if (tv.length) Plotly.react('g-reguas', tv, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' } }), CONFIG_PLOT);
-    else if (estRio.length) document.getElementById('g-reguas').innerHTML = '<p class="sub">Sem vazão nas estações fluviométricas do trecho na janela.</p>';
+    else document.getElementById('g-reguas').innerHTML = '<p class="sub">Sem vazão nas pontas do trecho na janela.</p>';
+    // afluentes, com escala própria
+    const ta = [];
+    afl.forEach((e, i) => { const r = recorte(e.serie.instante, { v: e.serie.vazao }, dias); if (r.arrays.v.some(x => x !== null)) ta.push(traco(r.x, r.arrays.v, `${e.curto}${e.rio_afluente && !e.curto.toLowerCase().includes(e.rio_afluente.toLowerCase().replace(/^rio /, '')) ? ' (' + e.rio_afluente + ')' : ''}`, ['#1B9E77', '#E6791E', '#0193DE', '#8E44AD'][i % 4], { line: { width: 1.8 } })); });
+    document.getElementById('bloco-afl').hidden = !ta.length;
+    if (ta.length) {
+      const ultimo = e => { const v = e.serie.vazao; for (let k = v.length - 1; k >= 0; k--) if (v[k] !== null) return v[k]; return null; };
+      const soma = afl.map(ultimo).filter(v => v !== null).reduce((a, b) => a + b, 0);
+      const saiAgora = PSAI ? (() => { for (let k = PSAI.vazao.length - 1; k >= 0; k--) if (PSAI.vazao[k] !== null) return PSAI.vazao[k]; return null; })() : null;
+      document.getElementById('e-afl').textContent = `Vazão dos afluentes com estação no trecho, em escala própria (no gráfico acima ficariam colados no zero). Somam agora ${fmt(soma)} m³/s${saiAgora ? `, ${fmt(soma / saiAgora * 100, 1)}% do que sai do trecho (${fmt(saiAgora)} m³/s)` : ''}. Afluentes sem estação não aparecem.`;
+      Plotly.react('g-afl', ta, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' } }), CONFIG_PLOT);
+    }
     // usina
     if (U) {
       const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, vu: H.pct_volume_util, mo: (U.montante || {}).defluencia }, dias); const x = r.x, A = r.arrays;
@@ -243,7 +249,6 @@
       const lr = rr ? [linhaLimite(rr.valor, `declarado +${rr.valor}`, PAL.fsarh), linhaLimite(-rr.valor, `declarado −${rr.valor}`, PAL.fsarh)].map(l => ({ s: l.shape, a: l.ann })) : [];
       Plotly.react('g-rampa', [{ x, y: dif, type: 'bar', name: 'variação por hora', marker: { color: dif.map(v => v === null ? PAL.cinza : (Math.abs(v) > (rr ? rr.valor : 1e9) ? PAL.fsarh : PAL.claro)) }, hovertemplate: '%{y:,.0f} m³/s por hora<extra></extra>' }],
         layoutBase({ showlegend: false, yaxis: { title: 'm³/s por hora', gridcolor: PAL.grade, tickformat: ',d' }, ...SA(lr) }), CONFIG_PLOT);
-      if (U.montante) Plotly.react('g-mont', [traco(x, A.mo, `Defluência ${U.montante.curto} (montante)`, PAL.claro, { line: { color: PAL.claro, width: 2 } }), traco(x, A.de, `Defluência ${U.curto}`, SERIES.defluencia, { line: { color: SERIES.defluencia, width: 2 } })], layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' } }), CONFIG_PLOT);
     }
     document.querySelectorAll('.indice button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
   }
@@ -252,7 +257,7 @@
 
   // ================= 4. Chuva no trecho
   const plu = (C.pluviometros || []).filter(p => p.trecho === slug);
-  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo? zero medido com satélite acima de 15 mm', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) <= .2) return ['concordam (até 20%)', 'color:#2E8B57']; return [d > 0 ? 'chão mediu mais que o satélite' : 'satélite estimou mais que o chão', 'color:#D9A400']; };
+  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo? zero medido com satélite acima de 15 mm', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) <= .2) return ['próximos', 'color:#2E8B57']; return [d > 0 ? 'chão mediu mais que o satélite' : 'satélite estimou mais que o chão', 'color:#D9A400']; };
   document.getElementById('chuva-tabela').innerHTML = plu.length ? `<div class="tabela-wrap"><table class="tab"><thead><tr><th>Estação</th><th class="num">Medido 24 h</th><th class="num">Medido 7 d</th><th class="num">MERGE 7 d</th><th class="num">Medido 30 d</th><th class="num">MERGE 30 d</th><th>Leitura</th></tr></thead><tbody>${plu.map(p => { const [txt, cor] = leitura(p); return `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td class="num">${fmt(p.mm_24h, 1)}</td><td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(p.merge ? p.merge.d7 : null, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td class="num">${fmt(p.merge ? p.merge.d30 : null, 1)}</td><td style="${cor}">${txt}</td></tr>`; }).join('')}</tbody></table></div>` : '';
   const pluSerie = T.pluviometros.filter(p => p.chuva_diaria);
   if (pluSerie.length) Plotly.newPlot('g-chuva', pluSerie.map((p, i) => ({ x: p.chuva_diaria.data, y: p.chuva_diaria.mm, type: 'bar', name: `${p.codigo} ${p.nome.replace(/^UHE /, '')}`, marker: { color: cores[i % cores.length] } })),

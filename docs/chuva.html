@@ -52,6 +52,7 @@
   <section class="bloco" id="chao">
     <h2><small>4</small>Satélite contra o chão, trecho a trecho</h2>
     <p class="sub">Cada pluviômetro da telemetria da ANA contra o que o MERGE estimou na célula de 0,1° onde ele está, em ordem de rio. Quando os dois concordam, o mapa acima merece confiança; pluviômetro em zero com o satélite indicando chuva é sensor mudo, não estiagem.</p>
+    <p class="explica">Coluna Leitura, comparando os 7 dias: <b>próximos</b> quando medido e satélite diferem em até 20% do maior dos dois (por exemplo, 82 mm contra 81 mm); <b>chão mediu mais</b> ou <b>satélite estimou mais</b> quando a diferença passa de 20%; <b>sensor mudo?</b> quando o pluviômetro marcou menos de 1 mm e o satélite mais de 15 mm. A diferença é esperada: o pluviômetro mede um ponto, o satélite estima a média de uma célula de cerca de 11 km.</p>
     <div class="tabela-wrap"><table class="tab" id="tab-comp"><thead><tr><th>Estação</th><th>Tipo</th><th class="num">Medido 7 d (mm)</th><th class="num">MERGE 7 d (mm)</th><th class="num">Diferença</th><th class="num">Medido 30 d</th><th class="num">MERGE 30 d</th><th>Leitura</th><th>Último dado</th></tr></thead><tbody></tbody></table></div>
   </section>
 
@@ -126,9 +127,9 @@
   const M = C.mensal || [];
   const rot = M.map(m => { const [a, mm] = m.mes.split('-'); return `${['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+mm - 1]}/${a.slice(2)}`; });
   Plotly.newPlot('g-mensal', [
-    { x: rot, y: M.map(m => m.mm), type: 'bar', name: 'observado (MERGE)', marker: { color: M.map(m => m.dias < 25 ? PAL.claro : PAL.medio) }, text: M.map(m => m.dias < 25 ? `${m.dias} dias` : ''), textposition: 'outside', textfont: { size: 10 }, hovertemplate: '%{y:,.1f} mm<extra>observado</extra>' },
+    { x: rot, y: M.map(m => m.mm), type: 'bar', name: 'observado (MERGE)', marker: { color: M.map(m => m.dias < 25 ? PAL.claro : PAL.medio) }, text: M.map(m => m.dias < 25 ? `${m.dias} dias` : ''), textposition: 'outside', cliponaxis: false, textfont: { size: 10 }, hovertemplate: '%{y:,.1f} mm<extra>observado</extra>' },
     { x: rot, y: M.map(m => m.mlt), type: 'scatter', mode: 'lines+markers', name: 'MLT 1998–2024', line: { color: PAL.escuro, width: 2 }, marker: { size: 6 }, hovertemplate: '%{y:,.1f} mm<extra>MLT</extra>' }],
-    layoutBase({ hovermode: 'x', yaxis: { title: 'mm por mês', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade } }), CONFIG_PLOT);
+    layoutBase({ hovermode: 'x', yaxis: { title: 'mm por mês', gridcolor: PAL.grade, range: [0, Math.max(1, ...M.map(m => Math.max(m.mm || 0, m.mlt || 0))) * 1.15] }, xaxis: { gridcolor: PAL.grade } }), CONFIG_PLOT);
   const D = C.diaria || { data: [], mm: [] };
   function desenharDiaria(dias) {
     const r = recorte(D.data, { y: D.mm }, dias);
@@ -140,12 +141,12 @@
   document.querySelectorAll('.controles button[data-d]').forEach(b => b.addEventListener('click', () => desenharDiaria(+b.dataset.d)));
 
   // ================= 4. Satélite × chão
-  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo? zero medido com satélite acima de 15 mm', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) <= .2) return ['concordam (até 20%)', 'color:#2E8B57']; return [d > 0 ? 'chão mediu mais que o satélite' : 'satélite estimou mais que o chão', 'color:#D9A400']; };
+  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo? zero medido com satélite acima de 15 mm', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) <= .2) return ['próximos', 'color:#2E8B57']; return [d > 0 ? 'chão mediu mais que o satélite' : 'satélite estimou mais que o chão', 'color:#D9A400']; };
   const porTrecho = B.trechos.map(t => ({ t, itens: (C.pluviometros || []).filter(p => p.trecho === t.slug) })).filter(g => g.itens.length);
   document.querySelector('#tab-comp tbody').innerHTML = porTrecho.map(g => `<tr><td colspan="9" style="background:#EEF3FA;color:var(--azul-escuro)"><a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a></td></tr>` + g.itens.map(p => {
     const sat7 = p.merge ? p.merge.d7 : null, sat30 = p.merge ? p.merge.d30 : null, [txt, cor] = leitura(p);
     const dif = (sat7 !== null && p.mm_7d !== null) ? p.mm_7d - sat7 : null;
-    return `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td>${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'estação fluviométrica com pluviômetro'}</td>
+    return `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td>${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'fluviométrica com pluviômetro'}</td>
       <td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(sat7, 1)}</td><td class="num">${dif === null ? '–' : (dif > 0 ? '+' : '') + fmt(dif, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td class="num">${fmt(sat30, 1)}</td><td style="${cor}">${txt}</td><td>${fmtInst(p.ultimo_instante)}</td></tr>`; }).join('')).join('');
 
   // ================= 5. Dados

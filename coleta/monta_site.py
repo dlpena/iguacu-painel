@@ -405,6 +405,22 @@ def main() -> int:
                                     "serie": serie_horaria(e["codigo"], tele)})
         for p in bloco["pluviometros"]:
             det["pluviometros"].append({**p, "chuva_diaria": chuva_diaria(p["codigo"], tele, 30)})
+        # o que chega e o que sai do trecho: um ponto do rio principal em cada ponta (config/trechos.yaml)
+        for chave in ("chega", "sai"):
+            ref = t.get(chave)
+            if not ref:
+                continue
+            tipo, alvo = ref.split(":", 1)
+            if tipo == "usina" and len(ho):
+                ua = us_por_slug[alvo]
+                ga = ho[ho["nom_reservatorio"] == ua["ons"]].sort_values("din_instante")
+                det[chave] = {"tipo": "usina", "id": alvo, "rotulo": f"Defluência {ua['curto']}", "fonte": "ONS, dado horário",
+                              "instante": instantes(ga["din_instante"]), "vazao": lista(ga["val_vazaodefluente"])}
+            elif tipo == "estacao":
+                e = est_por_cod.get(alvo, {})
+                sh = serie_horaria(alvo, tele)
+                det[chave] = {"tipo": "estacao", "id": alvo, "rotulo": e.get("curto") or alvo, "fonte": f"ANA, estação {alvo}",
+                              "area_km2": e.get("area_km2"), "instante": sh["instante"], "vazao": sh["vazao"]}
         gravar(f"trecho/{t['slug']}.json", det)
     gravar("bacia.json", {"gerado_em": carimbo, "trechos": bacia})
 

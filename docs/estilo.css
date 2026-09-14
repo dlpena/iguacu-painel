@@ -86,7 +86,9 @@ h3 { font-size: 15px; margin: 16px 0 6px; font-weight: normal; color: var(--mari
 /* tabelas */
 .tabela-wrap { overflow-x: auto; }
 table.tab { border-collapse: collapse; width: 100%; font-size: 13.5px; background: var(--cartao); }
-table.tab th, table.tab td { padding: 7px 9px; border-bottom: 1px solid var(--borda); text-align: left; white-space: nowrap; }
+table.tab th, table.tab td { padding: 7px 9px; border-bottom: 1px solid var(--borda); text-align: left; white-space: normal; vertical-align: top; }
+table.tab td.num, table.tab th.num, table.tab td.spark { white-space: nowrap; }
+table.tab th { vertical-align: bottom; }
 table.tab th { background: #EEF3FA; color: var(--azul-escuro); font-weight: normal; cursor: pointer; user-select: none; position: sticky; top: 0; }
 table.tab th.num, table.tab td.num { text-align: right; }
 table.tab tr:hover td { background: #F8FAFD; }
