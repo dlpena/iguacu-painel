@@ -31,6 +31,9 @@ RIOS = {
     "Rio Capanema": ("Rio Capanema", "afluente"),
     "Rio dos Andradas": ("Rio Andrada", "afluente"),
     "Rio das Cobras": ("Rio das Cobras", "afluente"),
+    # o rio da estação 65975300 ("rio Andrada" no cadastro da ANA/agente) consta na camada como Rio São Salvador:
+    # verificado em 14/09/2026 pela posição da estação (área a montante 1.213-1.401 km² na camada contra 1.387 km² no cadastro)
+    "Rio São Salvador": ("Rio Andrada (São Salvador na base da ANA)", "afluente"),
 }
 CITACAO = ('ANA/SNIRH, serviço "Rios principais" (SNIRH2016/Rios_principais, camada Curso d\'Água), '
            'https://portal1.snirh.gov.br/arcgis/rest/services/SNIRH2016/Cursos_Agua_dominialidade/FeatureServer')
