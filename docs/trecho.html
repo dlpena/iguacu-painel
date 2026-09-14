@@ -127,6 +127,7 @@
     L.polygon([[[-85, -180], [-85, 180], [85, 180], [85, -180]], ...aneis], { stroke: false, fillColor: '#6B7280', fillOpacity: .28, interactive: false }).addTo(mapa);
     L.geoJSON(bacia, { style: { color: PAL.escuro, weight: 2.5, fill: false, opacity: .9 }, interactive: false }).addTo(mapa);
   }
+  await desenharHidrografia(mapa);
   // usinas dos outros trechos em cinza, só para orientação
   B.trechos.filter(t => t.usina && t.slug !== slug).forEach(t => L.marker([t.usina.lat, t.usina.lon], { icon: L.divIcon({ className: '', iconSize: [14, 12], iconAnchor: [7, 6], html: '<svg width="14" height="12" viewBox="0 0 18 16"><path d="M9 1 L17 15 L1 15 Z" fill="#9CA3AF" stroke="#fff" stroke-width="1.5"/></svg>' }), interactive: true }).addTo(mapa).bindTooltip(`${t.usina.curto} (trecho ${t.curto || t.nome})`, { direction: 'top' }));
   if (U && R.usina) marcadorUsina([R.usina.lat, R.usina.lon], R.usina.curto, true).addTo(mapa);
@@ -137,6 +138,7 @@
     const sit = L.map('situacao', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
     const cam = L.geoJSON(bacia, { style: { color: PAL.escuro, weight: 1, fillColor: PAL.claro, fillOpacity: .35 } }).addTo(sit);
     sit.fitBounds(cam.getBounds(), { padding: [3, 3] }); // o mapa precisa de vista definida antes de receber marcadores
+    await desenharHidrografia(sit, 0.5, false);
     B.trechos.filter(t => t.usina).forEach(t => L.circleMarker([t.usina.lat, t.usina.lon], { radius: 2, color: '#294086', weight: 1, fillColor: '#294086', fillOpacity: 1, interactive: false }).addTo(sit));
     validos.forEach(p => L.circleMarker(p, { radius: 2.5, color: '#C0504D', weight: 1, fillColor: '#C0504D', fillOpacity: 1, interactive: false }).addTo(sit));
     const ret = L.rectangle(mapa.getBounds(), { color: '#C0504D', weight: 1, fillOpacity: .08, dashArray: '3 2', interactive: false }).addTo(sit);

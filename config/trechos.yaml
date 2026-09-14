@@ -2,6 +2,7 @@
 # explicam, com o papel de cada uma dito em palavras. Ordem das réguas: área de drenagem crescente
 # (config/estacoes.csv). Nomes curtos são só para rótulo; o nome oficial continua no catálogo.
 # papel: montante (rio principal, a montante da usina) | afluente (tributário) | barramento | jusante
+# margem (afluentes): direita = norte, esquerda = sul, olhando para jusante; definida pela posição da estação em relação ao Iguaçu
 trechos:
   - slug: foz-do-areia
     curto: Foz do Areia
@@ -38,7 +39,7 @@ trechos:
     usina: salto-osorio
     contexto: "Fio d'água imediatamente a jusante de Salto Santiago. A defluência de Salto Osório é a entrada da comparação de amortecimento exigida de Baixo Iguaçu (a afluência horária do ONS não serve para isso)."
     estacoes:
-      - {codigo: "65889700", papel: afluente, curto: "Rio das Cobras", rio: "rio das Cobras"}
+      - {codigo: "65889700", papel: afluente, curto: "Rio das Cobras", rio: "rio das Cobras", margem: direita}
       - {codigo: "65894991", papel: barramento, curto: "Barramento Salto Osório"}
     pluviometros: ["2552009", "2553079"]
   - slug: salto-caxias
@@ -47,7 +48,7 @@ trechos:
     usina: salto-caxias
     contexto: "Fio d'água com o rio Chopim entrando pela margem esquerda (régua de Águas do Verê). Balsa Jaracatiá e Boa Vista da Aparecida ficam no remanso; a outorga fixa mínimo de 200 m³/s (ou a natural, com piso de 76) e o ONS já publicou zeros espúrios de defluência aqui."
     estacoes:
-      - {codigo: "65960001", papel: afluente, curto: "Águas do Verê (Chopim)", rio: "rio Chopim"}
+      - {codigo: "65960001", papel: afluente, curto: "Águas do Verê (Chopim)", rio: "rio Chopim", margem: esquerda}
       - {codigo: "65970700", papel: montante, curto: "Balsa Jaracatiá"}
       - {codigo: "65971500", papel: montante, curto: "Boa Vista da Aparecida"}
       - {codigo: "65973501", papel: barramento, curto: "Barramento Salto Caxias"}
@@ -58,8 +59,8 @@ trechos:
     usina: baixo-iguacu
     contexto: "Última usina antes do Parque Nacional. Recebe Salto Caxias mais os rios Andrada e Capanema. A régua do barramento publica a defluência total e é o cruzamento natural com o dado do ONS; a de jusante confirma o que efetivamente segue para as Cataratas."
     estacoes:
-      - {codigo: "65975300", papel: afluente, curto: "Rio Andrada", rio: "rio Andrada"}
-      - {codigo: "65980200", papel: afluente, curto: "Rio Capanema", rio: "rio Capanema"}
+      - {codigo: "65975300", papel: afluente, curto: "Rio Andrada", rio: "rio Andrada", margem: direita}
+      - {codigo: "65980200", papel: afluente, curto: "Rio Capanema", rio: "rio Capanema", margem: esquerda}
       - {codigo: "65983100", papel: barramento, curto: "Barramento Baixo Iguaçu"}
       - {codigo: "65984000", papel: jusante, curto: "Jusante Baixo Iguaçu"}
     pluviometros: ["2553071", "2553073"]

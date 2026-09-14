@@ -22,10 +22,25 @@ function marcadorUsina(latlng, nome, rotuloFixo = false) {
   return m;
 }
 
+/* hidrografia (rio Iguaçu e afluentes monitorados, SNIRH) nos mapas; devolve a camada ou null */
+async function desenharHidrografia(mapa, escala = 1, interativa = true) {
+  try {
+    const gj = await carregar('hidrografia.geojson');
+    const cam = L.geoJSON(gj, {
+      style: f => f.properties.classe === 'principal' ? { color: '#0B6BA8', weight: 2.6 * escala, opacity: .9 } : { color: '#3FB0E8', weight: 1.4 * escala, opacity: .85 },
+      interactive: interativa,
+      onEachFeature: (f, l) => { if (interativa) l.bindTooltip(f.properties.nome, { sticky: true }); },
+    }).addTo(mapa);
+    return cam;
+  } catch (e) { console.warn('hidrografia', e); return null; }
+}
+const LEGENDA_HIDRO = '<i style="background:#0B6BA8;height:3px;border-radius:0"></i>rio Iguaçu<br><i style="background:#3FB0E8;height:2px;border-radius:0"></i>afluente monitorado';
+
 /* esquema longitudinal do rio: usinas e réguas em ordem, com o valor da última hora */
 function desenharEsquema(el, trechos, destaque = null) {
   const unico = trechos.length === 1;
-  const COL = 56, MARG = unico ? 64 : 28, Y = 150, H = 262;
+  const temSul = trechos.some(t => t.estacoes.some(e => e.papel === 'afluente' && e.margem === 'esquerda' && e.esquema !== false));
+  const COL = 56, MARG = unico ? 64 : 28, Y = 150, H = temSul ? 330 : 262;
   const cols = []; // {tipo, x, ...}
   trechos.forEach(t => {
     const ini = cols.length;
@@ -69,12 +84,17 @@ function desenharEsquema(el, trechos, destaque = null) {
     if (c.tipo === 'vazio') {
       return;
     } else if (c.tipo === 'afluente') {
-      // afluentes vizinhos alternam altura para os nomes (inclinados 20° para cima) não se cruzarem
-      const e = c.e, alto = cols[i + 1] && cols[i + 1].tipo === 'afluente', cy = alto ? Y - 84 : Y - 50;
-      s += `<a href="estacao.html?c=${e.codigo}"><path d="M${cx} ${cy} L${x(i + (alto ? 2 : 1)) - 4} ${Y - 3}" stroke="#80B5E1" stroke-width="2.5" fill="none" stroke-dasharray="3 3"/>`;
+      // margem direita (norte) acima do rio, margem esquerda (sul) abaixo, como no mapa com o norte para cima;
+      // afluentes vizinhos do mesmo lado alternam altura para os nomes não se cruzarem
+      const e = c.e, sul = e.margem === 'esquerda';
+      const alto = cols[i + 1] && cols[i + 1].tipo === 'afluente' && ((cols[i + 1].e.margem === 'esquerda') === sul);
+      const dist = alto ? 84 : 50, cy = sul ? Y + 100 + (alto ? 34 : 0) : Y - dist;
+      const alvo = x(i + (alto ? 2 : 1)) - 4;
+      s += `<a href="estacao.html?c=${e.codigo}"><path d="M${cx} ${cy} L${alvo} ${sul ? Y + 3 : Y - 3}" stroke="#80B5E1" stroke-width="2.5" fill="none" stroke-dasharray="3 3"/>`;
       s += `<circle cx="${cx}" cy="${cy}" r="6" fill="${cor(e.frescor_h)}" stroke="#fff" stroke-width="1.5"/>`;
       s += `<text x="${cx - 9}" y="${cy + 4}" font-size="11.5" text-anchor="end" fill="#1F2937">${fmt(e.vazao)}</text>`;
-      s += `<text transform="translate(${cx + 8} ${cy - 2}) rotate(-20)" font-size="10" fill="#6B7280">${esc(e.curto)}</text>`;
+      s += sul ? `<text transform="translate(${cx + 8} ${cy + 6}) rotate(20)" font-size="10" fill="#6B7280">${esc(e.curto)}</text>`
+               : `<text transform="translate(${cx + 8} ${cy - 2}) rotate(-20)" font-size="10" fill="#6B7280">${esc(e.curto)}</text>`;
       s += `<title>${esc(e.curto)} (${e.codigo}) · ${PAPEL[e.papel]}${e.rio_afluente ? ' · ' + e.rio_afluente : ''}\n${fmt(e.vazao)} m³/s · ${frescorTexto(e.frescor_h)}</title></a>`;
     } else if (c.tipo === 'regua') {
       const e = c.e;

@@ -328,7 +328,7 @@ def main() -> int:
     info_est = {}
     for i, t in enumerate(tr):
         for e in t["estacoes"]:
-            info_est[e["codigo"]] = {"trecho": t["slug"], "trecho_nome": t["nome"], "papel": e["papel"], "curto": e["curto"], "rio_afluente": e.get("rio"), "esquema": e.get("esquema", True), "ordem": i}
+            info_est[e["codigo"]] = {"trecho": t["slug"], "trecho_nome": t["nome"], "papel": e["papel"], "curto": e["curto"], "rio_afluente": e.get("rio"), "esquema": e.get("esquema", True), "margem": e.get("margem"), "ordem": i}
         for c in t.get("pluviometros", []):
             info_est.setdefault(c, {"trecho": t["slug"], "trecho_nome": t["nome"], "papel": "pluviometro", "curto": None, "rio_afluente": None, "ordem": i})
     trecho_da_usina = {t["usina"]: t["slug"] for t in tr if t.get("usina")}
@@ -342,7 +342,7 @@ def main() -> int:
         item = {"codigo": cod, "nome": r["Nome"], "curto": inf.get("curto") or r["Nome"].title(), "tipo": r["TipoEstacao"], "rio": r["Rio"], "municipio": r["Municipio"],
                 "responsavel": r["ResponsavelSigla"], "operadora": r["OperadoraSigla"], "telemetrica": r["EstacaoTelemetrica"],
                 "area_km2": num(r["AreaDrenagem"], 0), "lat": num(r["Latitude"], 4), "lon": num(r["Longitude"], 4),
-                "trecho": inf.get("trecho"), "trecho_nome": inf.get("trecho_nome"), "papel": inf.get("papel"), "rio_afluente": inf.get("rio_afluente"), "esquema": inf.get("esquema", True),
+                "trecho": inf.get("trecho"), "trecho_nome": inf.get("trecho_nome"), "papel": inf.get("papel"), "rio_afluente": inf.get("rio_afluente"), "esquema": inf.get("esquema", True), "margem": inf.get("margem"),
                 "ordem_trecho": inf.get("ordem", 99), "descricao": (r["Descricao"] or "")[:200]}
         item.update(estacao_atual(cod, tele, agora))
         est_json.append(item)
@@ -379,7 +379,7 @@ def main() -> int:
                               "atual": atual, "tendencia": tend, "ref": ref, "faixa": faixa, "n_regras": len(rg)}
         for e in t["estacoes"]:
             base = est_por_cod.get(e["codigo"], {"codigo": e["codigo"], "nome": e["codigo"]})
-            bloco["estacoes"].append({k: base.get(k) for k in ("codigo", "nome", "curto", "papel", "rio_afluente", "esquema", "area_km2", "lat", "lon", "responsavel",
+            bloco["estacoes"].append({k: base.get(k) for k in ("codigo", "nome", "curto", "papel", "rio_afluente", "esquema", "margem", "area_km2", "lat", "lon", "responsavel",
                                                               "ultimo_instante", "frescor_h", "cota_m", "vazao", "vazao_6h", "chuva_24h", "chuva_7d", "ref", "spark")})
         for c in t.get("pluviometros", []):
             base = est_por_cod.get(c)
@@ -419,6 +419,9 @@ def main() -> int:
     if not geo.exists() or geo.stat().st_mtime < (CONFIG / "bacia_iguacu.geojson").stat().st_mtime:
         n = simplificar(CONFIG / "bacia_iguacu.geojson", geo)
         log(f"bacia.geojson: {n} vértices, {geo.stat().st_size // 1024} KB")
+    hid = CONFIG / "hidrografia.geojson"
+    if hid.exists():
+        (SAIDA / "hidrografia.geojson").write_bytes(hid.read_bytes())
     log(f"site montado: {len(bacia)} trechos, {len(est_json)} estações, {len(avisos)} avisos")
     return 0
 
