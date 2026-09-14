@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import glob
 import json
+import re
 import sys
 from datetime import timedelta
 from pathlib import Path
@@ -71,6 +72,12 @@ def valor_ha(g: pd.DataFrame, col: str, t_ref, horas: int):
     alvo = t_ref - timedelta(hours=horas)
     h = g[g["din_instante"] <= alvo]
     return h[col].iloc[-1] if len(h) else None
+
+
+def nome_curto(nome: str) -> str:
+    """'UHE SALTO OSÓRIO LARANJEIRAS DO SUL' -> 'Salto Osório Laranjeiras do Sul'."""
+    n = re.sub(r"^(UHE|PCH|CGH)\s+", "", nome.strip()).title()
+    return re.sub(r"(Do|Da|De|Dos|Das|E)", lambda x: x.group(0).lower(), n)
 
 
 def trechos() -> list[dict]:
@@ -339,7 +346,7 @@ def main() -> int:
     for _, r in cat.iterrows():
         cod = r["Codigo"]
         inf = info_est.get(cod, {})
-        item = {"codigo": cod, "nome": r["Nome"], "curto": inf.get("curto") or r["Nome"].title(), "tipo": r["TipoEstacao"], "rio": r["Rio"], "municipio": r["Municipio"],
+        item = {"codigo": cod, "nome": r["Nome"], "curto": inf.get("curto") or nome_curto(r["Nome"]), "tipo": r["TipoEstacao"], "rio": r["Rio"], "municipio": r["Municipio"],
                 "responsavel": r["ResponsavelSigla"], "operadora": r["OperadoraSigla"], "telemetrica": r["EstacaoTelemetrica"],
                 "area_km2": num(r["AreaDrenagem"], 0), "lat": num(r["Latitude"], 4), "lon": num(r["Longitude"], 4),
                 "trecho": inf.get("trecho"), "trecho_nome": inf.get("trecho_nome"), "papel": inf.get("papel"), "rio_afluente": inf.get("rio_afluente"), "esquema": inf.get("esquema", True), "margem": inf.get("margem"),

@@ -89,7 +89,11 @@
   document.getElementById('trilha').innerHTML = trilha([['index.html', '← O rio agora'], D.trecho ? [`trecho.html?t=${D.trecho}`, `Trecho ${D.trecho_nome}`] : ['catalogo.html', 'Catálogo'], [null, `Estação ${D.codigo}`]]);
   document.getElementById('subtitulo').textContent = `${D.codigo} · ${D.nome} · ${papel}${D.rio_afluente ? ' (' + D.rio_afluente + ')' : ''}${D.trecho ? ' · trecho ' + D.trecho_nome : ''}`;
   const temChuva = (D.chuva_diaria && D.chuva_diaria.mm.some(x => x !== null && x > 0)) || D.tipo === 'Pluviométrica';
-  if (!temChuva) { document.getElementById('chuva').hidden = true; document.getElementById('lnk-chuva').hidden = true; document.getElementById('n-dados').textContent = '4'; }
+  const temSerie = D.serie.vazao.some(x => x !== null) || D.serie.cota_m.some(x => x !== null);
+  if (!temChuva) { document.getElementById('chuva').hidden = true; document.getElementById('lnk-chuva').hidden = true; }
+  if (!temSerie) { document.getElementById('serie').hidden = true; document.querySelector('a[href="#serie"]').hidden = true; }
+  // renumera as seções visíveis
+  [...document.querySelectorAll('section.bloco')].filter(s => !s.hidden).forEach((s, i) => { const n = s.querySelector('h2 small'); if (n) n.textContent = String(i + 1); });
 
   // ================= 1. Onde está
   const oQueMede = D.tipo === 'Pluviométrica' ? 'mede chuva' : (D.papel === 'barramento' ? 'mede a cota do reservatório junto à barragem e a vazão que a usina solta' : 'mede cota e vazão do rio');
