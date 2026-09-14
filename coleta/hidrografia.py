@@ -23,14 +23,14 @@ from comum import CONFIG, log  # noqa: E402
 from geo import aneis  # noqa: E402
 
 URL = "https://portal1.snirh.gov.br/arcgis/rest/services/SNIRH2016/Cursos_Agua_dominialidade/FeatureServer/0/query"
-# nome exato na camada -> rótulo e classe (principal ou afluente monitorado)
+# nome exato na camada -> rótulo e classe (principal ou afluente monitorado). Só afluentes com estação no painel;
+# o rio Jordão, por exemplo, fica de fora porque não tem estação cadastrada.
 RIOS = {
     "Rio Iguaçu": ("Rio Iguaçu", "principal"),
     "Rio Chopim": ("Rio Chopim", "afluente"),
     "Rio Capanema": ("Rio Capanema", "afluente"),
     "Rio dos Andradas": ("Rio Andrada", "afluente"),
     "Rio das Cobras": ("Rio das Cobras", "afluente"),
-    "Rio Jordão": ("Rio Jordão", "afluente"),
 }
 CITACAO = ('ANA/SNIRH, serviço "Rios principais" (SNIRH2016/Rios_principais, camada Curso d\'Água), '
            'https://portal1.snirh.gov.br/arcgis/rest/services/SNIRH2016/Cursos_Agua_dominialidade/FeatureServer')
