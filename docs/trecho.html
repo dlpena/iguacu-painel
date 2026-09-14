@@ -166,8 +166,11 @@
       if (r.arrays.c.some(x => x !== null)) tc.push(traco(r.x, r.arrays.c, nome, cores[i % cores.length]));
     });
     if (U) { const r = recorte(U.horario.instante, { d: U.horario.defluencia }, dias); tv.push(traco(r.x, r.arrays.d, `Defluência ${U.curto} (ONS)`, PAL.limite, { line: { color: PAL.limite, width: 2, dash: 'dash' } })); }
-    if (tv.length) Plotly.react('g-reguas', tv, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, shapes: [], annotations: [] }), CONFIG_PLOT); else document.getElementById('g-reguas').innerHTML = '<p class="sub">Sem vazão nas réguas do trecho.</p>';
-    if (tc.length) Plotly.react('g-cotas', tc, layoutBase({ yaxis: { title: 'cota (m)', gridcolor: PAL.grade } }), CONFIG_PLOT); else document.getElementById('g-cotas').innerHTML = '<p class="sub">Sem cota nas réguas do trecho.</p>';
+    // só a defluência do ONS (trecho sem régua além do barramento): o gráfico repetiria o da usina, então some
+    const soUsina = U && tv.length === 1;
+    document.getElementById('t-reguas').hidden = soUsina; document.getElementById('g-reguas').hidden = soUsina;
+    if (tv.length && !soUsina) Plotly.react('g-reguas', tv, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, shapes: [], annotations: [] }), CONFIG_PLOT); else document.getElementById('g-reguas').innerHTML = '<p class="sub">Sem vazão nas réguas do trecho.</p>';
+    if (tc.length) Plotly.react('g-cotas', tc, layoutBase({ yaxis: { title: 'cota (m)', gridcolor: PAL.grade, tickformat: ',.2f' } }), CONFIG_PLOT); else document.getElementById('g-cotas').innerHTML = '<p class="sub">Sem cota nas réguas do trecho.</p>';
     if (U) {
       const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, nj: H.nivel_jusante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, af: H.afluencia, mo: (U.montante || {}).defluencia }, dias); const x = r.x, A = r.arrays;
       const ln = lim(['nivel_montante'], ['minimo', 'maximo', 'maximo_declarado']).map(q => { const l = linhaLimite(q.valor, `${q.tipo === 'maximo_declarado' ? 'FSAR-H' : 'outorga'} ${fmt(q.valor, 2)} m`, q.tipo === 'maximo_declarado' ? PAL.fsarh : PAL.limite); return { s: l.shape, a: l.ann }; });
