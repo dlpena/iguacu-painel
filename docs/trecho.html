@@ -11,6 +11,21 @@
 <script src="https://cdn.plot.ly/plotly-locale-pt-br-latest.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
+<style>
+  .indice { position: sticky; top: 0; z-index: 900; background: rgba(246,248,251,.96); backdrop-filter: blur(4px); border-bottom: 1px solid var(--borda); margin: 14px -20px 0; padding: 8px 20px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .indice a.sec { padding: 5px 11px; border-radius: 14px; font-size: 13px; color: var(--azul-escuro); background: #EEF3FA; }
+  .indice a.sec:hover { background: var(--azul-claro); color: #fff; text-decoration: none; }
+  .indice .janela { margin-left: auto; display: flex; gap: 4px; align-items: center; font-size: 12.5px; color: var(--texto-suave); }
+  .indice .janela button { font-family: inherit; font-size: 12.5px; padding: 4px 10px; border: 1px solid var(--borda); background: #fff; border-radius: 6px; color: var(--azul-escuro); cursor: pointer; }
+  .indice .janela button.ativo { background: var(--azul-escuro); color: #fff; border-color: var(--azul-escuro); }
+  section.bloco { margin-top: 34px; scroll-margin-top: 64px; }
+  section.bloco > h2 { font-size: 19px; border: 0; padding: 0; margin: 0 0 2px; }
+  section.bloco > h2 small { font-size: 12px; color: var(--texto-suave); letter-spacing: .5px; text-transform: uppercase; margin-right: 8px; }
+  section.bloco > p.sub { margin-bottom: 12px; }
+  section.bloco h3 { font-size: 15px; color: var(--azul-escuro); margin: 22px 0 2px; }
+  section.bloco p.explica { font-size: 13px; color: var(--texto-suave); margin: 0 0 6px; max-width: 900px; }
+  @media (max-width: 700px) { .indice { margin: 14px -14px 0; padding: 8px 14px; } }
+</style>
 </head>
 <body>
 <header id="topo" class="topo"></header>
@@ -19,65 +34,88 @@
   <div class="controles" id="sel-trecho"></div>
   <h1 id="titulo">Trecho</h1>
   <p class="sub" id="contexto"></p>
-  <div class="cartao" style="padding:6px 8px 2px;margin-bottom:14px"><div class="esquema-wrap"><div id="esquema"></div></div><div class="sub" style="font-size:11.5px;margin:2px 6px 4px">Bacia inteira, da cabeceira (direita) à foz (esquerda); o trecho desta página está destacado. Clique em outra faixa para mudar de trecho.</div></div>
+  <div class="cartao" style="padding:6px 8px 2px"><div class="esquema-wrap"><div id="esquema"></div></div><div class="sub" style="font-size:11.5px;margin:2px 6px 4px">Bacia inteira, da cabeceira (direita) à foz (esquerda); o trecho desta página está destacado. Clique em outra faixa para mudar de trecho.</div></div>
 
-  <div class="grade" style="grid-template-columns: minmax(280px, 1fr) minmax(300px, 2fr)">
-    <div class="mapa-caixa"><div id="mapa" style="height:100%;min-height:320px"></div><div id="situacao" class="situacao" title="situação na bacia"></div></div>
-    <div id="pontos"></div>
-  </div>
+  <nav class="indice" id="indice">
+    <a class="sec" href="#agora">Agora</a><a class="sec" href="#rio">Rio</a><a class="sec" href="#usina" id="lnk-usina">Usina</a><a class="sec" href="#chuva">Chuva</a><a class="sec" href="#dados">Dados</a>
+    <div class="janela"><span>Janela dos gráficos:</span><button data-d="1">24 h</button><button data-d="7" class="ativo">7 d</button><button data-d="30">30 d</button><button data-d="90">90 d</button></div>
+  </nav>
 
-  <div id="avisos" style="margin-top:14px"></div>
-
-  <div class="controles" style="margin-top:20px">
-    <span>Janela:</span>
-    <button data-d="1">24 h</button><button data-d="7" class="ativo">7 d</button><button data-d="30">30 d</button><button data-d="90">90 d</button>
-    <button id="csv" style="margin-left:auto" hidden>Baixar CSV da usina (janela)</button>
-  </div>
-
-  <h2 id="t-reguas">Vazão ao longo do trecho</h2>
-  <div id="g-reguas" class="grafico"></div>
-
-  <div id="bloco-usina" hidden>
-    <h2 id="t-niveis">Nível de montante</h2>
-    <div id="g-niveis" class="grafico"></div>
-    <h2>Defluência, turbinada e vertida</h2>
-    <div id="g-vazoes" class="grafico"></div>
-    <div class="grade c2">
-      <div><h2>Variação horária (rampa)</h2><p class="sub" style="margin-bottom:6px">Diferença entre médias horárias consecutivas: indício, não medida da rampa instantânea.</p><div id="g-rampa" class="grafico baixo"></div></div>
-      <div><h2 id="t-mont">Usina de montante × esta usina</h2><p class="sub" style="margin-bottom:6px">O que entrou pela cascata contra o que saiu.</p><div id="g-mont" class="grafico baixo"></div></div>
+  <section class="bloco" id="agora">
+    <h2><small>1</small>Agora: como está o trecho</h2>
+    <p class="sub">Último dado de cada ponto, em ordem de rio, com a referência dos últimos 30 dias. Cor do ponto: verde até 2 h, amarelo até 24 h, cinza sem dado recente.</p>
+    <div class="grade" style="grid-template-columns: minmax(280px, 1fr) minmax(300px, 2fr)">
+      <div class="mapa-caixa"><div id="mapa" style="height:100%;min-height:320px"></div><div id="situacao" class="situacao" title="situação na bacia"></div></div>
+      <div id="pontos"></div>
     </div>
-    <div id="bloco-vu" hidden><h2>Volume útil (%)</h2><div id="g-vu" class="grafico baixo"></div></div>
-    <h2>Condicionantes e restrições vigentes</h2>
+    <div id="avisos" style="margin-top:14px"></div>
+  </section>
+
+  <section class="bloco" id="rio">
+    <h2><small>2</small>Rio: o que entra e o que sai do trecho</h2>
+    <p class="sub" id="rio-sub"></p>
+    <div id="g-reguas" class="grafico"></div>
+  </section>
+
+  <section class="bloco" id="usina" hidden>
+    <h2><small>3</small><span id="t-usina">Usina</span></h2>
+    <p class="sub" id="usina-sub"></p>
+
+    <h3 id="t-vazoes">Defluência, turbinada e vertida</h3>
+    <p class="explica" id="e-vazoes"></p>
+    <div id="g-vazoes" class="grafico"></div>
+
+    <div class="grade c2">
+      <div><h3>Nível de montante</h3><p class="explica" id="e-niveis"></p><div id="g-niveis" class="grafico baixo"></div></div>
+      <div id="bloco-vu" hidden><h3>Volume útil</h3><p class="explica">Percentual do volume útil do reservatório, dado horário do ONS.</p><div id="g-vu" class="grafico baixo"></div></div>
+      <div id="bloco-mont"><h3 id="t-mont">O que entrou pela cascata e o que saiu</h3><p class="explica" id="e-mont"></p><div id="g-mont" class="grafico baixo"></div></div>
+    </div>
+
+    <h3 id="t-rampa">Variação horária</h3>
+    <p class="explica" id="e-rampa"></p>
+    <div id="g-rampa" class="grafico baixo"></div>
+
+    <h3>Condicionantes e restrições vigentes</h3>
+    <p class="explica">Cada limite com a fonte lida (artigo da outorga ou formulário FSAR-H) e a vigência. São os mesmos limites desenhados nos gráficos acima.</p>
     <div id="regras"></div>
-  </div>
+  </section>
 
-  <h2>Cotas das estações fluviométricas</h2>
-  <div id="g-cotas" class="grafico baixo"></div>
+  <section class="bloco" id="chuva">
+    <h2><small id="n-chuva">4</small>Chuva no trecho</h2>
+    <p class="sub">Pluviômetros da telemetria da ANA neste trecho, cada um contra o que o MERGE (satélite) estimou na célula onde ele está. A chuva média da bacia inteira fica na página <a href="chuva.html">Chuva</a>.</p>
+    <div id="chuva-tabela"></div>
+    <div id="g-chuva" class="grafico baixo"></div>
+  </section>
 
-  <h2 id="t-chuva">Chuva nos pluviômetros do trecho (30 dias)</h2>
-  <div id="g-chuva" class="grafico baixo"></div>
+  <section class="bloco" id="dados">
+    <h2><small id="n-dados">5</small>Dados desta página</h2>
+    <p class="sub">Tudo é dado bruto das fontes públicas, sem consistência. Os arquivos trazem a citação no cabeçalho.</p>
+    <div class="controles"><button id="csv" hidden>Baixar CSV horário da usina (janela atual)</button><button id="csv-est">Baixar CSV horário das estações do trecho (janela atual)</button></div>
+    <div id="fontes-trecho" class="sub" style="font-size:12.5px"></div>
+  </section>
 </main>
 <footer id="rodape"></footer>
 <script>
 (async () => {
-  await iniciar('index.html');
+  const status = await iniciar('index.html');
   const B = await carregar('bacia.json');
   const slug = param('t', 'baixo-iguacu');
   document.getElementById('sel-trecho').innerHTML = '<span class="sub" style="margin:0 6px 0 0">foz</span>' + B.trechos.slice().reverse().map(t => `<a href="trecho.html?t=${t.slug}"><button class="${t.slug === slug ? 'ativo' : ''}">${t.curto || t.nome}</button></a>`).join('<span style="color:var(--azul-claro)">‹</span>') + '<span class="sub" style="margin:0 0 0 6px">cabeceira</span>';
-  const T = await carregar(`trecho/${slug}.json`);
+  const [T, C] = await Promise.all([carregar(`trecho/${slug}.json`), carregar('chuva.json').catch(() => ({}))]);
   const R = B.trechos.find(t => t.slug === slug) || { estacoes: [], pluviometros: [], avisos: [] };
   document.title = `${T.nome} · Painel Iguaçu`;
   document.getElementById('titulo').textContent = T.nome;
   document.getElementById('trilha').innerHTML = trilha([['index.html', '← O rio agora'], [null, `Trecho ${T.nome}`]]);
   document.getElementById('contexto').textContent = T.contexto;
   const U = T.usina;
-  desenharEsquema(document.getElementById('esquema'), B.trechos, slug); // bacia inteira com o trecho em destaque
+  desenharEsquema(document.getElementById('esquema'), B.trechos, slug);
+  if (!U) { document.getElementById('lnk-usina').hidden = true; document.getElementById('n-chuva').textContent = '3'; document.getElementById('n-dados').textContent = '4'; }
 
-  // ---- pontos do trecho (usina + réguas, em ordem de rio, cada um com referência)
+  // ================= 1. Agora
   const refTxt = (v, r) => (v !== null && v !== undefined && r) ? `${fmt(v / r * 100, 0)}% da média de 30 d (${fmt(r)})` : 'sem referência de 30 d';
   const cards = [];
   R.estacoes.forEach(e => {
-    if (e.papel === 'barramento' && U) return; // a régua de barramento aparece dentro do bloco da usina
+    if (e.papel === 'barramento' && U) return; // a estação de barramento aparece dentro do bloco da usina
     cards.push(`<a class="ponto-trecho ${e.papel}" href="estacao.html?c=${e.codigo}">
       <div class="papel">${PAPEL[e.papel]}${e.rio_afluente ? ' · ' + e.rio_afluente : ''}${e.area_km2 ? ' · ' + fmt(e.area_km2) + ' km²' : ''}</div>
       <div class="nome"><span class="ponto ${frescorClasse(e.frescor_h)}"></span>${e.curto} <small>${e.codigo}</small></div>
@@ -85,14 +123,12 @@
         ${e.cota_m !== null && e.cota_m !== undefined ? `<div><div class="var">cota</div><b>${fmt(e.cota_m, 2)}</b> m<div class="ref">${(e.ref || {}).cota_media_30d ? 'média 30 d ' + fmt(e.ref.cota_media_30d, 2) + ' m' : 'sem referência'}</div></div>` : ''}
         ${(e.vazao === null || e.vazao === undefined) && (e.cota_m === null || e.cota_m === undefined) ? '<div class="ref">sem transmissão nos últimos 90 dias (cadastro diz "operando")</div>' : ''}
         <div class="spark">${e.spark ? spark(e.spark.v, PAL.medio, 90, 24) : ''}<div class="ref">${frescorTexto(e.frescor_h)}</div></div></div></a>`);
-    if (e.papel === 'afluente' || e.papel === 'montante') return;
   });
   if (U) {
     const a = U.atual || {}, t = U.tendencia || {}, rf = U.ref || {}, fx = (R.usina || {}).faixa || {};
     const barr = R.estacoes.find(e => e.papel === 'barramento') || {};
     const nivelCtx = fx.min !== null && fx.min !== undefined ? `faixa da outorga ${fmt(fx.min, 1)} a ${fmt(fx.max, 1)} m${fx.declarado ? ' · máx. declarado ao ONS ' + fmt(fx.declarado, 2) : ''}` : `faixa 30 d ${fmt(rf.nivel_min_30d, 2)} a ${fmt(rf.nivel_max_30d, 2)} m · outorga não lida para o painel`;
     const qCtx = fx.q_min ? `mínimo declarado ${fmt(fx.q_min)} m³/s · ` : '';
-    const idx = cards.findIndex((c, i) => R.estacoes.filter(e => !(e.papel === 'barramento'))[i] && R.estacoes.filter(e => e.papel !== 'barramento')[i].papel === 'jusante');
     const bloco = `<div class="ponto-trecho usina">
       <div class="papel">usina · ${U.tipo === 'acumulacao' ? 'acumulação' : "fio d'água"} · ${U.agente}</div>
       <div class="nome"><span class="ponto ${frescorClasse(a.frescor_h)}"></span>${U.nome} <small>ONS ${fmtInst(a.instante)}</small></div>
@@ -107,112 +143,137 @@
     if (posJus >= 0) cards.splice(posJus, 0, bloco); else cards.push(bloco);
   }
   document.getElementById('pontos').innerHTML = cards.join('') || '<p class="sub">Sem estações fluviométricas cadastradas neste trecho.</p>';
+  document.getElementById('avisos').innerHTML = R.avisos.length ? '<h3 style="margin-top:4px">Para olhar (últimas 24 h)</h3>' + R.avisos.map(a => `<div class="aviso-item ${a.nivel}">${a.texto}<div class="meta">${a.curto ? a.curto + ' · ' : ''}${fmtInst(a.quando)} · ${a.regra}${a.fonte ? ' · ' + a.fonte : ''}</div></div>`).join('') : '';
 
-  // ---- avisos do trecho
-  document.getElementById('avisos').innerHTML = R.avisos.map(a => `<div class="aviso-item ${a.nivel}">${a.texto}<div class="meta">${a.curto ? a.curto + ' · ' : ''}${fmtInst(a.quando)} · ${a.regra}${a.fonte ? ' · ' + a.fonte : ''}</div></div>`).join('');
-
-  // ---- mini-mapa (espera o leiaute assentar: vetores adicionados a mapa sem tamanho quebram o renderizador do Leaflet)
-  await new Promise(r => setTimeout(r, 80)); // (não usar requestAnimationFrame: não dispara em aba oculta e trava o roteiro)
+  // ---- mapa (espera o leiaute assentar; não usar requestAnimationFrame, que não dispara em aba oculta)
+  await new Promise(r => setTimeout(r, 80));
   const mapa = L.map('mapa', { scrollWheelZoom: false, zoomControl: false });
   mapa.setView([-25.7, -52.3], 7);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 14 }).addTo(mapa);
   const pts = [];
-  R.estacoes.filter(e => e.lat && e.lon).forEach(e => { pts.push([e.lat, e.lon]); L.circleMarker([e.lat, e.lon], { radius: 6, color: '#fff', weight: 1, fillColor: { ok: '#2E8B57', aviso: '#D9A400', off: '#9CA3AF' }[frescorClasse(e.frescor_h)], fillOpacity: .95 }).addTo(mapa).bindTooltip(`${e.curto}: ${fmt(e.vazao)} m³/s`); });
+  R.estacoes.filter(e => e.lat && e.lon).forEach(e => { pts.push([e.lat, e.lon]); L.circleMarker([e.lat, e.lon], { radius: 6, color: '#fff', weight: 1, fillColor: { ok: '#2E8B57', aviso: '#D9A400', off: '#9CA3AF' }[frescorClasse(e.frescor_h)], fillOpacity: .95 }).addTo(mapa).bindTooltip(`<b>${e.curto}</b> · ${PAPEL[e.papel]}<br>${fmt(e.vazao)} m³/s · ${frescorTexto(e.frescor_h)}`); });
   R.pluviometros.filter(p => p.lat && p.lon).forEach(p => { pts.push([p.lat, p.lon]); L.circleMarker([p.lat, p.lon], { radius: 4, color: PAL.limite, weight: 1.5, fillColor: '#fff', fillOpacity: .9 }).addTo(mapa).bindTooltip(`pluviômetro ${p.codigo}: ${fmt(p.chuva_24h, 1)} mm/24 h`); });
-  if (U) { pts.push([U.lat || 0, U.lon || 0]); }
+  if (U) pts.push([U.lat || 0, U.lon || 0]);
   let bacia = null;
   try { bacia = await carregar('bacia.geojson'); } catch (e) {}
   if (bacia) {
-    // fora da bacia fica esmaecido: máscara = mundo com a bacia como furo
     const aneis = [];
     bacia.features.forEach(f => { const g = f.geometry; (g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates]).forEach(pol => aneis.push(pol[0].map(([lon, lat]) => [lat, lon]))); });
     L.polygon([[[-85, -180], [-85, 180], [85, 180], [85, -180]], ...aneis], { stroke: false, fillColor: '#6B7280', fillOpacity: .28, interactive: false }).addTo(mapa);
     L.geoJSON(bacia, { style: { color: PAL.escuro, weight: 2.5, fill: false, opacity: .9 }, interactive: false }).addTo(mapa);
   }
   await desenharHidrografia(mapa);
-  // usinas dos outros trechos em cinza, só para orientação
-  B.trechos.filter(t => t.usina && t.slug !== slug).forEach(t => L.marker([t.usina.lat, t.usina.lon], { icon: L.divIcon({ className: '', iconSize: [14, 12], iconAnchor: [7, 6], html: '<svg width="14" height="12" viewBox="0 0 18 16"><path d="M9 1 L17 15 L1 15 Z" fill="#9CA3AF" stroke="#fff" stroke-width="1.5"/></svg>' }), interactive: true }).addTo(mapa).bindTooltip(`${t.usina.curto} (trecho ${t.curto || t.nome})`, { direction: 'top' }));
+  B.trechos.filter(t => t.usina && t.slug !== slug).forEach(t => L.marker([t.usina.lat, t.usina.lon], { icon: L.divIcon({ className: '', iconSize: [14, 12], iconAnchor: [7, 6], html: '<svg width="14" height="12" viewBox="0 0 18 16"><path d="M9 1 L17 15 L1 15 Z" fill="#9CA3AF" stroke="#fff" stroke-width="1.5"/></svg>' }) }).addTo(mapa).bindTooltip(`${t.usina.curto} (trecho ${t.curto || t.nome})`, { direction: 'top' }));
   if (U && R.usina) marcadorUsina([R.usina.lat, R.usina.lon], R.usina.curto, true).addTo(mapa);
   const validos = pts.filter(p => p[0]);
   if (validos.length) mapa.fitBounds(validos, { padding: [40, 40], maxZoom: 9 }); else mapa.setView([-25.7, -52.3], 7);
-  // mapa de situação: bacia inteira, todas as usinas, os pontos deste trecho e o retângulo do que o mapa grande mostra
   try {
     const sit = L.map('situacao', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
     const cam = L.geoJSON(bacia, { style: { color: PAL.escuro, weight: 1, fillColor: PAL.claro, fillOpacity: .35 } }).addTo(sit);
-    sit.fitBounds(cam.getBounds(), { padding: [3, 3] }); // o mapa precisa de vista definida antes de receber marcadores
+    sit.fitBounds(cam.getBounds(), { padding: [3, 3] });
     await desenharHidrografia(sit, 0.5, false);
     B.trechos.filter(t => t.usina).forEach(t => L.circleMarker([t.usina.lat, t.usina.lon], { radius: 2, color: '#294086', weight: 1, fillColor: '#294086', fillOpacity: 1, interactive: false }).addTo(sit));
     validos.forEach(p => L.circleMarker(p, { radius: 2.5, color: '#C0504D', weight: 1, fillColor: '#C0504D', fillOpacity: 1, interactive: false }).addTo(sit));
     const ret = L.rectangle(mapa.getBounds(), { color: '#C0504D', weight: 1, fillOpacity: .08, dashArray: '3 2', interactive: false }).addTo(sit);
-    const ajustar = () => { try { sit.invalidateSize(); sit.fitBounds(cam.getBounds(), { padding: [3, 3] }); ret.setBounds(mapa.getBounds()); } catch (e) { console.warn('situação', e); } };
+    const ajustar = () => { try { sit.invalidateSize(); sit.fitBounds(cam.getBounds(), { padding: [3, 3] }); ret.setBounds(mapa.getBounds()); } catch (e) {} };
     mapa.on('move zoom', () => { try { ret.setBounds(mapa.getBounds()); } catch (e) {} });
     setTimeout(ajustar, 300); setTimeout(ajustar, 1200);
   } catch (e) { console.warn('situação', e); }
 
-  // ---- gráficos
+  // ================= 2. Rio  e  3. Usina (compartilham a janela)
   let dias = 7;
-  const cores = ['#294086', '#0193DE', '#3FB0E8', '#0B6BA8', '#8C9BB5', '#6B7280', '#80B5E1'];
+  const cores = ['#294086', '#0193DE', '#1B9E77', '#E6791E', '#8C9BB5', '#6B7280', '#80B5E1'];
   const regras = U ? U.regras || [] : [];
   const lim = (vars, tipos) => regras.filter(r => vars.includes(r.variavel) && tipos.includes(r.tipo) && r.valor !== null && r.valor !== undefined);
   const SA = rs => ({ shapes: rs.map(r => r.s), annotations: rs.map(r => r.a) });
+  const estRio = T.estacoes.filter(e => !(e.papel === 'barramento' && U));
+  const nomes = { montante: [], afluente: [], jusante: [] };
+  estRio.forEach(e => (nomes[e.papel] || (nomes[e.papel] = [])).push(e.curto));
+  const partes = [];
+  if (nomes.montante.length) partes.push(`entra pelo rio Iguaçu (${nomes.montante.join(', ')})`);
+  if (nomes.afluente.length) partes.push(`entra pelos afluentes (${nomes.afluente.join(', ')})`);
+  if (U) partes.push(`sai pela usina (defluência do ONS)`);
+  if (nomes.jusante.length) partes.push(`segue a jusante (${nomes.jusante.join(', ')})`);
+  document.getElementById('rio-sub').textContent = estRio.length ? `Vazões medidas nas estações fluviométricas do trecho, em m³/s: o que ${partes.join('; o que ')}. Dado bruto, curva-chave do operador.` : 'Neste trecho só há a usina do ONS; as vazões estão na seção Usina.';
+  if (!estRio.length) { document.getElementById('g-reguas').hidden = true; }
+
+  if (U) {
+    document.getElementById('usina').hidden = false;
+    document.getElementById('csv').hidden = false;
+    document.getElementById('t-usina').textContent = `Usina: o que a ${U.curto} está fazendo`;
+    document.getElementById('usina-sub').textContent = `Dado operativo horário do ONS da UHE ${U.nome} (${U.agente}). ${regras.length ? 'Os limites desenhados vêm da outorga e das restrições declaradas ao ONS (FSAR-H), listadas no fim da seção.' : 'A outorga desta usina ainda não foi lida para o painel, por isso nenhum limite é desenhado.'}`;
+    const lv = lim(['defluencia', 'vazao_turbinada'], ['minimo', 'maximo']);
+    document.getElementById('e-vazoes').textContent = 'Defluência é o total que sai da usina; turbinada e vertida são as parcelas.' + (lv.length ? ' Linhas tracejadas: ' + lv.map(q => `${q.variavel === 'defluencia' ? 'defluência' : 'turbinada'} ${q.tipo === 'minimo' ? 'mínima' : 'máxima'} de ${fmt(q.valor, 1)} m³/s (${q.fonte.split(';')[0]})`).join('; ') + '.' : '');
+    const ln = lim(['nivel_montante'], ['minimo', 'maximo', 'maximo_declarado']);
+    document.getElementById('e-niveis').textContent = 'Cota do reservatório a montante da barragem.' + (ln.length ? ' Linhas: ' + ln.map(q => `${q.tipo === 'maximo_declarado' ? 'máximo declarado ao ONS' : (q.tipo === 'minimo' ? 'mínimo' : 'máximo') + ' da outorga'} ${fmt(q.valor, 2)} m`).join('; ') + '.' : ' Sem faixa de outorga lida.');
+    const rr = regras.find(q => q.tipo === 'rampa');
+    const varRampa = rr && rr.variavel === 'vazao_turbinada' ? 'vazão turbinada' : 'defluência';
+    document.getElementById('t-rampa').textContent = `Variação horária da ${varRampa} (rampa)`;
+    document.getElementById('e-rampa').textContent = `Cada barra é a diferença entre a média de uma hora e a da hora anterior da ${varRampa}, em m³/s por hora: positiva quando a usina aumentou a vazão, negativa quando reduziu. ` + (rr ? `A restrição declarada ao ONS (${rr.fonte.split(';')[0]}) é de ${fmt(rr.valor)} m³/s por hora; barras em laranja passam desse valor. ` : 'Não há limite de rampa lido para esta usina. ') + 'Diferença de médias horárias subestima a rampa instantânea: é indício, não medida.';
+    if (U.montante) { document.getElementById('t-mont').textContent = 'O que entrou pela cascata e o que saiu'; document.getElementById('e-mont').textContent = `Defluência de ${U.montante.curto}, a usina imediatamente a montante, contra a defluência de ${U.curto}. A diferença é o que os afluentes do trecho e o reservatório acrescentaram ou retiveram.`; }
+    else { document.getElementById('t-mont').textContent = 'Primeira usina da cascata'; document.getElementById('e-mont').textContent = 'Não há usina do ONS a montante; o que chega vem das estações fluviométricas de montante, na seção Rio.'; document.getElementById('g-mont').hidden = true; }
+    document.getElementById('regras').innerHTML = regras.length ? regras.map(r => `<div class="regra"><div class="v">${r.valor !== null && r.valor !== undefined ? fmt(r.valor, String(r.valor).includes('.') ? 2 : 0) + ' ' + r.unidade : '—'}</div><div>${r.titulo}<span class="chip">${r.vigencia || ''}</span></div><div class="f">${r.fonte}${r.nota ? ' · ' + r.nota : ''}</div></div>`).join('')
+      : '<p class="sub">A outorga desta usina ainda não foi lida para o painel; nenhum limite é exibido até isso acontecer (regra: só dados verificáveis).</p>';
+  }
+
   function desenhar() {
-    // réguas (vazão) + defluência da usina
-    const tv = [], tc = [];
-    T.estacoes.forEach((e, i) => {
-      if (e.papel === 'barramento' && U) return; // repete a defluência do ONS; fica no gráfico da usina
-      const r = recorte(e.serie.instante, { v: e.serie.vazao, c: e.serie.cota_m }, dias);
-      const nome = `${e.curto} (${PAPEL[e.papel]})`;
-      if (r.arrays.v.some(x => x !== null)) tv.push(traco(r.x, r.arrays.v, nome, cores[i % cores.length], { line: { color: cores[i % cores.length], width: e.papel === 'afluente' ? 1 : 1.5, dash: e.papel === 'afluente' ? 'dot' : 'solid' } }));
-      if (r.arrays.c.some(x => x !== null)) tc.push(traco(r.x, r.arrays.c, nome, cores[i % cores.length]));
+    // rio
+    const tv = [];
+    estRio.forEach((e, i) => {
+      const r = recorte(e.serie.instante, { v: e.serie.vazao }, dias);
+      if (r.arrays.v.some(x => x !== null)) tv.push(traco(r.x, r.arrays.v, `${e.curto} (${PAPEL[e.papel]})`, cores[i % cores.length], { line: { color: cores[i % cores.length], width: e.papel === 'afluente' ? 1.2 : 1.8, dash: e.papel === 'afluente' ? 'dot' : 'solid' } }));
     });
-    if (U) { const r = recorte(U.horario.instante, { d: U.horario.defluencia }, dias); tv.push(traco(r.x, r.arrays.d, `Defluência ${U.curto} (ONS)`, PAL.limite, { line: { color: PAL.limite, width: 2, dash: 'dash' } })); }
-    // só a defluência do ONS (trecho sem régua além do barramento): o gráfico repetiria o da usina, então some
-    const soUsina = U && tv.length === 1;
-    document.getElementById('t-reguas').hidden = soUsina; document.getElementById('g-reguas').hidden = soUsina;
-    if (tv.length && !soUsina) Plotly.react('g-reguas', tv, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, shapes: [], annotations: [] }), CONFIG_PLOT); else document.getElementById('g-reguas').innerHTML = '<p class="sub">Sem vazão nas estações fluviométricas do trecho.</p>';
-    if (tc.length) Plotly.react('g-cotas', tc, layoutBase({ yaxis: { title: 'cota (m)', gridcolor: PAL.grade, tickformat: ',.2f' } }), CONFIG_PLOT); else document.getElementById('g-cotas').innerHTML = '<p class="sub">Sem cota nas estações fluviométricas do trecho.</p>';
+    if (U && estRio.length) { const r = recorte(U.horario.instante, { d: U.horario.defluencia }, dias); tv.push(traco(r.x, r.arrays.d, `Defluência ${U.curto} (ONS)`, PAL.limite, { line: { color: PAL.limite, width: 2, dash: 'dash' } })); }
+    if (tv.length) Plotly.react('g-reguas', tv, layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' } }), CONFIG_PLOT);
+    else if (estRio.length) document.getElementById('g-reguas').innerHTML = '<p class="sub">Sem vazão nas estações fluviométricas do trecho na janela.</p>';
+    // usina
     if (U) {
-      const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, nj: H.nivel_jusante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, af: H.afluencia, mo: (U.montante || {}).defluencia }, dias); const x = r.x, A = r.arrays;
-      const ln = lim(['nivel_montante'], ['minimo', 'maximo', 'maximo_declarado']).map(q => { const l = linhaLimite(q.valor, `${q.tipo === 'maximo_declarado' ? 'FSAR-H' : 'outorga'} ${fmt(q.valor, 2)} m`, q.tipo === 'maximo_declarado' ? PAL.fsarh : PAL.limite); return { s: l.shape, a: l.ann }; });
-      Plotly.react('g-niveis', [traco(x, A.nm, 'Nível montante', SERIES.nivel_montante)],
-        layoutBase({ showlegend: false, yaxis: { title: 'nível montante (m)', gridcolor: PAL.grade, tickformat: ',.2f' }, ...SA(ln) }), CONFIG_PLOT);
+      const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, vu: H.pct_volume_util, mo: (U.montante || {}).defluencia }, dias); const x = r.x, A = r.arrays;
       const lv = lim(['defluencia', 'vazao_turbinada'], ['minimo', 'maximo']).map(q => { const l = linhaLimite(q.valor, `${q.variavel === 'defluencia' ? 'defluência' : 'turbinada'} ${q.tipo === 'minimo' ? 'mín.' : 'máx.'} ${fmt(q.valor, 1)}`, PAL.limite); return { s: l.shape, a: l.ann }; });
-      Plotly.react('g-vazoes', [traco(x, A.de, 'Defluência', SERIES.defluencia, { line: { color: SERIES.defluencia, width: 2 } }), traco(x, A.tu, 'Turbinada', SERIES.vazao_turbinada), traco(x, A.ve, 'Vertida', SERIES.vazao_vertida)],
+      Plotly.react('g-vazoes', [traco(x, A.de, 'Defluência (total)', SERIES.defluencia, { line: { color: SERIES.defluencia, width: 2.2 } }), traco(x, A.tu, 'Turbinada', SERIES.vazao_turbinada), traco(x, A.ve, 'Vertida', SERIES.vazao_vertida)],
         layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, ...SA(lv) }), CONFIG_PLOT);
+      const ln = lim(['nivel_montante'], ['minimo', 'maximo', 'maximo_declarado']).map(q => { const l = linhaLimite(q.valor, `${q.tipo === 'maximo_declarado' ? 'FSAR-H' : 'outorga'} ${fmt(q.valor, 2)} m`, q.tipo === 'maximo_declarado' ? PAL.fsarh : PAL.limite); return { s: l.shape, a: l.ann }; });
+      Plotly.react('g-niveis', [traco(x, A.nm, 'Nível montante', SERIES.nivel_montante)], layoutBase({ showlegend: false, yaxis: { title: 'm', gridcolor: PAL.grade, tickformat: ',.2f' }, ...SA(ln) }), CONFIG_PLOT);
+      if (U.tipo === 'acumulacao' && A.vu && A.vu.some(v => v !== null)) {
+        document.getElementById('bloco-vu').hidden = false;
+        Plotly.react('g-vu', [traco(x, A.vu, 'Volume útil (%)', PAL.escuro, { fill: 'tozeroy', fillcolor: 'rgba(128,181,225,.25)' })], layoutBase({ showlegend: false, yaxis: { title: '%', gridcolor: PAL.grade, range: [0, 100] } }), CONFIG_PLOT);
+      }
       const rr = regras.find(q => q.tipo === 'rampa'); const base = rr && rr.variavel === 'vazao_turbinada' ? A.tu : A.de;
       const dif = base.map((v, i) => (i && v !== null && base[i - 1] !== null) ? v - base[i - 1] : null);
       const lr = rr ? [linhaLimite(rr.valor, `declarado +${rr.valor}`, PAL.fsarh), linhaLimite(-rr.valor, `declarado −${rr.valor}`, PAL.fsarh)].map(l => ({ s: l.shape, a: l.ann })) : [];
-      Plotly.react('g-rampa', [{ x, y: dif, type: 'bar', name: `Δ ${rr && rr.variavel === 'vazao_turbinada' ? 'turbinada' : 'defluência'} por hora`, marker: { color: dif.map(v => v === null ? PAL.cinza : (Math.abs(v) > (rr ? rr.valor : 1e9) ? PAL.fsarh : PAL.claro)) } }],
-        layoutBase({ showlegend: false, yaxis: { title: 'm³/s por hora', gridcolor: PAL.grade }, ...SA(lr) }), CONFIG_PLOT);
-      if (U.montante) { document.getElementById('t-mont').textContent = `${U.montante.curto} × ${U.curto} (defluências)`; Plotly.react('g-mont', [traco(x, A.mo, `Defluência ${U.montante.curto}`, PAL.claro), traco(x, A.de, `Defluência ${U.curto}`, SERIES.defluencia)], layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' } }), CONFIG_PLOT); }
-      else { document.getElementById('t-mont').textContent = 'Primeira usina da cascata'; document.getElementById('g-mont').innerHTML = '<p class="sub">Não há usina do ONS a montante; o que chega vem das estações fluviométricas de montante.</p>'; }
+      Plotly.react('g-rampa', [{ x, y: dif, type: 'bar', name: 'variação por hora', marker: { color: dif.map(v => v === null ? PAL.cinza : (Math.abs(v) > (rr ? rr.valor : 1e9) ? PAL.fsarh : PAL.claro)) }, hovertemplate: '%{y:,.0f} m³/s por hora<extra></extra>' }],
+        layoutBase({ showlegend: false, yaxis: { title: 'm³/s por hora', gridcolor: PAL.grade, tickformat: ',d' }, ...SA(lr) }), CONFIG_PLOT);
+      if (U.montante) Plotly.react('g-mont', [traco(x, A.mo, `Defluência ${U.montante.curto} (montante)`, PAL.claro, { line: { color: PAL.claro, width: 2 } }), traco(x, A.de, `Defluência ${U.curto}`, SERIES.defluencia, { line: { color: SERIES.defluencia, width: 2 } })], layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' } }), CONFIG_PLOT);
     }
-    document.querySelectorAll('.controles button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
+    document.querySelectorAll('.indice button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
   }
-  document.querySelectorAll('.controles button[data-d]').forEach(b => b.addEventListener('click', () => { dias = +b.dataset.d; desenhar(); }));
-  if (U) {
-    document.getElementById('bloco-usina').hidden = false;
-    document.getElementById('csv').hidden = false;
-    if (U.tipo === 'acumulacao' && U.horario.pct_volume_util) {
-      document.getElementById('bloco-vu').hidden = false;
-      Plotly.newPlot('g-vu', [traco(U.horario.instante, U.horario.pct_volume_util, 'Volume útil (%)', PAL.escuro, { fill: 'tozeroy', fillcolor: 'rgba(128,181,225,.25)' })],
-        layoutBase({ showlegend: false, yaxis: { title: '%', gridcolor: PAL.grade, range: [0, 100] } }), CONFIG_PLOT);
-    }
-    document.getElementById('regras').innerHTML = regras.length ? regras.map(r => `<div class="regra"><div class="v">${r.valor !== null && r.valor !== undefined ? fmt(r.valor, String(r.valor).includes('.') ? 2 : 0) + ' ' + r.unidade : '—'}</div><div>${r.titulo}<span class="chip">${r.vigencia || ''}</span></div><div class="f">${r.fonte}${r.nota ? ' · ' + r.nota : ''}</div></div>`).join('')
-      : '<p class="sub">A outorga desta usina ainda não foi lida para o painel; nenhum limite é exibido até isso acontecer (regra: só dados verificáveis).</p>';
-    document.getElementById('csv').addEventListener('click', () => {
-      const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, nj: H.nivel_jusante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, af: H.afluencia }, dias);
-      const linhas = ['# ' + U.nome + ' — ONS, Dados Abertos, base horária (https://dados.ons.org.br/dataset/dados_hidrologicos_ho); dado bruto', 'instante;nivel_montante_m;nivel_jusante_m;defluencia_m3s;turbinada_m3s;vertida_m3s;afluencia_ons_m3s'];
-      r.x.forEach((x, i) => linhas.push([x, r.arrays.nm[i], r.arrays.nj[i], r.arrays.de[i], r.arrays.tu[i], r.arrays.ve[i], r.arrays.af[i]].map(v => v === null ? '' : v).join(';')));
-      const blob = new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${U.slug}_${dias}d.csv`; a.click();
-    });
-  }
+  document.querySelectorAll('.indice button[data-d]').forEach(b => b.addEventListener('click', () => { dias = +b.dataset.d; desenhar(); }));
   desenhar();
-  // chuva dos pluviômetros
-  const plu = T.pluviometros.filter(p => p.chuva_diaria);
-  if (plu.length) Plotly.newPlot('g-chuva', plu.map((p, i) => ({ x: p.chuva_diaria.data, y: p.chuva_diaria.mm, type: 'bar', name: `${p.codigo} ${p.nome.replace(/^UHE /, '')}`, marker: { color: cores[i % cores.length] } })),
-    layoutBase({ barmode: 'group', hovermode: 'x', yaxis: { title: 'mm/dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m' } }), CONFIG_PLOT);
-  else document.getElementById('g-chuva').innerHTML = '<p class="sub">Nenhum pluviômetro do trecho transmitiu chuva nos últimos 30 dias. Veja a chuva do MERGE na página <a href="chuva.html">Chuva</a>.</p>';
+
+  // ================= 4. Chuva no trecho
+  const plu = (C.pluviometros || []).filter(p => p.trecho === slug);
+  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo? zero medido com satélite acima de 15 mm', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) <= .2) return ['concordam (até 20%)', 'color:#2E8B57']; return [d > 0 ? 'chão mediu mais que o satélite' : 'satélite estimou mais que o chão', 'color:#D9A400']; };
+  document.getElementById('chuva-tabela').innerHTML = plu.length ? `<div class="tabela-wrap"><table class="tab"><thead><tr><th>Estação</th><th class="num">Medido 24 h</th><th class="num">Medido 7 d</th><th class="num">MERGE 7 d</th><th class="num">Medido 30 d</th><th class="num">MERGE 30 d</th><th>Leitura</th></tr></thead><tbody>${plu.map(p => { const [txt, cor] = leitura(p); return `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td class="num">${fmt(p.mm_24h, 1)}</td><td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(p.merge ? p.merge.d7 : null, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td class="num">${fmt(p.merge ? p.merge.d30 : null, 1)}</td><td style="${cor}">${txt}</td></tr>`; }).join('')}</tbody></table></div>` : '';
+  const pluSerie = T.pluviometros.filter(p => p.chuva_diaria);
+  if (pluSerie.length) Plotly.newPlot('g-chuva', pluSerie.map((p, i) => ({ x: p.chuva_diaria.data, y: p.chuva_diaria.mm, type: 'bar', name: `${p.codigo} ${p.nome.replace(/^UHE /, '')}`, marker: { color: cores[i % cores.length] } })),
+    layoutBase({ barmode: 'group', hovermode: 'x', yaxis: { title: 'mm por dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m' } }), CONFIG_PLOT);
+  else document.getElementById('g-chuva').innerHTML = '<p class="sub">Nenhum pluviômetro do trecho transmitiu chuva nos últimos 30 dias.</p>';
+
+  // ================= 5. Dados
+  const c = (status && status.citacoes) || {};
+  document.getElementById('fontes-trecho').innerHTML = [U ? c.ons_ho : null, estRio.length || R.estacoes.length ? c.telemetria : null, plu.length ? c.merge : null].filter(Boolean).map(t => `<p>${t}, consulta em ${fmtData(status.gerado_em)}.</p>`).join('');
+  if (U) document.getElementById('csv').addEventListener('click', () => {
+    const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, nj: H.nivel_jusante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, vu: H.pct_volume_util }, dias);
+    const linhas = ['# ' + U.nome + ' — ' + (c.ons_ho || 'ONS, Dados Abertos, base horária') + '; dado bruto', 'instante;nivel_montante_m;nivel_jusante_m;defluencia_m3s;turbinada_m3s;vertida_m3s;volume_util_pct'];
+    r.x.forEach((x, i) => linhas.push([x, r.arrays.nm[i], r.arrays.nj[i], r.arrays.de[i], r.arrays.tu[i], r.arrays.ve[i], r.arrays.vu ? r.arrays.vu[i] : ''].map(v => v === null || v === undefined ? '' : v).join(';')));
+    baixar(`${U.slug}_${dias}d.csv`, linhas);
+  });
+  document.getElementById('csv-est').addEventListener('click', () => {
+    const linhas = ['# Estações do trecho ' + T.nome + ' — ' + (c.telemetria || 'ANA, webservice de telemetria') + '; dado bruto, médias horárias', 'codigo;nome;papel;instante;vazao_m3s;cota_m'];
+    T.estacoes.forEach(e => { const r = recorte(e.serie.instante, { v: e.serie.vazao, c: e.serie.cota_m }, dias); r.x.forEach((x, i) => linhas.push([e.codigo, e.curto, e.papel, x, r.arrays.v[i], r.arrays.c[i]].map(v => v === null || v === undefined ? '' : v).join(';'))); });
+    baixar(`estacoes_${slug}_${dias}d.csv`, linhas);
+  });
+  function baixar(nome, linhas) { const blob = new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; a.click(); }
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
 </body>
