@@ -15,35 +15,63 @@
 <body>
 <header id="topo" class="topo"></header>
 <main>
-  <h1>Chuva na bacia</h1>
-  <p class="sub">Produto MERGE do INPE/CPTEC: satélite GPM combinado com pluviômetros, grade de 0,1° (585 células na bacia, ~72 mil km²). Média espacial da bacia e distribuição por célula. Média de longo termo (MLT) da climatologia oficial 1998–2024.</p>
-  <div id="cartoes" class="grade c4"></div>
+  <h1>Chuva na bacia do Iguaçu</h1>
+  <p class="sub">Duas fontes que se completam: o MERGE do INPE/CPTEC (satélite GPM combinado com pluviômetros, grade de 0,1°, 585 células na bacia) diz onde e quanto choveu em toda a área; os pluviômetros da telemetria da ANA dizem o que foi medido no chão. A média de longo termo (MLT) é a climatologia oficial do MERGE, 1998–2024.</p>
 
-  <h2>Onde choveu</h2>
-  <div class="controles">
-    <span>Acumulado:</span><button data-k="d1" class="ativo">último dia</button><button data-k="d7">7 dias</button><button data-k="d30">30 dias</button>
-    <span id="info-grade" class="sub" style="margin:0 0 0 8px"></span>
-  </div>
-  <div id="mapa"></div>
+  <nav class="indice">
+    <a class="sec" href="#agora">Agora</a><a class="sec" href="#onde">Onde choveu</a><a class="sec" href="#tempo">Mês e ano</a><a class="sec" href="#chao">Satélite × chão</a><a class="sec" href="#dados">Dados</a>
+  </nav>
 
-  <h2>Chuva média diária na bacia</h2>
-  <div class="controles"><span>Janela:</span><button data-d="30">30 d</button><button data-d="90" class="ativo">90 d</button><button data-d="365">365 d</button></div>
-  <div id="g-diaria" class="grafico"></div>
+  <section class="bloco" id="agora">
+    <h2><small>1</small>Agora: quanto choveu na bacia</h2>
+    <p class="sub" id="agora-sub"></p>
+    <div id="cartoes" class="grade c4"></div>
+  </section>
 
-  <h2>Mensal contra a MLT</h2>
-  <div id="g-mensal" class="grafico"></div>
+  <section class="bloco" id="onde">
+    <h2><small>2</small>Onde choveu</h2>
+    <p class="sub">Cada quadrado é uma célula de 0,1° do MERGE (cerca de 11 km de lado) pintada pelo acumulado do período escolhido. Os círculos são os pluviômetros da ANA, pintados na mesma escala com o que mediram: círculo da cor do fundo é concordância; cor diferente, discordância. Passe o mouse para nome e leitura.</p>
+    <div class="controles">
+      <span>Acumulado:</span><button data-k="d1" class="ativo">último dia</button><button data-k="d7">7 dias</button><button data-k="d30">30 dias</button>
+      <span id="info-grade" class="sub" style="margin:0 0 0 8px"></span>
+    </div>
+    <div id="mapa"></div>
+  </section>
 
-  <h2>Satélite contra o chão, trecho a trecho</h2>
-  <p class="sub" style="margin-bottom:8px">Cada pluviômetro da telemetria da ANA contra o que o MERGE estimou na célula de 0,1° onde ele está, em ordem de rio. Quando os dois concordam, o mapa acima merece confiança; pluviômetro em zero com o satélite indicando chuva é sensor mudo, não estiagem.</p>
-  <div class="tabela-wrap"><table class="tab" id="tab-comp"><thead><tr><th>Estação</th><th>Tipo</th><th class="num">Medido 7 d (mm)</th><th class="num">MERGE 7 d (mm)</th><th class="num">Diferença</th><th class="num">Medido 30 d</th><th class="num">MERGE 30 d</th><th>Leitura</th><th>Último dado</th></tr></thead><tbody></tbody></table></div>
+  <section class="bloco" id="tempo">
+    <h2><small>3</small>Como está o mês e o ano</h2>
+    <p class="sub">Chuva média da bacia inteira (média das 585 células), somada por mês e comparada à MLT do mesmo mês. Barras claras são meses ainda incompletos, com o número de dias somados.</p>
+    <h3>Mensal contra a MLT</h3>
+    <div id="g-mensal" class="grafico"></div>
+    <h3>Dia a dia</h3>
+    <p class="explica">Chuva média diária da bacia. O dia D do MERGE acumula as 24 h encerradas às 12 UTC (9 h de Brasília) desse dia.</p>
+    <div class="controles"><span>Janela:</span><button data-d="30">30 d</button><button data-d="90" class="ativo">90 d</button><button data-d="365">365 d</button></div>
+    <div id="g-diaria" class="grafico"></div>
+  </section>
+
+  <section class="bloco" id="chao">
+    <h2><small>4</small>Satélite contra o chão, trecho a trecho</h2>
+    <p class="sub">Cada pluviômetro da telemetria da ANA contra o que o MERGE estimou na célula de 0,1° onde ele está, em ordem de rio. Quando os dois concordam, o mapa acima merece confiança; pluviômetro em zero com o satélite indicando chuva é sensor mudo, não estiagem.</p>
+    <div class="tabela-wrap"><table class="tab" id="tab-comp"><thead><tr><th>Estação</th><th>Tipo</th><th class="num">Medido 7 d (mm)</th><th class="num">MERGE 7 d (mm)</th><th class="num">Diferença</th><th class="num">Medido 30 d</th><th class="num">MERGE 30 d</th><th>Leitura</th><th>Último dado</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="bloco" id="dados">
+    <h2><small>5</small>Dados desta página</h2>
+    <p class="sub">A série diária da bacia é calculada pelo painel a partir dos arquivos GRIB2 do INPE; os pluviômetros vêm do webservice de telemetria da ANA. Os arquivos trazem a citação no cabeçalho.</p>
+    <div class="controles"><button id="csv-bacia">Baixar CSV da chuva média diária da bacia (365 dias)</button><button id="csv-plu">Baixar CSV dos pluviômetros contra o MERGE</button></div>
+    <div id="fontes" class="sub" style="font-size:12.5px"></div>
+  </section>
 </main>
 <footer id="rodape"></footer>
 <script>
 (async () => {
-  await iniciar('chuva.html');
+  const status = await iniciar('chuva.html');
   const [C, B] = await Promise.all([carregar('chuva.json'), carregar('bacia.json')]);
   const U = { usinas: B.trechos.filter(t => t.usina).map(t => t.usina) };
   const ac = C.acumulados || {};
+
+  // ================= 1. Agora
+  document.getElementById('agora-sub').textContent = `Média espacial da bacia pelo MERGE, último arquivo disponível: ${fmtData(ac.ultimo_dia)}. ${ac.mlt_mes ? `O mês em curso já tem ${fmt(ac.mes_atual / ac.mlt_mes * 100, 0)}% da MLT do mês inteiro com ${ac.dias_mes} dias somados.` : ''}`;
   document.getElementById('cartoes').innerHTML = [
     ['Último dia', `${fmt(ac.d1, 1)} <small>mm</small>`, `MERGE de ${fmtData(ac.ultimo_dia)} (referência 12 UTC)`],
     ['7 dias', `${fmt(ac.d7, 1)} <small>mm</small>`, 'média da bacia'],
@@ -51,15 +79,17 @@
     [`Mês em curso (${ac.dias_mes || 0} dias)`, `${fmt(ac.mes_atual, 1)} <small>mm</small>`, `MLT do mês inteiro: ${fmt(ac.mlt_mes, 1)} mm${ac.mlt_mes ? ' · ' + fmt(ac.mes_atual / ac.mlt_mes * 100, 0) + '% da MLT' : ''}`],
   ].map(c => `<div class="cartao"><div class="rotulo">${c[0]}</div><div class="valor">${c[1]}</div><div class="nota">${c[2]}</div></div>`).join('');
 
-  // ---- mapa de células
+  // ================= 2. Onde choveu
+  await new Promise(r => setTimeout(r, 80));
   const mapa = L.map('mapa', { zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
+  mapa.setView([-25.7, -52.3], 7);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 14, opacity: .6 }).addTo(mapa);
   let camadaCel = null, legenda = null;
   const G = C.grade;
+  const escalaDe = k => { const vals = G ? G[k] : [], max = Math.max(1, ...vals.filter(v => v !== null)); return [k === 'd1' ? Math.max(10, Math.ceil(max / 10) * 10) : Math.max(20, Math.ceil(max / 20) * 20), max]; };
   function desenharGrade(k) {
     if (!G) return;
-    const vals = G[k], max = Math.max(1, ...vals.filter(v => v !== null));
-    const escala = k === 'd1' ? Math.max(10, Math.ceil(max / 10) * 10) : Math.max(20, Math.ceil(max / 20) * 20);
+    const [escala, max] = escalaDe(k), vals = G[k];
     if (camadaCel) camadaCel.remove();
     camadaCel = L.layerGroup(G.lat.map((la, i) => L.rectangle([[la - .05, G.lon[i] - .05], [la + .05, G.lon[i] + .05]], { stroke: false, fillColor: corChuva(vals[i], escala), fillOpacity: .75, interactive: true })
       .bindTooltip(`${fmt(vals[i], 1)} mm`, { sticky: true }))).addTo(mapa);
@@ -69,21 +99,18 @@
     legenda.addTo(mapa);
     document.getElementById('info-grade').textContent = `${G[k + '_dias']} dia(s) de MERGE somados · máximo na bacia ${fmt(max, 1)} mm`;
     document.querySelectorAll('.controles button[data-k]').forEach(b => b.classList.toggle('ativo', b.dataset.k === k));
+    pintarPluviometros(k);
   }
-  try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { style: { color: PAL.escuro, weight: 2, fill: false } }).addTo(mapa); mapa.fitBounds(cam.getBounds(), { paddingTopLeft: [0, 0], paddingBottomRight: [0, 10] }); } catch (e) { mapa.setView([-25.7, -52.3], 7); }
+  try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { style: { color: PAL.escuro, weight: 2, fill: false } }).addTo(mapa); mapa.fitBounds(cam.getBounds(), { paddingBottomRight: [0, 10] }); } catch (e) {}
   const simbolos = L.control({ position: 'topright' });
   simbolos.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = `<i style="border-radius:50%;background:#0193DE;border:2px solid #C0504D"></i>pluviômetro (cor = medido no período, mesma escala do MERGE)<br>${SVG_TRIANGULO}usina<br>${LEGENDA_HIDRO}<br><span style="color:#6B7280">passe o mouse para nome e leitura</span>`; return d; };
   simbolos.addTo(mapa);
   await desenharHidrografia(mapa, 0.9);
-  desenharGrade('d1');
-  document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => desenharGrade(b.dataset.k)));
   U.usinas.forEach(u => marcadorUsina([u.lat, u.lon], u.curto, true).addTo(mapa));
-  // pluviômetros: círculo pintado com a MESMA escala das células, para comparar satélite e chão de relance
   const marcadores = [];
   (C.pluviometros || []).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius: 8, color: '#C0504D', weight: 2, fillColor: '#fff', fillOpacity: 1 }).addTo(mapa).bindTooltip('', { direction: 'top', offset: [0, -8] }); marcadores.push([m, p]); });
   function pintarPluviometros(k) {
-    const vals = G ? G[k] : [], max = Math.max(1, ...vals.filter(v => v !== null));
-    const escala = k === 'd1' ? Math.max(10, Math.ceil(max / 10) * 10) : Math.max(20, Math.ceil(max / 20) * 20);
+    const [escala] = escalaDe(k);
     const chave = { d1: 'mm_24h', d7: 'mm_7d', d30: 'mm_30d' }[k], rot = { d1: '24 h', d7: '7 d', d30: '30 d' }[k];
     marcadores.forEach(([m, p]) => {
       const v = p[chave], sat = p.merge ? p.merge[k] : null;
@@ -92,31 +119,27 @@
       m.bindPopup(`<b>${p.curto || p.nome}</b> · ${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'estação fluviométrica com pluviômetro'}<br>${p.codigo}<br>medido em ${rot}: <b>${fmt(v, 1)} mm</b> · MERGE na célula: ${fmt(sat, 1)} mm<br><a href="trecho.html?t=${p.trecho}">trecho</a> · <a href="estacao.html?c=${p.codigo}">estação</a>`);
     });
   }
-  const _desenharGrade = desenharGrade;
-  desenharGrade = k => { _desenharGrade(k); pintarPluviometros(k); };
-  pintarPluviometros('d1');
-  document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => pintarPluviometros(b.dataset.k)));
+  desenharGrade('d1');
+  document.querySelectorAll('.controles button[data-k]').forEach(b => b.addEventListener('click', () => desenharGrade(b.dataset.k)));
 
-  // ---- diária
+  // ================= 3. Mês e ano
+  const M = C.mensal || [];
+  const rot = M.map(m => { const [a, mm] = m.mes.split('-'); return `${['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+mm - 1]}/${a.slice(2)}`; });
+  Plotly.newPlot('g-mensal', [
+    { x: rot, y: M.map(m => m.mm), type: 'bar', name: 'observado (MERGE)', marker: { color: M.map(m => m.dias < 25 ? PAL.claro : PAL.medio) }, text: M.map(m => m.dias < 25 ? `${m.dias} dias` : ''), textposition: 'outside', textfont: { size: 10 }, hovertemplate: '%{y:,.1f} mm<extra>observado</extra>' },
+    { x: rot, y: M.map(m => m.mlt), type: 'scatter', mode: 'lines+markers', name: 'MLT 1998–2024', line: { color: PAL.escuro, width: 2 }, marker: { size: 6 }, hovertemplate: '%{y:,.1f} mm<extra>MLT</extra>' }],
+    layoutBase({ hovermode: 'x', yaxis: { title: 'mm por mês', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade } }), CONFIG_PLOT);
   const D = C.diaria || { data: [], mm: [] };
   function desenharDiaria(dias) {
     const r = recorte(D.data, { y: D.mm }, dias);
-    Plotly.react('g-diaria', [{ x: r.x, y: r.arrays.y, type: 'bar', name: 'mm/dia', marker: { color: PAL.medio } }],
-      layoutBase({ showlegend: false, yaxis: { title: 'mm/dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m/%Y' } }), CONFIG_PLOT);
+    Plotly.react('g-diaria', [{ x: r.x, y: r.arrays.y, type: 'bar', name: 'mm/dia', marker: { color: PAL.medio }, hovertemplate: '%{y:,.1f} mm<extra></extra>' }],
+      layoutBase({ showlegend: false, yaxis: { title: 'mm por dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m/%Y' } }), CONFIG_PLOT);
     document.querySelectorAll('.controles button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
   }
   desenharDiaria(90);
   document.querySelectorAll('.controles button[data-d]').forEach(b => b.addEventListener('click', () => desenharDiaria(+b.dataset.d)));
 
-  // ---- mensal
-  const M = C.mensal || [];
-  const rot = M.map(m => { const [a, mm] = m.mes.split('-'); return `${['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+mm - 1]}/${a.slice(2)}`; });
-  Plotly.newPlot('g-mensal', [
-    { x: rot, y: M.map(m => m.mm), type: 'bar', name: 'observado (MERGE)', marker: { color: M.map(m => m.dias < 25 ? PAL.claro : PAL.medio) }, text: M.map(m => m.dias < 25 ? `${m.dias} dias` : ''), textposition: 'outside', textfont: { size: 10 } },
-    { x: rot, y: M.map(m => m.mlt), type: 'scatter', mode: 'lines+markers', name: 'MLT 1998–2024', line: { color: PAL.escuro, width: 2 }, marker: { size: 6 } }],
-    layoutBase({ hovermode: 'x', yaxis: { title: 'mm/mês', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade } }), CONFIG_PLOT);
-
-  // ---- tabela: pluviômetros por trecho, cada um contra o MERGE da célula
+  // ================= 4. Satélite × chão
   const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo? zero medido com satélite acima de 15 mm', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) <= .2) return ['concordam (até 20%)', 'color:#2E8B57']; return [d > 0 ? 'chão mediu mais que o satélite' : 'satélite estimou mais que o chão', 'color:#D9A400']; };
   const porTrecho = B.trechos.map(t => ({ t, itens: (C.pluviometros || []).filter(p => p.trecho === t.slug) })).filter(g => g.itens.length);
   document.querySelector('#tab-comp tbody').innerHTML = porTrecho.map(g => `<tr><td colspan="9" style="background:#EEF3FA;color:var(--azul-escuro)"><a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a></td></tr>` + g.itens.map(p => {
@@ -124,6 +147,13 @@
     const dif = (sat7 !== null && p.mm_7d !== null) ? p.mm_7d - sat7 : null;
     return `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td>${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'estação fluviométrica com pluviômetro'}</td>
       <td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(sat7, 1)}</td><td class="num">${dif === null ? '–' : (dif > 0 ? '+' : '') + fmt(dif, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td class="num">${fmt(sat30, 1)}</td><td style="${cor}">${txt}</td><td>${fmtInst(p.ultimo_instante)}</td></tr>`; }).join('')).join('');
+
+  // ================= 5. Dados
+  const c = (status && status.citacoes) || {};
+  document.getElementById('fontes').innerHTML = [c.merge, c.mlt, c.telemetria].filter(Boolean).map(t => `<p>${t}, consulta em ${fmtData(status.gerado_em)}.</p>`).join('');
+  const baixar = (nome, linhas) => { const blob = new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; a.click(); };
+  document.getElementById('csv-bacia').addEventListener('click', () => baixar('chuva_media_bacia_iguacu.csv', ['# Chuva média diária da bacia do Iguaçu (585 células de 0,1°) — ' + (c.merge || 'INPE/CPTEC, MERGE'), 'data;chuva_mm', ...D.data.map((d, i) => `${d};${D.mm[i] ?? ''}`)]));
+  document.getElementById('csv-plu').addEventListener('click', () => baixar('pluviometros_vs_merge.csv', ['# Pluviômetros da telemetria da ANA contra o MERGE na célula — ' + (c.telemetria || 'ANA') + ' | ' + (c.merge || 'INPE'), 'codigo;nome;trecho;medido_24h;merge_1d;medido_7d;merge_7d;medido_30d;merge_30d;ultimo_dado', ...(C.pluviometros || []).map(p => [p.codigo, p.nome, p.trecho, p.mm_24h, p.merge ? p.merge.d1 : '', p.mm_7d, p.merge ? p.merge.d7 : '', p.mm_30d, p.merge ? p.merge.d30 : '', p.ultimo_instante].map(v => v === null || v === undefined ? '' : v).join(';'))]));
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
 </body>

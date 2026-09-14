@@ -13,35 +13,64 @@
 <body>
 <header id="topo" class="topo"></header>
 <main>
-  <h1>Catálogo de estações e perfil do rio</h1>
-  <p class="sub">Todas as estações da Resolução Conjunta ANEEL/ANA nº 3 na bacia, agrupadas por trecho em ordem de rio. Para ver uma estação no contexto, abra o trecho; esta página é a referência completa.</p>
+  <h1>Catálogo das estações e perfil do rio</h1>
+  <p class="sub">Referência completa das estações da Resolução Conjunta ANEEL/ANA nº 3 na bacia, agrupadas por trecho em ordem de rio. Para ver uma estação no contexto do rio, abra o trecho; para a série completa, abra a estação.</p>
 
-  <h2>Perfil longitudinal do rio Iguaçu</h2>
-  <p class="sub" style="margin-bottom:6px">Vazão atual em cada estação fluviométrica do rio principal contra a área de drenagem. Degraus mostram onde a cascata retém ou libera água; usinas marcadas em azul escuro.</p>
-  <div id="g-perfil" class="grafico"></div>
+  <nav class="indice">
+    <a class="sec" href="#perfil">Perfil do rio</a><a class="sec" href="#estacoes">Estações por trecho</a><a class="sec" href="#dados">Dados</a>
+  </nav>
 
-  <h2>Estações por trecho</h2>
-  <div class="controles">
-    <select id="f-tipo"><option value="">Todos os tipos</option><option>Fluviométrica</option><option>Pluviométrica</option></select>
-    <label><input type="checkbox" id="f-dado" checked> só com dado nos últimos 7 dias</label>
-  </div>
-  <div id="grupos"></div>
+  <section class="bloco" id="perfil">
+    <h2><small>1</small>Perfil do rio: a vazão de agora ao longo do Iguaçu</h2>
+    <p class="sub">Cada ponto é uma estação fluviométrica do rio principal com dado nas últimas 24 h, na posição da sua área de drenagem: quanto mais à direita, mais a jusante. A linha sobe onde o rio recebe água e cai onde um reservatório retém; degraus no barramento de uma usina mostram a diferença entre o que chega e o que ela solta. Pontos maiores e escuros são estações de barramento.</p>
+    <div id="g-perfil" class="grafico"></div>
+    <p class="explica" id="perfil-nota"></p>
+  </section>
+
+  <section class="bloco" id="estacoes">
+    <h2><small>2</small>Estações por trecho</h2>
+    <p class="sub">Uma tabela por trecho, de montante para jusante, com o papel de cada estação antes de qualquer número. "Média 30 d" é a média da própria estação nos últimos 30 dias; a coluna "7 dias" é a tendência recente. Clique no cabeçalho para ordenar.</p>
+    <div class="controles">
+      <select id="f-tipo"><option value="">Todos os tipos</option><option>Fluviométrica</option><option>Pluviométrica</option></select>
+      <label><input type="checkbox" id="f-dado" checked> só com dado nos últimos 7 dias</label>
+      <span id="f-resumo" class="sub" style="margin:0 0 0 8px"></span>
+    </div>
+    <div id="grupos"></div>
+  </section>
+
+  <section class="bloco" id="dados">
+    <h2><small>3</small>Dados desta página</h2>
+    <p class="sub">Catálogo de estações da Resolução Conjunta ANEEL/ANA nº 3 (cadastro da ANA) com o último dado do webservice de telemetria. Dado bruto, sem consistência.</p>
+    <div class="controles"><button id="csv">Baixar CSV do catálogo com o último dado</button></div>
+    <div id="fontes" class="sub" style="font-size:12.5px"></div>
+  </section>
 </main>
 <footer id="rodape"></footer>
 <script>
 (async () => {
-  await iniciar('catalogo.html');
+  const status = await iniciar('catalogo.html');
   const [E, B] = await Promise.all([carregar('estacoes.json'), carregar('bacia.json')]);
   const est = E.estacoes;
+
+  // ================= 1. Perfil
+  const rio = est.filter(e => e.rio === 'RIO IGUAÇU' && e.tipo === 'Fluviométrica' && e.area_km2 && e.vazao !== null && e.vazao !== undefined && e.frescor_h <= 24).sort((a, b) => a.area_km2 - b.area_km2);
+  Plotly.newPlot('g-perfil', [{ x: rio.map(e => e.area_km2), y: rio.map(e => e.vazao), text: rio.map(e => e.curto), mode: 'lines+markers+text', textposition: rio.map((e, i) => i % 2 ? 'bottom center' : 'top center'), textfont: { size: 10 },
+    hovertemplate: '%{text}<br>%{x:,.0f} km² · %{y:,.0f} m³/s<extra></extra>', line: { color: PAL.medio }, marker: { color: rio.map(e => e.papel === 'barramento' ? PAL.escuro : PAL.medio), size: rio.map(e => e.papel === 'barramento' ? 11 : 8) }, name: 'vazão atual' }],
+    layoutBase({ showlegend: false, hovermode: 'closest', xaxis: { title: 'área de drenagem (km²)', gridcolor: PAL.grade, tickformat: ',d' }, yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, margin: { l: 64, r: 16, t: 40, b: 50 } }), CONFIG_PLOT);
+  const mudas = est.filter(e => e.rio === 'RIO IGUAÇU' && e.tipo === 'Fluviométrica' && !(e.frescor_h <= 24));
+  document.getElementById('perfil-nota').textContent = `${rio.length} estações com dado nas últimas 24 h.` + (mudas.length ? ` Fora do perfil por falta de dado recente: ${mudas.map(e => e.curto).join(', ')}.` : '');
+
+  // ================= 2. Estações por trecho
   function render() {
     const ft = document.getElementById('f-tipo').value, fd = document.getElementById('f-dado').checked;
     const sel = est.filter(e => (!ft || e.tipo === ft) && (!fd || (e.frescor_h !== undefined && e.frescor_h !== null && e.frescor_h <= 24 * 7)));
     const grupos = B.trechos.map(t => ({ t, itens: sel.filter(e => e.trecho === t.slug) })).filter(g => g.itens.length);
     const soltas = sel.filter(e => !e.trecho);
     if (soltas.length) grupos.push({ t: { slug: null, nome: 'Sem trecho atribuído', contexto: '' }, itens: soltas });
-    document.getElementById('grupos').innerHTML = grupos.map(g => `<h3>${g.t.slug ? `<a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a>` : g.t.nome} <span class="chip">${g.itens.length}</span></h3>
+    document.getElementById('f-resumo').textContent = `${sel.length} de ${est.length} estações`;
+    document.getElementById('grupos').innerHTML = grupos.map(g => `<h3>${g.t.slug ? `<a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a>` : g.t.nome} <span class="chip">${g.itens.length}</span></h3>${g.t.contexto ? `<p class="explica">${g.t.contexto}</p>` : ''}
       <div class="tabela-wrap"><table class="tab"><thead><tr><th>Código</th><th>Nome</th><th>Papel no trecho</th><th>Resp.</th><th class="num">Área (km²)</th><th>Último dado</th><th class="num">Cota (m)</th><th class="num">Vazão (m³/s)</th><th class="num">Média 30 d</th><th class="num">Chuva 24 h</th><th class="num">Chuva 7 d</th><th>7 dias</th></tr></thead><tbody>
-      ${g.itens.map(e => `<tr><td data-v="${e.codigo}"><a href="estacao.html?c=${e.codigo}">${e.codigo}</a></td><td title="${e.nome}">${e.nome}</td><td>${PAPEL[e.papel] || (e.tipo === 'Pluviométrica' ? 'pluviômetro' : '–')}${e.rio_afluente ? ' · ' + e.rio_afluente : ''}</td><td>${e.responsavel || ''}</td>
+      ${g.itens.map(e => `<tr><td data-v="${e.codigo}"><a href="estacao.html?c=${e.codigo}">${e.codigo}</a></td><td title="${e.nome}">${e.curto || e.nome}</td><td>${PAPEL[e.papel] || (e.tipo === 'Pluviométrica' ? 'pluviômetro' : '–')}${e.rio_afluente ? ' · ' + e.rio_afluente : ''}</td><td>${e.responsavel || ''}</td>
         <td class="num" data-v="${e.area_km2 ?? ''}">${fmt(e.area_km2)}</td><td data-v="${e.ultimo_instante || ''}"><span class="ponto ${frescorClasse(e.frescor_h)}"></span>${fmtInst(e.ultimo_instante)}</td>
         <td class="num">${fmt(e.cota_m, 2)}</td><td class="num">${fmt(e.vazao)}</td><td class="num">${fmt((e.ref || {}).vazao_media_30d)}</td><td class="num">${fmt(e.chuva_24h, 1)}</td><td class="num">${fmt(e.chuva_7d, 1)}</td>
         <td class="spark">${e.spark ? spark(e.spark.v, e.spark.var === 'chuva_mm' ? PAL.claro : PAL.medio) : ''}</td></tr>`).join('')}</tbody></table></div>`).join('');
@@ -49,10 +78,15 @@
   }
   ['f-tipo', 'f-dado'].forEach(id => document.getElementById(id).addEventListener('change', render));
   render();
-  const rio = est.filter(e => e.rio === 'RIO IGUAÇU' && e.tipo === 'Fluviométrica' && e.area_km2 && e.vazao !== null && e.vazao !== undefined && e.frescor_h <= 24).sort((a, b) => a.area_km2 - b.area_km2);
-  Plotly.newPlot('g-perfil', [{ x: rio.map(e => e.area_km2), y: rio.map(e => e.vazao), text: rio.map(e => e.curto), mode: 'lines+markers+text', textposition: rio.map((e, i) => i % 2 ? 'bottom center' : 'top center'), textfont: { size: 10 },
-    hovertemplate: '%{text}<br>%{x:,.0f} km² · %{y:,.0f} m³/s<extra></extra>', line: { color: PAL.medio }, marker: { color: rio.map(e => e.papel === 'barramento' ? PAL.escuro : PAL.medio), size: rio.map(e => e.papel === 'barramento' ? 11 : 8) }, name: 'vazão atual' }],
-    layoutBase({ showlegend: false, hovermode: 'closest', xaxis: { title: 'área de drenagem (km²)', gridcolor: PAL.grade }, yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, margin: { l: 56, r: 16, t: 40, b: 50 } }), CONFIG_PLOT);
+
+  // ================= 3. Dados
+  const c = (status && status.citacoes) || {};
+  document.getElementById('fontes').innerHTML = `<p>${c.telemetria || 'ANA, webservice de telemetria'}, consulta em ${fmtData(status.gerado_em)}.</p><p>Cadastro: estações da Resolução Conjunta ANEEL/ANA nº 3/2010 (catálogo da ANA).</p>`;
+  document.getElementById('csv').addEventListener('click', () => {
+    const linhas = ['# Catálogo das estações da bacia do Iguaçu com o último dado — ' + (c.telemetria || 'ANA, webservice de telemetria') + '; dado bruto', 'codigo;nome;tipo;trecho;papel;rio;responsavel;operadora;area_km2;lat;lon;ultimo_dado;cota_m;vazao_m3s;vazao_media_30d;chuva_24h_mm;chuva_7d_mm'];
+    est.forEach(e => linhas.push([e.codigo, e.nome, e.tipo, e.trecho_nome, e.papel, e.rio, e.responsavel, e.operadora, e.area_km2, e.lat, e.lon, e.ultimo_instante, e.cota_m, e.vazao, (e.ref || {}).vazao_media_30d, e.chuva_24h, e.chuva_7d].map(v => v === null || v === undefined ? '' : v).join(';')));
+    const blob = new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'catalogo_estacoes_iguacu.csv'; a.click();
+  });
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
 </body>
