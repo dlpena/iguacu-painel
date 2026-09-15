@@ -11,7 +11,7 @@ automaticamente a cada hora por GitHub Actions, só com fontes públicas e sem c
 
 `coleta/monta_site.py` transforma `dados/` nos JSON de `docs/data/`, lidos pelas páginas de `docs/`.
 
-**Painel técnico não oficial**, desenvolvido por Diego Liz Pena. Não é produto da ANA nem do ONS.
+**Painel técnico não oficial.** Não é produto da ANA nem do ONS.
 Exibe dado bruto e regra; não conclui descumprimento.
 
 ## Estrutura
