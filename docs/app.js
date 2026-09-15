@@ -44,16 +44,27 @@ const LEGENDA_HIDRO = '<i style="background:#0B6BA8;height:3px;border-radius:0">
 
 /* legenda do esquema longitudinal (início e trecho) */
 function legendaEsquema() {
-  const tri = '<svg width="14" height="16" viewBox="0 0 16 18"><path d="M15 9 L1 1 L1 17 Z" fill="#294086"/></svg>';
-  const cir = '<svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#294086"/></svg>';
+  const tri = '<svg width="15" height="13" viewBox="0 0 18 16"><path d="M9 1 L17 15 L1 15 Z" fill="#294086"/></svg>';
+  const cir = '<svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#294086"/></svg>';
   const pto = c => `<svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="${c}"/></svg>`;
+  const afl = '<svg width="22" height="11" viewBox="0 0 22 11"><path d="M1 2 L20 9" stroke="#80B5E1" stroke-width="2.5" stroke-dasharray="3 3"/></svg>';
+  const item = (icone, texto) => `<div class="li"><span class="ic">${icone}</span><span>${texto}</span></div>`;
   return `<div class="legenda-esquema">
-    <span>${tri} UHE com reservatório de acumulação: número acima = defluência (m³/s); <b>VU</b> abaixo = volume útil armazenado (%)</span>
-    <span>${cir} UHE a fio d'água: número acima = defluência (m³/s)</span>
-    <span>${pto('#0193DE')} estação fluviométrica: número = vazão (m³/s)</span>
-    <span><i class="lg afl"></i>afluente (margem direita acima do rio, esquerda abaixo)</span>
-    <span>cor do ponto e do contorno das usinas: ${pto('#2E8B57')} dado há até 2 h ${pto('#D9A400')} até 24 h ${pto('#9CA3AF')} sem dado recente</span>
-    <span>${pto('#E08A1E')} aviso no trecho</span>
+    <div class="grupo"><div class="tit">Símbolos</div>
+      ${item(tri, 'UHE com reservatório de acumulação · número acima: defluência (m³/s) · <b>VU</b> abaixo: volume útil armazenado (%)')}
+      ${item(cir, "UHE a fio d'água · número acima: defluência (m³/s)")}
+      ${item(pto('#0193DE'), 'estação fluviométrica · número: vazão (m³/s)')}
+      ${item(afl, 'afluente · margem direita acima do rio, margem esquerda abaixo')}
+    </div>
+    <div class="grupo"><div class="tit">Idade do dado</div>
+      <div class="li" style="color:var(--texto-suave)">cor das estações e do contorno das usinas</div>
+      ${item(pto('#2E8B57'), 'até 2 h')}
+      ${item(pto('#D9A400'), 'até 24 h')}
+      ${item(pto('#9CA3AF'), 'sem dado recente')}
+    </div>
+    <div class="grupo"><div class="tit">Aviso</div>
+      ${item(pto('#E08A1E'), 'ao lado do nome do trecho: há evento para olhar nas últimas 24 h')}
+    </div>
   </div>`;
 }
 
