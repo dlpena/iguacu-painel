@@ -5,6 +5,26 @@
   "fim": "2026-09-15"
  },
  "estacoes": {
+  "65035001": {
+   "n": 175,
+   "ultimo": "2026-09-15T06:00:00"
+  },
+  "65060001": {
+   "n": 175,
+   "ultimo": "2026-09-15T06:00:00"
+  },
+  "65220001": {
+   "n": 175,
+   "ultimo": "2026-09-15T06:00:00"
+  },
+  "65310001": {
+   "n": 175,
+   "ultimo": "2026-09-15T06:00:00"
+  },
+  "65365801": {
+   "n": 175,
+   "ultimo": "2026-09-15T06:00:00"
+  },
   "65774400": {
    "n": 175,
    "ultimo": "2026-09-15T06:00:00"
@@ -62,12 +82,12 @@
    "ultimo": null
   },
   "65980200": {
-   "n": 698,
-   "ultimo": "2026-09-15T06:15:00"
-  },
-  "65975300": {
    "n": 699,
    "ultimo": "2026-09-15T06:30:00"
+  },
+  "65975300": {
+   "n": 700,
+   "ultimo": "2026-09-15T06:45:00"
   },
   "65960001": {
    "n": 175,
@@ -157,13 +177,7 @@
  "arquivos": [
   "2026-09.parquet"
  ],
- "erros": [
-  "65035001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65035001&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026",
-  "65060001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65060001&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026",
-  "65220001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65220001&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026",
-  "65310001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65310001&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026",
-  "65365801: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65365801&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026"
- ],
+ "erros": [],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-09-15T07:02:52-03:00"
+ "atualizado_em": "2026-09-15T07:11:13-03:00"
 }
