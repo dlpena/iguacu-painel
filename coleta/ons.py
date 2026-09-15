@@ -69,6 +69,10 @@ def limpa(d: pd.DataFrame, horario: bool) -> pd.DataFrame:
         if c.startswith("val_"):
             d[c] = pd.to_numeric(d[c], errors="coerce")
     if horario:
+        # O ONS grava o registro da 0h como 23:59 do dia anterior (agosto/2026: 744 registros por usina, de
+        # 01/08 01:00 a 31/08 23:59). Vira 00:00 do dia seguinte; antes era descartado pelo filtro de minuto zero.
+        h0 = (d["din_instante"].dt.hour == 23) & (d["din_instante"].dt.minute == 59)
+        d.loc[h0, "din_instante"] = d.loc[h0, "din_instante"] + pd.Timedelta(minutes=1)
         d = d[d["din_instante"].dt.minute == 0]
     d = (d.drop_duplicates(["nom_reservatorio", "din_instante"], keep="last")
           .sort_values(["nom_reservatorio", "din_instante"]))
