@@ -250,7 +250,7 @@ const CONFIG_PLOT = { responsive: true, displaylogo: false, locale: 'pt-BR', mod
                       toImageButtonOptions: { format: 'png', scale: 2 } };
 function linhaLimite(y, texto, cor = PAL.limite, tracado = 'dash') {
   return { shape: { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: y, y1: y, line: { color: cor, width: 1.5, dash: tracado } },
-           ann: { xref: 'paper', x: 1, y: y, text: texto, showarrow: false, xanchor: 'right', yanchor: 'bottom', font: { size: 10, color: cor }, bgcolor: 'rgba(255,255,255,.7)' } };
+           ann: { xref: 'paper', x: 1, y: y, text: texto, showarrow: false, xanchor: 'right', xshift: -6, yanchor: 'bottom', // afastado da borda: colado nela, o último caractere sai cortado font: { size: 10, color: cor }, bgcolor: 'rgba(255,255,255,.7)' } };
 }
 function traco(x, y, nome, cor, extra = {}) { return Object.assign({ x, y, name: nome, type: 'scatter', mode: 'lines', line: { color: cor, width: 1.6 }, connectgaps: false }, extra); }
 function recorte(x, arrays, dias) {
