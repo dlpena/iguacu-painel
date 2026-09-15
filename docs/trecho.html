@@ -203,7 +203,7 @@
     document.getElementById('t-usina').textContent = `Usina: como a UHE ${U.curto} está sendo operada`;
     document.getElementById('usina-sub').textContent = `Dado operativo horário do ONS da UHE ${U.nome} (${U.agente}). ${regras.length ? 'Os limites desenhados vêm da outorga e das restrições declaradas ao ONS (FSAR-H), listadas no fim da seção.' : 'A outorga desta usina ainda não foi lida para o painel, por isso nenhum limite é desenhado.'}`;
     const lv = lim(['defluencia', 'vazao_turbinada'], ['minimo', 'maximo']);
-    document.getElementById('e-vazoes').textContent = 'Defluência é o total que sai da usina; turbinada e vertida são as parcelas.' + (lv.length ? ' Linhas tracejadas: ' + lv.map(q => `${q.variavel === 'defluencia' ? 'defluência' : 'turbinada'} ${q.tipo === 'minimo' ? 'mínima' : 'máxima'} de ${fmt(q.valor, 1)} m³/s (${q.fonte.split(';')[0]})`).join('; ') + '.' : '');
+    document.getElementById('e-vazoes').textContent = 'Defluência é o total que sai da usina; turbinada e vertida são as parcelas.' + (lv.length ? ' Linhas tracejadas: ' + lv.map(q => `${q.variavel === 'defluencia' ? 'defluência' : 'turbinada'} ${q.tipo === 'minimo' ? 'mínima' : 'máxima'} de ${fmt(q.valor, Number.isInteger(+q.valor) ? 0 : 1)} m³/s (${q.fonte.split(';')[0]})`).join('; ') + '.' : '');
     const ln = lim(['nivel_montante'], ['minimo', 'maximo', 'maximo_declarado']);
     document.getElementById('e-niveis').textContent = 'Cota do reservatório a montante da barragem.' + (ln.length ? ' Linhas: ' + ln.map(q => `${q.tipo === 'maximo_declarado' ? 'máximo declarado ao ONS' : (q.tipo === 'minimo' ? 'mínimo' : 'máximo') + ' da outorga'} ${fmt(q.valor, 2)} m`).join('; ') + '.' : ' Sem faixa de outorga lida.');
     const rr = regras.find(q => q.tipo === 'rampa');
@@ -235,7 +235,7 @@
     // usina
     if (U) {
       const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, vu: H.pct_volume_util, mo: (U.montante || {}).defluencia }, dias); const x = r.x, A = r.arrays;
-      const lv = lim(['defluencia', 'vazao_turbinada'], ['minimo', 'maximo']).map(q => { const l = linhaLimite(q.valor, `${q.variavel === 'defluencia' ? 'defluência' : 'turbinada'} ${q.tipo === 'minimo' ? 'mín.' : 'máx.'} ${fmt(q.valor, 1)}`, PAL.limite); return { s: l.shape, a: l.ann }; });
+      const lv = lim(['defluencia', 'vazao_turbinada'], ['minimo', 'maximo']).map(q => { const l = linhaLimite(q.valor, `${q.variavel === 'defluencia' ? 'defluência' : 'turbinada'} ${q.tipo === 'minimo' ? 'mín.' : 'máx.'} ${fmt(q.valor, Number.isInteger(+q.valor) ? 0 : 1)} m³/s`, PAL.limite); return { s: l.shape, a: l.ann }; });
       Plotly.react('g-vazoes', [traco(x, A.de, 'Defluência (total)', SERIES.defluencia, { line: { color: SERIES.defluencia, width: 2.2 } }), traco(x, A.tu, 'Turbinada', SERIES.vazao_turbinada), traco(x, A.ve, 'Vertida', SERIES.vazao_vertida)],
         layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, ...SA(lv) }), CONFIG_PLOT);
       const ln = lim(['nivel_montante'], ['minimo', 'maximo', 'maximo_declarado']).map(q => { const l = linhaLimite(q.valor, `${q.tipo === 'maximo_declarado' ? 'FSAR-H' : 'outorga'} ${fmt(q.valor, 2)} m`, q.tipo === 'maximo_declarado' ? PAL.fsarh : PAL.limite); return { s: l.shape, a: l.ann }; });
@@ -246,7 +246,7 @@
       }
       const rr = regras.find(q => q.tipo === 'rampa'); const base = rr && rr.variavel === 'vazao_turbinada' ? A.tu : A.de;
       const dif = base.map((v, i) => (i && v !== null && base[i - 1] !== null) ? v - base[i - 1] : null);
-      const lr = rr ? [linhaLimite(rr.valor, `declarado +${rr.valor}`, PAL.fsarh), linhaLimite(-rr.valor, `declarado −${rr.valor}`, PAL.fsarh)].map(l => ({ s: l.shape, a: l.ann })) : [];
+      const lr = rr ? [linhaLimite(rr.valor, `declarado +${fmt(rr.valor)} m³/s por hora`, PAL.fsarh), linhaLimite(-rr.valor, `declarado −${fmt(rr.valor)} m³/s por hora`, PAL.fsarh)].map(l => ({ s: l.shape, a: l.ann })) : [];
       Plotly.react('g-rampa', [{ x, y: dif, type: 'bar', name: 'variação por hora', marker: { color: dif.map(v => v === null ? PAL.cinza : (Math.abs(v) > (rr ? rr.valor : 1e9) ? PAL.fsarh : PAL.claro)) }, hovertemplate: '%{y:,.0f} m³/s por hora<extra></extra>' }],
         layoutBase({ showlegend: false, yaxis: { title: 'm³/s por hora', gridcolor: PAL.grade, tickformat: ',d' }, ...SA(lr) }), CONFIG_PLOT);
     }
