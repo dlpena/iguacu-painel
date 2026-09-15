@@ -1,183 +1,55 @@
 {
- "ok": true,
+ "ok": false,
  "janela": {
   "inicio": "2026-09-08",
   "fim": "2026-09-15"
  },
- "estacoes": {
-  "65035001": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65060001": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65220001": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65310001": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65365801": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65774400": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65803001": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65883051": {
-   "n": 186,
-   "ultimo": "2026-09-15T17:00:00"
-  },
-  "65894991": {
-   "n": 186,
-   "ultimo": "2026-09-15T17:00:00"
-  },
-  "65970700": {
-   "n": 0,
-   "ultimo": null
-  },
-  "65971500": {
-   "n": 0,
-   "ultimo": null
-  },
-  "65973501": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65983100": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65984000": {
-   "n": 747,
-   "ultimo": "2026-09-15T18:30:00"
-  },
-  "65987000": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65987001": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65992500": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65992502": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65993000": {
-   "n": 0,
-   "ultimo": null
-  },
-  "65980200": {
-   "n": 747,
-   "ultimo": "2026-09-15T18:30:00"
-  },
-  "65975300": {
-   "n": 748,
-   "ultimo": "2026-09-15T18:45:00"
-  },
-  "65960001": {
-   "n": 187,
-   "ultimo": "2026-09-15T18:00:00"
-  },
-  "65889700": {
-   "n": 186,
-   "ultimo": "2026-09-15T17:00:00"
-  },
-  "2552070": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2551063": {
-   "n": 186,
-   "ultimo": "2026-09-15T17:00:00"
-  },
-  "2552030": {
-   "n": 186,
-   "ultimo": "2026-09-15T17:00:00"
-  },
-  "2552055": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2551015": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2553071": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2553073": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2651058": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2650028": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2651054": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2552009": {
-   "n": 186,
-   "ultimo": "2026-09-15T17:00:00"
-  },
-  "2553069": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2553070": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2651000": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2553079": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2553059": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2553089": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2553052": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2652048": {
-   "n": 0,
-   "ultimo": null
-  }
- },
- "arquivos": [
-  "2026-09.parquet"
+ "estacoes": {},
+ "arquivos": [],
+ "erros": [
+  "65035001: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65035001&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65060001: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65060001&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65220001: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65220001&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65310001: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65310001&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65365801: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65365801&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65774400: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65774400&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65803001: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65803001&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65883051: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65883051&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65894991: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65894991&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65970700: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65970700&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65971500: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65971500&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65973501: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65973501&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65983100: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65983100&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65984000: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65984000&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65987000: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65987000&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65987001: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65987001&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65992500: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65992500&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65992502: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65992502&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65993000: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65993000&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65980200: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65980200&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65975300: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65975300&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65960001: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65960001&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "65889700: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65889700&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2552070: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2552070&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2551063: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2551063&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2552030: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2552030&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2552055: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2552055&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2551015: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2551015&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2553071: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2553071&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2553073: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2553073&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2651058: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2651058&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2650028: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2650028&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2651054: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2651054&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2552009: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2552009&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2553069: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2553069&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2553070: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2553070&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2651000: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2651000&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2553079: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2553079&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2553059: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2553059&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2553089: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2553089&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2553052: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2553052&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))",
+  "2652048: ConnectionError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2652048&dataInicio=08%2F09%2F2026&dataFim=15%2F09%2F2026 (Caused by NewConnectionError(\"HTTPSConnection(host='telemetriaws1.ana.gov.br', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable\"))"
  ],
- "erros": [],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-09-15T19:11:15-03:00"
+ "atualizado_em": "2026-09-15T20:10:51-03:00"
 }
