@@ -250,6 +250,7 @@
       Plotly.react('g-rampa', [{ x, y: dif, type: 'bar', name: 'variação por hora', marker: { color: dif.map(v => v === null ? PAL.cinza : (Math.abs(v) > (rr ? rr.valor : 1e9) ? PAL.fsarh : PAL.claro)) }, hovertemplate: '%{y:,.0f} m³/s por hora<extra></extra>' }],
         layoutBase({ showlegend: false, yaxis: { title: 'm³/s por hora', gridcolor: PAL.grade, tickformat: ',d' }, ...SA(lr) }), CONFIG_PLOT);
     }
+    desenharChuva();
     document.querySelectorAll('.indice button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
   }
   document.querySelectorAll('.indice button[data-d]').forEach(b => b.addEventListener('click', () => { dias = +b.dataset.d; desenhar(); }));
@@ -259,10 +260,14 @@
   const plu = (C.pluviometros || []).filter(p => p.trecho === slug);
 
   document.getElementById('chuva-tabela').innerHTML = plu.length ? `<div class="tabela-wrap"><table class="tab"><thead><tr><th>Estação</th><th class="num">24 h (mm)</th><th class="num">7 dias (mm)</th><th class="num">30 dias (mm)</th><th>Último dado</th></tr></thead><tbody>${plu.map(p => `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td class="num">${fmt(p.mm_24h, 1)}</td><td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td>${fmtInst(p.ultimo_instante)}</td></tr>`).join('')}</tbody></table></div>` : '';
-  const pluSerie = T.pluviometros.filter(p => p.chuva_diaria);
-  if (pluSerie.length) Plotly.newPlot('g-chuva', pluSerie.map((p, i) => ({ x: p.chuva_diaria.data, y: p.chuva_diaria.mm, type: 'bar', name: `${p.codigo} ${p.nome.replace(/^UHE /, '')}`, marker: { color: cores[i % cores.length] } })),
-    layoutBase({ barmode: 'group', hovermode: 'x', yaxis: { title: 'mm por dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m' } }), CONFIG_PLOT);
-  else document.getElementById('g-chuva').innerHTML = '<p class="sub">Nenhuma estação do trecho registrou chuva nos últimos 30 dias.</p>';
+  // chuva diária das estações do trecho: segue a janela dos gráficos (24 h mostra os dois últimos dias, a barra é diária)
+  function desenharChuva() {
+    const g = document.getElementById('g-chuva');
+    const serie = T.pluviometros.filter(p => p.chuva_diaria && p.chuva_diaria.mm.some(v => v));
+    if (!serie.length) { g.innerHTML = '<p class="sub">Nenhuma estação do trecho registrou chuva nos últimos 90 dias.</p>'; return; }
+    Plotly.react(g, serie.map((p, i) => { const r = recorte(p.chuva_diaria.data, { mm: p.chuva_diaria.mm }, dias); return { x: r.x, y: r.arrays.mm, type: 'bar', name: `${p.codigo} ${p.nome.replace(/^UHE /, '')}`, marker: { color: cores[i % cores.length] }, hovertemplate: '%{y:,.1f} mm<extra>%{fullData.name}</extra>' }; }),
+      layoutBase({ barmode: 'group', hovermode: 'x', yaxis: { title: 'mm por dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m' } }), CONFIG_PLOT);
+  }
 
   // ================= 5. Dados
   const c = (status && status.citacoes) || {};

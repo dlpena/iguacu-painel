@@ -397,11 +397,11 @@ def main() -> int:
             det["estacoes"].append({**{k: e.get(k) for k in ("codigo", "nome", "curto", "papel", "rio_afluente", "area_km2", "lat", "lon", "responsavel", "frescor_h", "ultimo_instante", "vazao", "cota_m", "ref")},
                                     "serie": serie_horaria(e["codigo"], tele)})
         for p in bloco["pluviometros"]:
-            det["pluviometros"].append({**p, "chuva_diaria": chuva_diaria(p["codigo"], tele, 30)})
+            det["pluviometros"].append({**p, "chuva_diaria": chuva_diaria(p["codigo"], tele, 90)})
         # estações fluviométricas do trecho que também medem chuva entram no gráfico, como na tabela
         ja = {p["codigo"] for p in det["pluviometros"]}
         for e in t["estacoes"]:
-            cd = chuva_diaria(e["codigo"], tele, 30)
+            cd = chuva_diaria(e["codigo"], tele, 90)
             if e["codigo"] not in ja and cd and any(v for v in cd["mm"] if v):
                 base = est_por_cod.get(e["codigo"], {})
                 det["pluviometros"].append({"codigo": e["codigo"], "nome": base.get("curto") or e["codigo"], "chuva_diaria": cd})

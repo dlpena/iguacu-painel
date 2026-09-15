@@ -132,7 +132,7 @@
 
   // ================= 3. Cota e vazão
   const temV = D.serie.vazao.some(x => x !== null), temC = D.serie.cota_m.some(x => x !== null);
-  document.getElementById('e-serie').textContent = !(temV || temC) ? 'Esta estação não transmite cota nem vazão.' : `${temC ? (D.papel === 'barramento' ? 'Cota do reservatório em metros' : 'Cota da régua em metros') : ''}${temC && temV ? ' e ' : ''}${temV ? 'vazão em m³/s pela curva-chave do operador' : ''}, no intervalo de transmissão da estação (15 min a 1 h). Sem consistência.`;
+  document.getElementById('e-serie').textContent = !(temV || temC) ? 'Esta estação não transmite cota nem vazão.' : `${temC ? (D.papel === 'barramento' ? 'Cota do reservatório em metros' : 'Cota em metros') : ''}${temC && temV ? ' e ' : ''}${temV ? 'vazão em m³/s pela curva-chave do operador' : ''}, no intervalo de transmissão da estação (15 min a 1 h). Sem consistência.`;
   let dias = 7;
   function desenhar() {
     const r = recorte(D.serie.instante, { c: D.serie.cota_m, v: D.serie.vazao }, dias);
@@ -141,6 +141,7 @@
     if (temV) tr.push(traco(r.x, r.arrays.v, 'Vazão (m³/s)', PAL.medio, { yaxis: temC ? 'y2' : 'y' }));
     if (!tr.length) document.getElementById('g-serie').innerHTML = '';
     else Plotly.react('g-serie', tr, layoutBase({ yaxis: { title: temC ? 'cota (m)' : 'm³/s', gridcolor: PAL.grade, tickformat: temC ? ',.2f' : ',d' }, ...(temC && temV ? { yaxis2: { title: 'm³/s', overlaying: 'y', side: 'right', showgrid: false, rangemode: 'tozero' } } : {}) }), CONFIG_PLOT);
+    desenharChuva();
     document.querySelectorAll('.indice button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
   }
   document.querySelectorAll('.indice button[data-d]').forEach(b => b.addEventListener('click', () => { dias = +b.dataset.d; desenhar(); }));
@@ -150,10 +151,15 @@
   if (temChuva) {
 
     document.getElementById('e-chuva').textContent = 'Chuva diária medida pelo pluviômetro da estação. Dado bruto, sem consistência.';
-    if (D.chuva_diaria && D.chuva_diaria.mm.some(x => x !== null && x > 0)) {
-      Plotly.newPlot('g-chuva', [{ x: D.chuva_diaria.data, y: D.chuva_diaria.mm, type: 'bar', name: 'chuva medida (mm/dia)', marker: { color: PAL.claro } }],
-        layoutBase({ showlegend: false, yaxis: { title: 'mm por dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m/%Y' } }), CONFIG_PLOT);
-    } else document.getElementById('g-chuva').innerHTML = '<p class="sub">Sem chuva registrada nos últimos 90 dias.</p>';
+  }
+  // chuva diária segue a janela dos gráficos (24 h mostra os dois últimos dias, porque a barra é diária)
+  function desenharChuva() {
+    if (!temChuva) return;
+    const g = document.getElementById('g-chuva');
+    if (!(D.chuva_diaria && D.chuva_diaria.mm.some(x => x !== null && x > 0))) { g.innerHTML = '<p class="sub">Sem chuva registrada nos últimos 90 dias.</p>'; return; }
+    const r = recorte(D.chuva_diaria.data, { mm: D.chuva_diaria.mm }, dias);
+    Plotly.react(g, [{ x: r.x, y: r.arrays.mm, type: 'bar', name: 'chuva medida (mm/dia)', marker: { color: PAL.claro }, hovertemplate: '%{y:,.1f} mm<extra></extra>' }],
+      layoutBase({ showlegend: false, yaxis: { title: 'mm por dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m/%Y' } }), CONFIG_PLOT);
   }
 
   // ================= 5. Dados
