@@ -230,6 +230,22 @@ function layoutBase(extra = {}) {
   }
   return lay;
 }
+// O "responsive" do Plotly só reage a resize da janela. Quando a largura do contêiner muda sem isso
+// (barra de rolagem que aparece depois do primeiro desenho, seções que abrem), o gráfico fica mais largo
+// que o cartão e os rótulos da direita saem cortados. O observador redimensiona pelo contêiner.
+if (window.Plotly && window.ResizeObserver) {
+  const obs = new ResizeObserver(es => es.forEach(e => {
+    const g = e.target, w = e.contentRect.width;
+    if (g._fullLayout && w > 0 && Math.abs(w - g._fullLayout.width) > 1) Plotly.Plots.resize(g);
+  }));
+  for (const f of ['newPlot', 'react']) {
+    const orig = Plotly[f];
+    Plotly[f] = function (gd, ...resto) {
+      const el = typeof gd === 'string' ? document.getElementById(gd) : gd;
+      return orig.call(this, gd, ...resto).then(r => { if (el) obs.observe(el); return r; });
+    };
+  }
+}
 const CONFIG_PLOT = { responsive: true, displaylogo: false, locale: 'pt-BR', modeBarButtonsToRemove: ['lasso2d', 'select2d'],
                       toImageButtonOptions: { format: 'png', scale: 2 } };
 function linhaLimite(y, texto, cor = PAL.limite, tracado = 'dash') {
