@@ -213,7 +213,6 @@ def monta_chuva(tele, agora, est_json):
             grade[k + "_dias"] = int(len(sub))
         out["grade"] = grade
     plu = []
-    grade = out.get("grade")
     for e in est_json:
         if e.get("chuva_7d") is None or e["lat"] is None:
             continue
@@ -223,12 +222,6 @@ def monta_chuva(tele, agora, est_json):
         item = {"codigo": e["codigo"], "nome": e["nome"], "curto": e.get("curto"), "tipo": e["tipo"], "papel": e.get("papel"), "lat": e["lat"], "lon": e["lon"],
                 "trecho": e.get("trecho"), "ordem_trecho": e.get("ordem_trecho", 99), "frescor_h": e.get("frescor_h"),
                 "mm_24h": e["chuva_24h"], "mm_7d": e["chuva_7d"], "mm_30d": num(g["chuva_mm"].sum(), 1), "ultimo_instante": e.get("ultimo_instante")}
-        if grade:
-            # célula do MERGE mais próxima do pluviômetro (grade de 0,1°): comparação MERGE × pluviômetro
-            la, lo = np.asarray(grade["lat"]), np.asarray(grade["lon"])
-            k = int(np.argmin((la - e["lat"]) ** 2 + (lo - e["lon"]) ** 2))
-            if (la[k] - e["lat"]) ** 2 + (lo[k] - e["lon"]) ** 2 <= 0.1 ** 2:
-                item["merge"] = {"d1": grade["d1"][k], "d7": grade["d7"][k], "d30": grade["d30"][k], "celula": k}
         plu.append(item)
     out["pluviometros"] = plu
     return out
@@ -405,6 +398,13 @@ def main() -> int:
                                     "serie": serie_horaria(e["codigo"], tele)})
         for p in bloco["pluviometros"]:
             det["pluviometros"].append({**p, "chuva_diaria": chuva_diaria(p["codigo"], tele, 30)})
+        # estações fluviométricas do trecho que também medem chuva entram no gráfico, como na tabela
+        ja = {p["codigo"] for p in det["pluviometros"]}
+        for e in t["estacoes"]:
+            cd = chuva_diaria(e["codigo"], tele, 30)
+            if e["codigo"] not in ja and cd and any(v for v in cd["mm"] if v):
+                base = est_por_cod.get(e["codigo"], {})
+                det["pluviometros"].append({"codigo": e["codigo"], "nome": base.get("curto") or e["codigo"], "chuva_diaria": cd})
         # o que chega e o que sai do trecho: um ponto do rio principal em cada ponta (config/trechos.yaml)
         for chave in ("chega", "sai"):
             ref = t.get(chave)

@@ -86,7 +86,7 @@
 
   <section class="bloco" id="chuva">
     <h2><small id="n-chuva">4</small>Chuva no trecho</h2>
-    <p class="sub">Pluviômetros da telemetria da ANA neste trecho, cada um contra o que o MERGE (satélite combinado com pluviômetros) estimou na célula onde ele está. A chuva média da bacia inteira fica na página <a href="chuva.html">Chuva</a>.</p>
+    <p class="sub">Chuva medida nos pluviômetros da telemetria da ANA neste trecho. Dado bruto, sem consistência. A chuva do MERGE (média da bacia e mapa por célula) fica na página <a href="chuva.html">Chuva</a>.</p>
     <div id="chuva-tabela"></div>
     <div id="g-chuva" class="grafico baixo"></div>
   </section>
@@ -257,16 +257,16 @@
 
   // ================= 4. Chuva no trecho
   const plu = (C.pluviometros || []).filter(p => p.trecho === slug);
-  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo?', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) < .2) return ['próximos', 'color:#2E8B57']; return [d > 0 ? 'pluviômetro mediu mais' : 'MERGE estimou mais', 'color:#D9A400']; };
-  document.getElementById('chuva-tabela').innerHTML = plu.length ? `<div class="tabela-wrap"><table class="tab"><thead><tr><th>Estação</th><th class="num">Medido 24 h</th><th class="num">Medido 7 d</th><th class="num">MERGE 7 d</th><th class="num">Medido 30 d</th><th class="num">MERGE 30 d</th><th>Leitura</th></tr></thead><tbody>${plu.map(p => { const [txt, cor] = leitura(p); return `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td class="num">${fmt(p.mm_24h, 1)}</td><td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(p.merge ? p.merge.d7 : null, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td class="num">${fmt(p.merge ? p.merge.d30 : null, 1)}</td><td style="${cor}">${txt}</td></tr>`; }).join('')}</tbody></table></div><p class="nota-tabela"><b>Como ler a coluna Leitura</b> (comparação dos 7 dias): <b>próximos</b> quando a discrepância entre o pluviômetro e o MERGE é inferior a 20% do maior dos dois valores (por exemplo, 82 mm no pluviômetro e 81 mm no MERGE); <b>pluviômetro mediu mais</b> ou <b>MERGE estimou mais</b> quando a discrepância é de 20% ou mais; <b>sensor mudo?</b> quando o pluviômetro marcou menos de 1 mm e o MERGE mais de 15 mm. Alguma discrepância é esperada: o pluviômetro mede um ponto, o MERGE estima a média de uma célula de cerca de 11 km.</p>` : '';
+
+  document.getElementById('chuva-tabela').innerHTML = plu.length ? `<div class="tabela-wrap"><table class="tab"><thead><tr><th>Estação</th><th class="num">24 h (mm)</th><th class="num">7 dias (mm)</th><th class="num">30 dias (mm)</th><th>Último dado</th></tr></thead><tbody>${plu.map(p => `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td class="num">${fmt(p.mm_24h, 1)}</td><td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td>${fmtInst(p.ultimo_instante)}</td></tr>`).join('')}</tbody></table></div>` : '';
   const pluSerie = T.pluviometros.filter(p => p.chuva_diaria);
   if (pluSerie.length) Plotly.newPlot('g-chuva', pluSerie.map((p, i) => ({ x: p.chuva_diaria.data, y: p.chuva_diaria.mm, type: 'bar', name: `${p.codigo} ${p.nome.replace(/^UHE /, '')}`, marker: { color: cores[i % cores.length] } })),
     layoutBase({ barmode: 'group', hovermode: 'x', yaxis: { title: 'mm por dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m' } }), CONFIG_PLOT);
-  else document.getElementById('g-chuva').innerHTML = '<p class="sub">Nenhum pluviômetro do trecho transmitiu chuva nos últimos 30 dias.</p>';
+  else document.getElementById('g-chuva').innerHTML = '<p class="sub">Nenhuma estação do trecho registrou chuva nos últimos 30 dias.</p>';
 
   // ================= 5. Dados
   const c = (status && status.citacoes) || {};
-  document.getElementById('fontes-trecho').innerHTML = [U ? c.ons_ho : null, estRio.length || R.estacoes.length ? c.telemetria : null, plu.length ? c.merge : null].filter(Boolean).map(t => `<p>${t}, consulta em ${fmtData(status.gerado_em)}.</p>`).join('');
+  document.getElementById('fontes-trecho').innerHTML = [U ? c.ons_ho : null, estRio.length || R.estacoes.length ? c.telemetria : null, null].filter(Boolean).map(t => `<p>${t}, consulta em ${fmtData(status.gerado_em)}.</p>`).join('');
   if (U) document.getElementById('csv').addEventListener('click', () => {
     const H = U.horario; const r = recorte(H.instante, { nm: H.nivel_montante, nj: H.nivel_jusante, de: H.defluencia, tu: H.vazao_turbinada, ve: H.vazao_vertida, vu: H.pct_volume_util }, dias);
     const linhas = ['# ' + U.nome + ' — ' + (c.ons_ho || 'ONS, Dados Abertos, base horária') + '; dado bruto', 'instante;nivel_montante_m;nivel_jusante_m;defluencia_m3s;turbinada_m3s;vertida_m3s;volume_util_pct'];

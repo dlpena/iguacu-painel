@@ -65,7 +65,6 @@
   <section class="bloco" id="chuva">
     <h2><small>4</small>Chuva</h2>
     <p class="explica" id="e-chuva"></p>
-    <div id="chuva-comp"></div>
     <div id="g-chuva" class="grafico baixo"></div>
   </section>
 
@@ -149,12 +148,8 @@
 
   // ================= 4. Chuva
   if (temChuva) {
-    const p = (C.pluviometros || []).find(x => x.codigo === D.codigo);
-    document.getElementById('e-chuva').textContent = 'Chuva diária medida pelo pluviômetro da estação, contra a estimativa do MERGE (satélite GPM com pluviômetros, INPE) na célula de 0,1° onde ela está.';
-    if (p && p.merge) {
-      const linha = (rot, v, s) => `<tr><td>${rot}</td><td class="num">${fmt(v, 1)}</td><td class="num">${fmt(s, 1)}</td><td class="num">${v !== null && s !== null ? (v - s > 0 ? '+' : '') + fmt(v - s, 1) : '–'}</td></tr>`;
-      document.getElementById('chuva-comp').innerHTML = `<div class="tabela-wrap" style="max-width:520px"><table class="tab"><thead><tr><th>Período</th><th class="num">Medido (mm)</th><th class="num">MERGE na célula (mm)</th><th class="num">Diferença</th></tr></thead><tbody>${linha('24 h / último dia', p.mm_24h, p.merge.d1)}${linha('7 dias', p.mm_7d, p.merge.d7)}${linha('30 dias', p.mm_30d, p.merge.d30)}</tbody></table></div>`;
-    }
+
+    document.getElementById('e-chuva').textContent = 'Chuva diária medida pelo pluviômetro da estação. Dado bruto, sem consistência.';
     if (D.chuva_diaria && D.chuva_diaria.mm.some(x => x !== null && x > 0)) {
       Plotly.newPlot('g-chuva', [{ x: D.chuva_diaria.data, y: D.chuva_diaria.mm, type: 'bar', name: 'chuva medida (mm/dia)', marker: { color: PAL.claro } }],
         layoutBase({ showlegend: false, yaxis: { title: 'mm por dia', gridcolor: PAL.grade, rangemode: 'tozero' }, xaxis: { gridcolor: PAL.grade, hoverformat: '%d/%m/%Y' } }), CONFIG_PLOT);
@@ -163,7 +158,7 @@
 
   // ================= 5. Dados
   const c = (status && status.citacoes) || {};
-  document.getElementById('fontes').innerHTML = `<p>${c.telemetria || 'ANA, webservice de telemetria'}, consulta em ${fmtData(status.gerado_em)}.</p>${temChuva && c.merge ? `<p>${c.merge}, consulta em ${fmtData(status.gerado_em)}.</p>` : ''}`;
+  document.getElementById('fontes').innerHTML = `<p>${c.telemetria || 'ANA, webservice de telemetria'}, consulta em ${fmtData(status.gerado_em)}.</p>`;
   document.getElementById('csv').addEventListener('click', () => {
     const r = recorte(D.serie.instante, { c: D.serie.cota_m, v: D.serie.vazao }, dias);
     const linhas = [`# Estação ${D.codigo} ${D.nome} — ${c.telemetria || 'ANA, webservice de telemetria'}; dado bruto`, 'instante;cota_m;vazao_m3s'];

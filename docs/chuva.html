@@ -16,10 +16,10 @@
 <header id="topo" class="topo"></header>
 <main>
   <h1>Chuva na bacia do Iguaçu</h1>
-  <p class="sub">Duas fontes que se completam: o MERGE do INPE/CPTEC (estimativa do satélite GPM combinada com observações de pluviômetros, grade de 0,1°, 585 células na bacia) diz onde e quanto choveu em toda a área; os pluviômetros da telemetria da ANA dizem o que foi medido em cada ponto. A média de longo termo (MLT) é a climatologia oficial do MERGE, 1998–2024.</p>
+  <p class="sub">Duas fontes que se completam: o MERGE do INPE/CPTEC (estimativa do satélite GPM combinada com observações de pluviômetros, grade de 0,1°, 585 células na bacia) diz onde e quanto choveu em toda a área; os pluviômetros da telemetria da ANA dizem o que foi medido em cada ponto. Não são comparados ao MERGE: o MERGE já incorpora pluviômetros da ANA e do ONS (documentação do INPE), então a comparação não seria independente. A média de longo termo (MLT) é a climatologia oficial do MERGE, 1998–2024.</p>
 
   <nav class="indice">
-    <a class="sec" href="#agora">Agora</a><a class="sec" href="#onde">Onde choveu</a><a class="sec" href="#tempo">Mês e ano</a><a class="sec" href="#chao">MERGE vs pluviômetros</a><a class="sec" href="#dados">Dados</a>
+    <a class="sec" href="#agora">Agora</a><a class="sec" href="#onde">Onde choveu</a><a class="sec" href="#tempo">Mês e ano</a><a class="sec" href="#chao">Pluviômetros</a><a class="sec" href="#dados">Dados</a>
   </nav>
 
   <section class="bloco" id="agora">
@@ -30,7 +30,7 @@
 
   <section class="bloco" id="onde">
     <h2><small>2</small>Onde choveu</h2>
-    <p class="sub">Cada quadrado é uma célula de 0,1° do MERGE (cerca de 11 km de lado) pintada pelo acumulado do período escolhido. Os círculos são os pluviômetros da ANA, pintados na mesma escala com o que mediram: círculo da cor do fundo é concordância; cor diferente, discordância. Passe o mouse para nome e leitura.</p>
+    <p class="sub">Cada quadrado é uma célula de 0,1° do MERGE (cerca de 11 km de lado), pintada pelo acumulado do período escolhido. Os círculos brancos marcam os pluviômetros da ANA; passe o mouse para o nome e a chuva medida.</p>
     <div class="controles">
       <span>Acumulado:</span><button data-k="d1" class="ativo">último dia</button><button data-k="d7">7 dias</button><button data-k="d30">30 dias</button>
       <span id="info-grade" class="sub" style="margin:0 0 0 8px"></span>
@@ -50,16 +50,15 @@
   </section>
 
   <section class="bloco" id="chao">
-    <h2><small>4</small>MERGE vs pluviômetros da ANA</h2>
-    <p class="sub">Cada pluviômetro da telemetria da ANA contra o que o MERGE estimou na célula de 0,1° onde ele está, agrupados por trecho em ordem de rio. O MERGE já incorpora pluviômetros de várias redes, entre elas ANA, ONS, INMET e Simepar (documentação do INPE), então parte destes pluviômetros pode ter entrado no próprio MERGE: a comparação não é independente. Ela serve para achar sensor com problema e diferenças locais, não para validar o MERGE.</p>
-    <div class="tabela-wrap"><table class="tab" id="tab-comp"><thead><tr><th>Estação</th><th>Tipo</th><th class="num">Medido 7 d (mm)</th><th class="num">MERGE 7 d (mm)</th><th class="num">Diferença</th><th class="num">Medido 30 d</th><th class="num">MERGE 30 d</th><th>Leitura</th><th>Último dado</th></tr></thead><tbody></tbody></table></div>
-    <p class="nota-tabela"><b>Como ler a coluna Leitura</b> (comparação dos 7 dias): <b>próximos</b> quando a discrepância entre o pluviômetro e o MERGE é inferior a 20% do maior dos dois valores (por exemplo, 82 mm no pluviômetro e 81 mm no MERGE); <b>pluviômetro mediu mais</b> ou <b>MERGE estimou mais</b> quando a discrepância é de 20% ou mais; <b>sensor mudo?</b> quando o pluviômetro marcou menos de 1 mm e o MERGE mais de 15 mm. Alguma discrepância é esperada: o pluviômetro mede um ponto, o MERGE estima a média de uma célula de cerca de 11 km.</p>
+    <h2><small>4</small>Pluviômetros da ANA</h2>
+    <p class="sub">Chuva medida em cada pluviômetro da telemetria da ANA na bacia, agrupada por trecho em ordem de rio. Dado bruto, sem consistência. Não são comparados ao MERGE: o MERGE já incorpora pluviômetros da ANA e do ONS (documentação do INPE), então a comparação não seria independente.</p>
+    <div class="tabela-wrap"><table class="tab" id="tab-plu"><thead><tr><th>Estação</th><th>Tipo</th><th class="num">24 h (mm)</th><th class="num">7 dias (mm)</th><th class="num">30 dias (mm)</th><th>Último dado</th></tr></thead><tbody></tbody></table></div>
   </section>
 
   <section class="bloco" id="dados">
     <h2><small>5</small>Dados desta página</h2>
     <p class="sub">A série diária da bacia é calculada pelo painel a partir dos arquivos GRIB2 do INPE; os pluviômetros vêm do webservice de telemetria da ANA. Os arquivos trazem a citação no cabeçalho.</p>
-    <div class="controles"><button id="csv-bacia">Baixar CSV da chuva média diária da bacia (365 dias)</button><button id="csv-plu">Baixar CSV dos pluviômetros contra o MERGE</button></div>
+    <div class="controles"><button id="csv-bacia">Baixar CSV da chuva média diária da bacia (365 dias)</button><button id="csv-plu">Baixar CSV da chuva medida nos pluviômetros</button></div>
     <div id="fontes" class="sub" style="font-size:12.5px"></div>
   </section>
 </main>
@@ -104,20 +103,18 @@
   }
   try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { style: { color: PAL.escuro, weight: 2, fill: false } }).addTo(mapa); mapa.fitBounds(cam.getBounds(), { paddingBottomRight: [0, 10] }); } catch (e) {}
   const simbolos = L.control({ position: 'topright' });
-  simbolos.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = `<i style="border-radius:50%;background:#0193DE;border:2px solid #C0504D"></i>pluviômetro (cor = medido no período, mesma escala do MERGE)<br>${LEGENDA_USINAS}<br>${LEGENDA_HIDRO}<br><span style="color:#6B7280">passe o mouse para nome e leitura</span>`; return d; };
+  simbolos.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = `<i style="border-radius:50%;background:#fff;border:2px solid #294086"></i>pluviômetro da ANA<br>${LEGENDA_USINAS}<br>${LEGENDA_HIDRO}<br><span style="color:#6B7280">passe o mouse para nome e chuva medida</span>`; return d; };
   simbolos.addTo(mapa);
   await desenharHidrografia(mapa, 0.9);
   U.usinas.forEach(u => marcadorUsina([u.lat, u.lon], u.curto, true, u.tipo).addTo(mapa));
   const marcadores = [];
-  (C.pluviometros || []).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius: 8, color: '#C0504D', weight: 2, fillColor: '#fff', fillOpacity: 1 }).addTo(mapa).bindTooltip('', { direction: 'top', offset: [0, -8] }); marcadores.push([m, p]); });
+  (C.pluviometros || []).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius: 6, color: '#294086', weight: 2, fillColor: '#fff', fillOpacity: 1 }).addTo(mapa).bindTooltip('', { direction: 'top', offset: [0, -6] }); marcadores.push([m, p]); });
   function pintarPluviometros(k) {
-    const [escala] = escalaDe(k);
-    const chave = { d1: 'mm_24h', d7: 'mm_7d', d30: 'mm_30d' }[k], rot = { d1: '24 h', d7: '7 d', d30: '30 d' }[k];
+    // cor neutra: os pluviômetros não são pintados na escala do MERGE, para não sugerir comparação
+    const chave = { d1: 'mm_24h', d7: 'mm_7d', d30: 'mm_30d' }[k], rot = { d1: '24 h', d7: '7 dias', d30: '30 dias' }[k];
     marcadores.forEach(([m, p]) => {
-      const v = p[chave], sat = p.merge ? p.merge[k] : null;
-      m.setStyle({ fillColor: corChuva(v, escala) });
-      m.setTooltipContent(`<b>${p.curto || p.nome.replace(/^UHE /, '')}</b><br>medido em ${rot}: ${fmt(v, 1)} mm · MERGE na célula: ${fmt(sat, 1)} mm`);
-      m.bindPopup(`<b>${p.curto || p.nome}</b> · ${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'estação fluviométrica com pluviômetro'}<br>${p.codigo}<br>medido em ${rot}: <b>${fmt(v, 1)} mm</b> · MERGE na célula: ${fmt(sat, 1)} mm<br><a href="trecho.html?t=${p.trecho}">trecho</a> · <a href="estacao.html?c=${p.codigo}">estação</a>`);
+      m.setTooltipContent(`<b>${p.curto || p.nome.replace(/^UHE /, '')}</b><br>chuva medida em ${rot}: ${fmt(p[chave], 1)} mm`);
+      m.bindPopup(`<b>${p.curto || p.nome}</b> · ${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'estação fluviométrica com pluviômetro'}<br>${p.codigo}<br>chuva medida em ${rot}: <b>${fmt(p[chave], 1)} mm</b><br><a href="trecho.html?t=${p.trecho}">trecho</a> · <a href="estacao.html?c=${p.codigo}">estação</a>`);
     });
   }
   desenharGrade('d1');
@@ -140,21 +137,17 @@
   desenharDiaria(90);
   document.querySelectorAll('.controles button[data-d]').forEach(b => b.addEventListener('click', () => desenharDiaria(+b.dataset.d)));
 
-  // ================= 4. MERGE vs pluviômetros
-  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo?', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) < .2) return ['próximos', 'color:#2E8B57']; return [d > 0 ? 'pluviômetro mediu mais' : 'MERGE estimou mais', 'color:#D9A400']; };
+  // ================= 4. Pluviômetros da ANA
   const porTrecho = B.trechos.map(t => ({ t, itens: (C.pluviometros || []).filter(p => p.trecho === t.slug) })).filter(g => g.itens.length);
-  document.querySelector('#tab-comp tbody').innerHTML = porTrecho.map(g => `<tr><td colspan="9" style="background:#EEF3FA;color:var(--azul-escuro)"><a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a></td></tr>` + g.itens.map(p => {
-    const sat7 = p.merge ? p.merge.d7 : null, sat30 = p.merge ? p.merge.d30 : null, [txt, cor] = leitura(p);
-    const dif = (sat7 !== null && p.mm_7d !== null) ? p.mm_7d - sat7 : null;
-    return `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td>${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'fluviométrica com pluviômetro'}</td>
-      <td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(sat7, 1)}</td><td class="num">${dif === null ? '–' : (dif > 0 ? '+' : '') + fmt(dif, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td class="num">${fmt(sat30, 1)}</td><td style="${cor}">${txt}</td><td>${fmtInst(p.ultimo_instante)}</td></tr>`; }).join('')).join('');
+  document.querySelector('#tab-plu tbody').innerHTML = porTrecho.map(g => `<tr><td colspan="6" style="background:#EEF3FA;color:var(--azul-escuro)"><a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a></td></tr>` + g.itens.map(p =>
+    `<tr><td><span class="ponto ${frescorClasse(p.frescor_h)}"></span><a href="estacao.html?c=${p.codigo}">${p.curto || p.nome.replace(/^UHE /, '')}</a> <small style="color:var(--texto-suave)">${p.codigo}</small></td><td>${p.tipo === 'Pluviométrica' ? 'pluviômetro' : 'fluviométrica com pluviômetro'}</td><td class="num">${fmt(p.mm_24h, 1)}</td><td class="num">${fmt(p.mm_7d, 1)}</td><td class="num">${fmt(p.mm_30d, 1)}</td><td>${fmtInst(p.ultimo_instante)}</td></tr>`).join('')).join('');
 
   // ================= 5. Dados
   const c = (status && status.citacoes) || {};
   document.getElementById('fontes').innerHTML = [c.merge, c.mlt, c.telemetria].filter(Boolean).map(t => `<p>${t}, consulta em ${fmtData(status.gerado_em)}.</p>`).join('');
   const baixar = (nome, linhas) => { const blob = new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; a.click(); };
   document.getElementById('csv-bacia').addEventListener('click', () => baixar('chuva_media_bacia_iguacu.csv', ['# Chuva média diária da bacia do Iguaçu (585 células de 0,1°) — ' + (c.merge || 'INPE/CPTEC, MERGE'), 'data;chuva_mm', ...D.data.map((d, i) => `${d};${D.mm[i] ?? ''}`)]));
-  document.getElementById('csv-plu').addEventListener('click', () => baixar('pluviometros_vs_merge.csv', ['# Pluviômetros da telemetria da ANA contra o MERGE na célula — ' + (c.telemetria || 'ANA') + ' | ' + (c.merge || 'INPE'), 'codigo;nome;trecho;medido_24h;merge_1d;medido_7d;merge_7d;medido_30d;merge_30d;ultimo_dado', ...(C.pluviometros || []).map(p => [p.codigo, p.nome, p.trecho, p.mm_24h, p.merge ? p.merge.d1 : '', p.mm_7d, p.merge ? p.merge.d7 : '', p.mm_30d, p.merge ? p.merge.d30 : '', p.ultimo_instante].map(v => v === null || v === undefined ? '' : v).join(';'))]));
+  document.getElementById('csv-plu').addEventListener('click', () => baixar('pluviometros_chuva_medida.csv', ['# Chuva medida nos pluviômetros da telemetria da ANA na bacia do Iguaçu — ' + (c.telemetria || 'ANA, webservice de telemetria') + '; dado bruto', 'codigo;nome;tipo;trecho;chuva_24h_mm;chuva_7d_mm;chuva_30d_mm;ultimo_dado', ...(C.pluviometros || []).map(p => [p.codigo, p.nome, p.tipo, p.trecho, p.mm_24h, p.mm_7d, p.mm_30d, p.ultimo_instante].map(v => v === null || v === undefined ? '' : v).join(';'))]));
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
 </body>
