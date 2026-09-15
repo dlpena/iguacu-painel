@@ -224,7 +224,7 @@ def monta_chuva(tele, agora, est_json):
                 "trecho": e.get("trecho"), "ordem_trecho": e.get("ordem_trecho", 99), "frescor_h": e.get("frescor_h"),
                 "mm_24h": e["chuva_24h"], "mm_7d": e["chuva_7d"], "mm_30d": num(g["chuva_mm"].sum(), 1), "ultimo_instante": e.get("ultimo_instante")}
         if grade:
-            # célula do MERGE mais próxima do pluviômetro (grade de 0,1°): comparação satélite × observado
+            # célula do MERGE mais próxima do pluviômetro (grade de 0,1°): comparação MERGE × pluviômetro
             la, lo = np.asarray(grade["lat"]), np.asarray(grade["lon"])
             k = int(np.argmin((la - e["lat"]) ** 2 + (lo - e["lon"]) ** 2))
             if (la[k] - e["lat"]) ** 2 + (lo[k] - e["lon"]) ** 2 <= 0.1 ** 2:

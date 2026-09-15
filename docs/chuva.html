@@ -16,10 +16,10 @@
 <header id="topo" class="topo"></header>
 <main>
   <h1>Chuva na bacia do Iguaçu</h1>
-  <p class="sub">Duas fontes que se completam: o MERGE do INPE/CPTEC (satélite GPM combinado com pluviômetros, grade de 0,1°, 585 células na bacia) diz onde e quanto choveu em toda a área; os pluviômetros da telemetria da ANA dizem o que foi medido no chão. A média de longo termo (MLT) é a climatologia oficial do MERGE, 1998–2024.</p>
+  <p class="sub">Duas fontes que se completam: o MERGE do INPE/CPTEC (estimativa do satélite GPM combinada com observações de pluviômetros, grade de 0,1°, 585 células na bacia) diz onde e quanto choveu em toda a área; os pluviômetros da telemetria da ANA dizem o que foi medido em cada ponto. A média de longo termo (MLT) é a climatologia oficial do MERGE, 1998–2024.</p>
 
   <nav class="indice">
-    <a class="sec" href="#agora">Agora</a><a class="sec" href="#onde">Onde choveu</a><a class="sec" href="#tempo">Mês e ano</a><a class="sec" href="#chao">Satélite vs pluviômetros</a><a class="sec" href="#dados">Dados</a>
+    <a class="sec" href="#agora">Agora</a><a class="sec" href="#onde">Onde choveu</a><a class="sec" href="#tempo">Mês e ano</a><a class="sec" href="#chao">MERGE vs pluviômetros</a><a class="sec" href="#dados">Dados</a>
   </nav>
 
   <section class="bloco" id="agora">
@@ -44,16 +44,16 @@
     <h3>Mensal contra a MLT</h3>
     <div id="g-mensal" class="grafico"></div>
     <h3>Dia a dia</h3>
-    <p class="explica">Chuva média diária da bacia. O dia D do MERGE acumula as 24 h encerradas às 12 UTC (9 h de Brasília) desse dia.</p>
+    <p class="explica">Chuva média diária da bacia. O arquivo do dia D traz hora de referência 12 UTC (9 h de Brasília) no metadado; a janela exata de acumulação não consta na documentação do INPE e fica a confirmar.</p>
     <div class="controles"><span>Janela:</span><button data-d="30">30 d</button><button data-d="90" class="ativo">90 d</button><button data-d="365">365 d</button></div>
     <div id="g-diaria" class="grafico"></div>
   </section>
 
   <section class="bloco" id="chao">
-    <h2><small>4</small>Satélite vs pluviômetros</h2>
-    <p class="sub">Cada pluviômetro da telemetria da ANA contra o que o MERGE estimou na célula de 0,1° onde ele está, agrupados por trecho em ordem de rio. Quando os dois estão próximos, o mapa acima merece confiança.</p>
+    <h2><small>4</small>MERGE vs pluviômetros da ANA</h2>
+    <p class="sub">Cada pluviômetro da telemetria da ANA contra o que o MERGE estimou na célula de 0,1° onde ele está, agrupados por trecho em ordem de rio. O MERGE já incorpora pluviômetros de várias redes, entre elas ANA, ONS, INMET e Simepar (documentação do INPE), então parte destes pluviômetros pode ter entrado no próprio MERGE: a comparação não é independente. Ela serve para achar sensor com problema e diferenças locais, não para validar o MERGE.</p>
     <div class="tabela-wrap"><table class="tab" id="tab-comp"><thead><tr><th>Estação</th><th>Tipo</th><th class="num">Medido 7 d (mm)</th><th class="num">MERGE 7 d (mm)</th><th class="num">Diferença</th><th class="num">Medido 30 d</th><th class="num">MERGE 30 d</th><th>Leitura</th><th>Último dado</th></tr></thead><tbody></tbody></table></div>
-    <p class="nota-tabela"><b>Como ler a coluna Leitura</b> (comparação dos 7 dias): <b>próximos</b> quando a discrepância entre o pluviômetro e o MERGE é inferior a 20% do maior dos dois valores (por exemplo, 82 mm no pluviômetro e 81 mm no MERGE); <b>pluviômetro mediu mais</b> ou <b>satélite estimou mais</b> quando a discrepância é de 20% ou mais; <b>sensor mudo?</b> quando o pluviômetro marcou menos de 1 mm e o MERGE mais de 15 mm. Alguma discrepância é esperada: o pluviômetro mede um ponto, o MERGE estima a média de uma célula de cerca de 11 km.</p>
+    <p class="nota-tabela"><b>Como ler a coluna Leitura</b> (comparação dos 7 dias): <b>próximos</b> quando a discrepância entre o pluviômetro e o MERGE é inferior a 20% do maior dos dois valores (por exemplo, 82 mm no pluviômetro e 81 mm no MERGE); <b>pluviômetro mediu mais</b> ou <b>MERGE estimou mais</b> quando a discrepância é de 20% ou mais; <b>sensor mudo?</b> quando o pluviômetro marcou menos de 1 mm e o MERGE mais de 15 mm. Alguma discrepância é esperada: o pluviômetro mede um ponto, o MERGE estima a média de uma célula de cerca de 11 km.</p>
   </section>
 
   <section class="bloco" id="dados">
@@ -140,8 +140,8 @@
   desenharDiaria(90);
   document.querySelectorAll('.controles button[data-d]').forEach(b => b.addEventListener('click', () => desenharDiaria(+b.dataset.d)));
 
-  // ================= 4. Satélite vs pluviômetros
-  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo?', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) < .2) return ['próximos', 'color:#2E8B57']; return [d > 0 ? 'pluviômetro mediu mais' : 'satélite estimou mais', 'color:#D9A400']; };
+  // ================= 4. MERGE vs pluviômetros
+  const leitura = p => { const v = p.mm_7d, sat = p.merge ? p.merge.d7 : null; if (sat === null || v === null || v === undefined) return ['sem célula ou sem dado', '']; if (v < 1 && sat > 15) return ['sensor mudo?', 'color:#C0504D']; const mx = Math.max(v, sat, 1), d = (v - sat) / mx; if (Math.abs(d) < .2) return ['próximos', 'color:#2E8B57']; return [d > 0 ? 'pluviômetro mediu mais' : 'MERGE estimou mais', 'color:#D9A400']; };
   const porTrecho = B.trechos.map(t => ({ t, itens: (C.pluviometros || []).filter(p => p.trecho === t.slug) })).filter(g => g.itens.length);
   document.querySelector('#tab-comp tbody').innerHTML = porTrecho.map(g => `<tr><td colspan="9" style="background:#EEF3FA;color:var(--azul-escuro)"><a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a></td></tr>` + g.itens.map(p => {
     const sat7 = p.merge ? p.merge.d7 : null, sat30 = p.merge ? p.merge.d30 : null, [txt, cor] = leitura(p);
