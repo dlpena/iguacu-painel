@@ -1,4 +1,6 @@
 /* Painel Iguaçu — identidade inspirada na ANA (azuis do logotipo institucional; a confirmar no manual de marca) */
+/* o atributo hidden sempre vence: sem isto, classes com display (ex.: .bloco) mostram seções que deviam sumir */
+[hidden] { display: none !important; }
 :root {
   --azul-escuro: #294086;
   --azul-medio: #0193DE;
