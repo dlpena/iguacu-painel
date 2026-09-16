@@ -12,26 +12,35 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
 <style>
-  .indice { position: sticky; top: var(--h-topo, 0px); z-index: 900; background: rgba(246,248,251,.96); backdrop-filter: blur(4px); border-bottom: 1px solid var(--borda); margin: 14px -20px 0; padding: 8px 20px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  /* trilha e seletor de trechos ficam fixos logo abaixo da barra principal; o índice desce a mesma altura */
+  .barra-trecho { position: sticky; top: var(--h-topo, 0px); z-index: 950; background: rgba(246,248,251,.96); backdrop-filter: blur(4px);
+                  margin: 0 -20px; padding: 6px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .barra-trecho.solta { position: static; background: none; backdrop-filter: none; }
+  .barra-trecho #trilha { margin: 0; }
+  .barra-trecho .controles { margin: 0; }
+  .indice { position: sticky; top: calc(var(--h-topo, 0px) + var(--h-trecho, 0px)); z-index: 900; background: rgba(246,248,251,.96); backdrop-filter: blur(4px); border-bottom: 1px solid var(--borda); margin: 14px -20px 0; padding: 8px 20px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
   .indice a.sec { padding: 5px 11px; border-radius: 14px; font-size: 13px; color: var(--azul-escuro); background: #EEF3FA; }
   .indice a.sec:hover { background: var(--azul-claro); color: #fff; text-decoration: none; }
   .indice .janela { margin-left: auto; display: flex; gap: 4px; align-items: center; font-size: 12.5px; color: var(--texto-suave); }
   .indice .janela button { font-family: inherit; font-size: 12.5px; padding: 4px 10px; border: 1px solid var(--borda); background: #fff; border-radius: 6px; color: var(--azul-escuro); cursor: pointer; }
   .indice .janela button.ativo { background: var(--azul-escuro); color: #fff; border-color: var(--azul-escuro); }
-  section.bloco { margin-top: 34px; scroll-margin-top: calc(var(--h-topo, 0px) + 64px); }
+  section.bloco { margin-top: 34px; scroll-margin-top: calc(var(--h-topo, 0px) + var(--h-trecho, 0px) + 64px); }
   section.bloco > h2 { font-size: 19px; border: 0; padding: 0; margin: 0 0 2px; }
   section.bloco > h2 small { font-size: 12px; color: var(--texto-suave); letter-spacing: .5px; text-transform: uppercase; margin-right: 8px; }
   section.bloco > p.sub { margin-bottom: 12px; }
   section.bloco h3 { font-size: 15px; color: var(--azul-escuro); margin: 22px 0 2px; }
   section.bloco p.explica { font-size: 13px; color: var(--texto-suave); margin: 0 0 6px; max-width: 900px; }
-  @media (max-width: 700px) { .indice { margin: 14px -14px 0; padding: 8px 14px; } }
+  @media (max-width: 700px) { .indice { margin: 14px -14px 0; padding: 8px 14px; }
+                              .barra-trecho { position: static; margin: 0 -14px; padding: 6px 14px; } }
 </style>
 </head>
 <body>
 <header id="topo" class="topo"></header>
 <main>
-  <div id="trilha"></div>
-  <div class="controles" id="sel-trecho"></div>
+  <div class="barra-trecho" id="barra-trecho">
+    <div id="trilha"></div>
+    <div class="controles" id="sel-trecho"></div>
+  </div>
   <h1 id="titulo">Trecho</h1>
   <p class="sub" id="contexto"></p>
   <div class="cartao" style="padding:6px 8px 2px"><div class="esquema-wrap"><div id="esquema"></div></div><div class="sub" style="font-size:11.5px;margin:2px 6px 4px">Bacia inteira, da cabeceira (direita) à foz (esquerda); o trecho desta página está destacado. Clique em outra faixa para mudar de trecho.</div><div id="legenda-esquema"></div></div>
@@ -105,6 +114,19 @@
   const B = await carregar('bacia.json');
   const slug = param('t', 'baixo-iguacu');
   document.getElementById('sel-trecho').innerHTML = '<span class="sub" style="margin:0 6px 0 0">foz</span>' + B.trechos.slice().reverse().map(t => `<a href="trecho.html?t=${t.slug}"><button class="${t.slug === slug ? 'ativo' : ''}">${t.curto || t.nome}</button></a>`).join('<span style="color:var(--azul-claro)">‹</span>') + '<span class="sub" style="margin:0 0 0 6px">cabeceira</span>';
+  // mesma conta da barra principal: 1 px de sobreposição para não sobrar fresta entre as barras fixas
+  const barra = document.getElementById('barra-trecho');
+  const medirBarra = () => {
+    // quando trilha e seletor não cabem numa linha, a barra some do topo: três barras fixas comeriam a tela
+    const h = barra.getBoundingClientRect().height;
+    barra.classList.toggle('solta', h > 56);
+    const fixa = getComputedStyle(barra).position === 'sticky';
+    document.documentElement.style.setProperty('--h-trecho', (fixa ? Math.max(0, barra.getBoundingClientRect().height - 1) : 0) + 'px');
+  };
+  medirBarra();
+  if (window.ResizeObserver) new ResizeObserver(medirBarra).observe(barra);
+  window.addEventListener('resize', medirBarra);
+  window.addEventListener('load', medirBarra);
   const [T, C] = await Promise.all([carregar(`trecho/${slug}.json`), carregar('chuva.json').catch(() => ({}))]);
   const R = B.trechos.find(t => t.slug === slug) || { estacoes: [], pluviometros: [], avisos: [] };
   document.title = `${T.nome} · Painel Iguaçu`;
@@ -112,6 +134,7 @@
   document.getElementById('trilha').innerHTML = trilha([['index.html', '← O rio agora'], [null, `Trecho ${T.nome}`]]);
   document.getElementById('contexto').textContent = T.contexto;
   const U = T.usina;
+  medirBarra(); // depois da trilha: a barra pode ter ganhado altura e quebrado em duas linhas
   desenharEsquema(document.getElementById('esquema'), B.trechos, slug);
   document.getElementById('legenda-esquema').innerHTML = legendaEsquema();
   if (!U) { document.getElementById('lnk-usina').hidden = true; document.getElementById('n-chuva').textContent = '3'; document.getElementById('n-dados').textContent = '4'; }
