@@ -20,7 +20,7 @@
 
   <section class="bloco" id="estacoes">
     <h2><small>1</small>Estações por trecho</h2>
-    <p class="sub">Uma tabela por trecho, de montante para jusante, com o papel de cada estação antes de qualquer número. "Média 30 d" é a média da própria estação nos últimos 30 dias; a coluna "7 dias" é a tendência recente. Traço nas colunas de chuva quer dizer que a estação não transmite chuva, ou seja, não tem pluviômetro em operação: não confunda com zero, que é chuva medida e igual a zero. Clique no cabeçalho para ordenar.</p>
+    <p class="sub">Uma tabela por trecho, de montante para jusante, com o papel de cada estação antes de qualquer número. "Média 30 d" é a média da própria estação nos últimos 30 dias; a coluna "7 dias" é a tendência recente. O minigráfico é sempre a vazão dos últimos 7 dias, em médias de 6 h: estação que não transmite vazão fica sem desenho. Traço nas colunas de chuva quer dizer que a estação não transmite chuva, ou seja, não tem pluviômetro em operação: não confunda com zero, que é chuva medida e igual a zero. Clique no cabeçalho para ordenar.</p>
     <div class="controles">
       <select id="f-tipo"><option value="">Todos os tipos</option><option>Fluviométrica</option><option>Pluviométrica</option></select>
       <label><input type="checkbox" id="f-dado" checked> só com dado nos últimos 7 dias</label>
@@ -52,11 +52,11 @@
     if (soltas.length) grupos.push({ t: { slug: null, nome: 'Sem trecho atribuído', contexto: '' }, itens: soltas });
     document.getElementById('f-resumo').textContent = `${sel.length} de ${est.length} estações`;
     document.getElementById('grupos').innerHTML = grupos.map(g => `<h3>${g.t.slug ? `<a href="trecho.html?t=${g.t.slug}">${g.t.nome}</a>` : g.t.nome} <span class="chip">${g.itens.length}</span></h3>${g.t.contexto ? `<p class="explica">${g.t.contexto}</p>` : ''}
-      <div class="tabela-wrap"><table class="tab"><thead><tr><th>Código</th><th>Nome</th><th>Papel no trecho</th><th>Último dado</th><th class="num">Cota (m)</th><th class="num">Vazão (m³/s)</th><th class="num">Média 30 d</th><th class="num">Chuva 24 h</th><th class="num">Chuva 7 d</th><th>7 dias</th></tr></thead><tbody>
+      <div class="tabela-wrap"><table class="tab"><thead><tr><th>Código</th><th>Nome</th><th>Papel no trecho</th><th>Último dado</th><th class="num">Cota (m)</th><th class="num">Vazão (m³/s)</th><th class="num">Média 30 d</th><th class="num">Chuva 24 h</th><th class="num">Chuva 7 d</th><th>Vazão, 7 dias</th></tr></thead><tbody>
       ${g.itens.map(e => `<tr><td data-v="${e.codigo}"><a href="estacao.html?c=${e.codigo}">${e.codigo}</a></td><td title="${e.nome}">${e.curto || e.nome}</td><td>${PAPEL[e.papel] || (e.tipo === 'Pluviométrica' ? 'pluviômetro' : '–')}${e.rio_afluente ? ' · ' + e.rio_afluente : ''}</td>
         <td data-v="${e.ultimo_instante || ''}"><span class="ponto ${frescorClasse(e.frescor_h)}"></span>${fmtInst(e.ultimo_instante)}</td>
         <td class="num">${fmt(e.cota_m, 2)}</td><td class="num">${fmt(e.vazao)}</td><td class="num">${fmt((e.ref || {}).vazao_media_30d)}</td><td class="num">${fmt(e.chuva_24h, 1)}</td><td class="num">${fmt(e.chuva_7d, 1)}</td>
-        <td class="spark">${e.spark ? spark(e.spark.v, e.spark.var === 'chuva_mm' ? PAL.claro : PAL.medio) : ''}</td></tr>`).join('')}</tbody></table></div>`).join('');
+        <td class="spark">${e.spark && e.spark.var === 'vazao' ? spark(e.spark.v, PAL.medio) : ''}</td></tr>`).join('')}</tbody></table></div>`).join('');
     document.querySelectorAll('table.tab').forEach(tabelaOrdenavel);
   }
   ['f-tipo', 'f-dado'].forEach(id => document.getElementById(id).addEventListener('change', render));
