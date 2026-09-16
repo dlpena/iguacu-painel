@@ -125,6 +125,14 @@ def usina_detalhe(u, ho, di, tele, cat, regras_por_usina, montante):
 
 
 # ------------------------------------------------------------------ estações
+def chuva_soma(g, filtro):
+    """Soma da chuva no recorte; None quando a estação não tem nenhuma leitura de chuva no mês (sem pluviômetro)."""
+    if not len(g) or not g["chuva_mm"].notna().any():
+        return None
+    s = g if filtro is None else g.loc[filtro]
+    return num(s["chuva_mm"].sum(), 1) if s["chuva_mm"].notna().any() else None
+
+
 def estacao_atual(cod, tele, agora):
     g = tele[tele["codigo"] == cod].sort_values("instante")
     if not len(g):
@@ -136,11 +144,14 @@ def estacao_atual(cod, tele, agora):
     item = {"ultimo_instante": ult["instante"].strftime("%Y-%m-%dT%H:%M"), "frescor_h": horas_desde(ult["instante"], agora),
             "cota_m": num(gc["cota_cm"].iloc[-1] / 100, 3) if len(gc) else None,
             "vazao": num(gv["vazao"].iloc[-1]) if len(gv) else None,
-            "chuva_24h": num(g.loc[g["instante"] > agora - timedelta(hours=24), "chuva_mm"].sum(), 1),
-            "chuva_7d": num(g.loc[g["instante"] > agora - timedelta(days=7), "chuva_mm"].sum(), 1),
+            # estação sem pluviômetro não devolve chuva nenhuma: soma de vazios daria 0 mm, que se lê como
+            # "não choveu". Fica nulo, e as páginas mostram traço.
+            "tem_chuva": bool(g["chuva_mm"].notna().any()),
+            "chuva_24h": chuva_soma(g, g["instante"] > agora - timedelta(hours=24)),
+            "chuva_7d": chuva_soma(g, g["instante"] > agora - timedelta(days=7)),
             "ref": {"vazao_media_30d": num(j30["vazao"].mean()), "vazao_max_30d": num(j30["vazao"].max()), "vazao_min_30d": num(j30["vazao"].min()),
                     "cota_media_30d": num(j30["cota_cm"].mean() / 100, 2) if j30["cota_cm"].notna().any() else None,
-                    "chuva_30d": num(j30["chuva_mm"].sum(), 1)}}
+                    "chuva_30d": chuva_soma(j30, None)}}
     antes = g[g["instante"] <= ult["instante"] - timedelta(hours=6)]
     if len(antes) and pd.notna(ult["vazao"]) and antes["vazao"].notna().any():
         item["vazao_6h"] = num(ult["vazao"] - antes["vazao"].dropna().iloc[-1])
