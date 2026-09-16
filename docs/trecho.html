@@ -12,13 +12,13 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
 <style>
-  .indice { position: sticky; top: 0; z-index: 900; background: rgba(246,248,251,.96); backdrop-filter: blur(4px); border-bottom: 1px solid var(--borda); margin: 14px -20px 0; padding: 8px 20px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .indice { position: sticky; top: var(--h-topo, 0px); z-index: 900; background: rgba(246,248,251,.96); backdrop-filter: blur(4px); border-bottom: 1px solid var(--borda); margin: 14px -20px 0; padding: 8px 20px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
   .indice a.sec { padding: 5px 11px; border-radius: 14px; font-size: 13px; color: var(--azul-escuro); background: #EEF3FA; }
   .indice a.sec:hover { background: var(--azul-claro); color: #fff; text-decoration: none; }
   .indice .janela { margin-left: auto; display: flex; gap: 4px; align-items: center; font-size: 12.5px; color: var(--texto-suave); }
   .indice .janela button { font-family: inherit; font-size: 12.5px; padding: 4px 10px; border: 1px solid var(--borda); background: #fff; border-radius: 6px; color: var(--azul-escuro); cursor: pointer; }
   .indice .janela button.ativo { background: var(--azul-escuro); color: #fff; border-color: var(--azul-escuro); }
-  section.bloco { margin-top: 34px; scroll-margin-top: 64px; }
+  section.bloco { margin-top: 34px; scroll-margin-top: calc(var(--h-topo, 0px) + 64px); }
   section.bloco > h2 { font-size: 19px; border: 0; padding: 0; margin: 0 0 2px; }
   section.bloco > h2 small { font-size: 12px; color: var(--texto-suave); letter-spacing: .5px; text-transform: uppercase; margin-right: 8px; }
   section.bloco > p.sub { margin-bottom: 12px; }

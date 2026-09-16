@@ -25,7 +25,9 @@ a { color: var(--azul-medio); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* cabeçalho */
-.topo { background: var(--cartao); border-top: 5px solid var(--azul-escuro); border-bottom: 1px solid var(--borda); }
+/* barra principal fixa no topo; --h-topo é medida em app.js e usada pelo índice e pelas âncoras */
+.topo { background: var(--cartao); border-top: 5px solid var(--azul-escuro); border-bottom: 1px solid var(--borda);
+        position: sticky; top: 0; z-index: 1100; }
 .topo .interno { max-width: 1280px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 .marca { display: flex; align-items: center; gap: 10px; color: var(--azul-escuro); font-size: 20px; letter-spacing: .3px; }
 .marca:hover { text-decoration: none; }
@@ -104,6 +106,8 @@ table.tab td.spark svg { vertical-align: middle; }
 
 /* mapa */
 #mapa { height: 520px; border-radius: 10px; border: 1px solid var(--borda); }
+/* o Leaflet dá z-index alto a controles e legendas; isolar o mapa mantém tudo abaixo da barra e do índice */
+.leaflet-container { position: relative; z-index: 0; isolation: isolate; }
 .legenda-mapa { background: #fff; padding: 8px 10px; border-radius: 6px; font-size: 12px; line-height: 1.6; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
 .legenda-mapa i { display: inline-block; width: 14px; height: 14px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
 .legenda-mapa svg { vertical-align: middle; margin-right: 4px; }
@@ -152,13 +156,13 @@ table.tab td.spark svg { vertical-align: middle; }
 .situacao .leaflet-control-attribution { display: none; }
 
 /* páginas em seções com índice fixo (trecho, estação, chuva, catálogo) */
-.indice { position: sticky; top: 0; z-index: 900; background: rgba(246,248,251,.96); backdrop-filter: blur(4px); border-bottom: 1px solid var(--borda); margin: 14px -20px 0; padding: 8px 20px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.indice { position: sticky; top: var(--h-topo, 0px); z-index: 900; background: rgba(246,248,251,.96); backdrop-filter: blur(4px); border-bottom: 1px solid var(--borda); margin: 14px -20px 0; padding: 8px 20px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .indice a.sec { padding: 5px 11px; border-radius: 14px; font-size: 13px; color: var(--azul-escuro); background: #EEF3FA; }
 .indice a.sec:hover { background: var(--azul-claro); color: #fff; text-decoration: none; }
 .indice .janela { margin-left: auto; display: flex; gap: 4px; align-items: center; font-size: 12.5px; color: var(--texto-suave); }
 .indice .janela button { font-family: inherit; font-size: 12.5px; padding: 4px 10px; border: 1px solid var(--borda); background: #fff; border-radius: 6px; color: var(--azul-escuro); cursor: pointer; }
 .indice .janela button.ativo { background: var(--azul-escuro); color: #fff; border-color: var(--azul-escuro); }
-section.bloco { margin-top: 34px; scroll-margin-top: 64px; }
+section.bloco { margin-top: 34px; scroll-margin-top: calc(var(--h-topo, 0px) + 64px); }
 section.bloco > h2 { font-size: 19px; border: 0; padding: 0; margin: 0 0 2px; }
 section.bloco > h2 small { font-size: 12px; color: var(--texto-suave); letter-spacing: .5px; text-transform: uppercase; margin-right: 8px; }
 section.bloco > p.sub { margin-bottom: 12px; }
@@ -179,4 +183,6 @@ footer p { margin: 4px 0; }
   .cartao .valor { font-size: 22px; }
   .bloco .seta { display: none; }
   #mapa { height: 360px; }
+  /* no celular a barra ocuparia mais de um terço da tela: fixo fica só o índice das seções */
+  .topo { position: static; }
 }
