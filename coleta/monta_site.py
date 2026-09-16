@@ -180,12 +180,14 @@ def chuva_diaria(cod, tele, dias=30):
 def monta_chuva(tele, agora, est_json):
     pasta = DADOS / "merge"
     csv = pasta / "chuva_bacia_diaria.csv"
-    out = {"meta": {"produto": "MERGE/INPE, grade 0,1°; o arquivo do dia D tem hora de referência 12 UTC (metadado do GRIB)"}}
+    out = {"meta": {"produto": "MERGE/INPE, grade 0,1°; o arquivo do dia D acumula das 12 UTC de D-1 às 12 UTC de D "
+                             "(Rozante et al. 2020, IJRS; Rozante & Rozante 2024, Remote Sensing)"}}
     if not csv.exists():
         return out
     s = pd.read_csv(csv, parse_dates=["data"]).sort_values("data")
     s = s[s["data"] >= pd.Timestamp(agora.date() - timedelta(days=DIAS_CHUVA))]
-    out["diaria"] = {"data": instantes(s["data"], "%Y-%m-%d"), "mm": lista(s["chuva_mm"], 1)}
+    out["diaria"] = {"data": instantes(s["data"], "%Y-%m-%d"), "mm": lista(s["chuva_mm"], 1),
+                     "versao": [None if pd.isna(v) else str(v) for v in s.get("versao", pd.Series([None] * len(s)))]}
     mlt = json.loads((pasta / "mlt.json").read_text(encoding="utf-8")) if (pasta / "mlt.json").exists() else {}
     mlt_mm = mlt.get("mlt_mm", {})
     men = s.groupby(s["data"].dt.to_period("M")).agg(mm=("chuva_mm", "sum"), dias=("chuva_mm", "size"))

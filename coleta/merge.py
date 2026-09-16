@@ -40,6 +40,11 @@ CSV = PASTA / "chuva_bacia_diaria.csv"
 CELULAS = PASTA / "celulas.parquet"
 MASCARA = PASTA / "mascara.npz"
 DIAS_CELULAS = 120
+# O INPE reescreve o arquivo do dia: primeiro com IMERG-Early (~16 UTC do próprio dia), depois com IMERG-Late
+# (~02:40 UTC do dia seguinte) e de novo no fechamento do mês (dias 1 a 4 do mês seguinte). Por isso os dias
+# recentes são rebaixados a cada rodada, e o mês anterior é refeito no começo do mês.
+REFAZ_DIAS = 7
+URL_CTL = "https://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/{a}/{m:02d}/MERGE_CPTEC_{a}{m:02d}{d:02d}.ctl"
 CITACAO = ("INPE/CPTEC, produto MERGE (precipitação diária em grade de 0,1°, satélite GPM combinado com pluviômetros), "
            "https://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/")
 
@@ -72,8 +77,24 @@ def carregar_mascara(ds) -> dict:
 
 def ler_csv() -> pd.DataFrame:
     if CSV.exists():
-        return pd.read_csv(CSV, parse_dates=["data"])
-    return pd.DataFrame(columns=["data", "chuva_mm", "n_celulas"])
+        d = pd.read_csv(CSV, parse_dates=["data"])
+        if "versao" not in d.columns:
+            d["versao"] = None
+        return d
+    return pd.DataFrame(columns=["data", "chuva_mm", "n_celulas", "versao"])
+
+
+def versao_do_dia(sess, d: date) -> str | None:
+    """Qual rodada do IMERG gerou o arquivo do dia (early, late ou final), lida no título do .ctl."""
+    try:
+        r = sess.get(URL_CTL.format(a=d.year, m=d.month, d=d.day), timeout=(10, 30))
+        if r.ok:
+            for linha in r.text.splitlines():
+                if linha.lower().startswith("title"):
+                    return linha.split("GPM-IMERG", 1)[-1].strip(" _-").lower() or None
+    except Exception:  # noqa: BLE001
+        pass
+    return None
 
 
 def processa_dias(dias: list[date]) -> tuple[int, list[str], dict]:
@@ -85,8 +106,9 @@ def processa_dias(dias: list[date]) -> tuple[int, list[str], dict]:
     PASTA.mkdir(parents=True, exist_ok=True)
     novos, falhas, meta = [], [], {}
     m = None
+    limite_refaz = hoje_brt() - timedelta(days=REFAZ_DIAS)
     for d in dias:
-        if d in feitos:
+        if d in feitos and d < limite_refaz:
             continue
         try:
             r = sess.get(URL_DIA.format(a=d.year, m=d.month, d=d.day), timeout=(10, 90))
@@ -100,7 +122,8 @@ def processa_dias(dias: list[date]) -> tuple[int, list[str], dict]:
                 m = carregar_mascara(ds)
                 meta = {k: str(ds[k].values) for k in ("time", "step", "valid_time") if k in ds.coords}
             vals = v.ravel()[m["idx"]]
-            novos.append({"data": pd.Timestamp(d), "chuva_mm": round(float(np.nanmean(vals)), 3), "n_celulas": int(len(vals))})
+            novos.append({"data": pd.Timestamp(d), "chuva_mm": round(float(np.nanmean(vals)), 3), "n_celulas": int(len(vals)),
+                          "versao": versao_do_dia(sess, d)})
             if d >= hoje_brt() - timedelta(days=DIAS_CELULAS):
                 cel = pd.concat([cel, pd.DataFrame({"data": pd.Timestamp(d), "celula": np.arange(len(vals)), "mm": np.round(vals, 2)})])
         except Exception as e:  # noqa: BLE001
@@ -150,7 +173,12 @@ def main() -> int:
     args = ap.parse_args()
     hoje = hoje_brt()
     d1 = date.fromisoformat(args.ate) if args.ate else hoje
-    d0 = date.fromisoformat(args.desde) if args.desde else d1 - timedelta(days=10)
+    if args.desde:
+        d0 = date.fromisoformat(args.desde)
+    elif hoje.day <= 6:
+        d0 = (hoje.replace(day=1) - timedelta(days=1)).replace(day=1)  # refaz o mês anterior no fechamento
+    else:
+        d0 = d1 - timedelta(days=10)
     dias = [d0 + timedelta(days=i) for i in range((d1 - d0).days + 1)]
     n, falhas, meta = processa_dias(dias)
     if args.mlt or not (PASTA / "mlt.json").exists():

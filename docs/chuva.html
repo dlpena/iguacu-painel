@@ -44,7 +44,7 @@
     <h3>Mensal contra a MLT</h3>
     <div id="g-mensal" class="grafico"></div>
     <h3>Dia a dia</h3>
-    <p class="explica">Chuva média diária da bacia. O arquivo do dia D traz hora de referência 12 UTC (9 h de Brasília) no metadado; a janela exata de acumulação não consta na documentação do INPE e fica a confirmar.</p>
+    <p class="explica">Chuva média diária da bacia. Cada barra rotulada com o dia D acumula das 12 UTC de D-1 às 12 UTC de D, ou seja, das 9 h de Brasília do dia anterior às 9 h do dia D, como recomenda a OMM (Rozante et al., 2020; Rozante e Rozante, 2024). A barra do dia mais recente costuma vir da rodada IMERG-Early e é reescrita pelo INPE algumas horas depois, com a rodada Late e mais pluviômetros: o painel rebaixa os últimos 7 dias a cada rodada e refaz o mês anterior no começo do mês.</p>
     <div class="controles"><span>Janela:</span><button data-d="30">30 d</button><button data-d="90" class="ativo">90 d</button><button data-d="365">365 d</button></div>
     <div id="g-diaria" class="grafico"></div>
   </section>
@@ -69,11 +69,13 @@
   const [C, B] = await Promise.all([carregar('chuva.json'), carregar('bacia.json')]);
   const U = { usinas: B.trechos.filter(t => t.usina).map(t => t.usina) };
   const ac = C.acumulados || {};
+  const vers = (C.diaria || {}).versao || [];
+  const ultimaVersao = vers.length ? vers[vers.length - 1] : null; // rodada do IMERG que gerou o último dia
 
   // ================= 1. Agora
   document.getElementById('agora-sub').textContent = `Média espacial da bacia pelo MERGE, último arquivo disponível: ${fmtData(ac.ultimo_dia)}. ${ac.mlt_mes ? `O mês em curso já tem ${fmt(ac.mes_atual / ac.mlt_mes * 100, 0)}% da MLT do mês inteiro com ${ac.dias_mes} dias somados.` : ''}`;
   document.getElementById('cartoes').innerHTML = [
-    ['Último dia', `${fmt(ac.d1, 1)} <small>mm</small>`, `MERGE de ${fmtData(ac.ultimo_dia)} (referência 12 UTC)`],
+    ['Último dia', `${fmt(ac.d1, 1)} <small>mm</small>`, `MERGE de ${fmtData(ac.ultimo_dia)}: 9 h do dia anterior às 9 h desse dia${ultimaVersao ? ' · rodada ' + ultimaVersao + (ultimaVersao === 'early' ? ', provisória' : '') : ''}`],
     ['7 dias', `${fmt(ac.d7, 1)} <small>mm</small>`, 'média da bacia'],
     ['30 dias', `${fmt(ac.d30, 1)} <small>mm</small>`, 'média da bacia'],
     [`Mês em curso (${ac.dias_mes || 0} dias)`, `${fmt(ac.mes_atual, 1)} <small>mm</small>`, `MLT do mês inteiro: ${fmt(ac.mlt_mes, 1)} mm${ac.mlt_mes ? ' · ' + fmt(ac.mes_atual / ac.mlt_mes * 100, 0) + '% da MLT' : ''}`],
