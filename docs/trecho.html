@@ -150,7 +150,7 @@
       <div class="valores">${e.vazao !== null && e.vazao !== undefined ? `<div><div class="var">vazão</div><b>${fmt(e.vazao)}</b> m³/s${tend(e.vazao_6h)}<div class="ref">${refTxt(e.vazao, (e.ref || {}).vazao_media_30d)}</div></div>` : ''}
         ${e.cota_m !== null && e.cota_m !== undefined ? `<div><div class="var">cota</div><b>${fmt(e.cota_m, 2)}</b> m<div class="ref">${(e.ref || {}).cota_media_30d ? 'média 30 d ' + fmt(e.ref.cota_media_30d, 2) + ' m' : 'sem referência'}</div></div>` : ''}
         ${(e.vazao === null || e.vazao === undefined) && (e.cota_m === null || e.cota_m === undefined) ? '<div class="ref">sem transmissão nos últimos 90 dias (cadastro diz "operando")</div>' : ''}
-        <div class="spark">${e.spark ? spark(e.spark.v, PAL.medio, 90, 24) : ''}<div class="ref">${frescorTexto(e.frescor_h)}</div></div></div></a>`);
+        <div class="spark"><span id="mini-${e.codigo}">${e.spark ? spark(e.spark.v, PAL.medio, 90, 24) : ''}</span><div class="ref"><span id="minirot-${e.codigo}"></span>${frescorTexto(e.frescor_h)}</div></div></div></a>`);
   });
   if (U) {
     const a = U.atual || {}, t = U.tendencia || {}, rf = U.ref || {}, fx = (R.usina || {}).faixa || {};
@@ -259,6 +259,24 @@
       : '<p class="sub">A outorga desta usina ainda não foi lida para o painel; nenhum limite é exibido até isso acontecer (regra: só dados verificáveis).</p>';
   }
 
+  // os minigráficos dos cartões seguem a mesma janela dos gráficos, para não conviverem duas escalas de tempo
+  const ROT_JANELA = { 1: '24 h', 7: '7 d', 30: '30 d', 90: '90 d' };
+  function desenharMinis() {
+    T.estacoes.forEach(e => {
+      const el = document.getElementById('mini-' + e.codigo);
+      if (!el || !e.serie) return;
+      const temV = (e.serie.vazao || []).some(x => x !== null && x !== undefined);
+      const r = recorte(e.serie.instante, { v: temV ? e.serie.vazao : e.serie.cota_m }, dias);
+      const serie = (r.arrays.v || []).filter(x => x !== undefined);
+      const v = serie.filter(x => x !== null);
+      // 90 px não comportam 1.500 pontos: um a cada N mantém o desenho e alivia o SVG
+      const n = Math.max(1, Math.ceil(serie.length / 180));
+      el.innerHTML = v.length > 1 ? spark(serie.filter((_, i) => i % n === 0), temV ? PAL.medio : PAL.escuro, 90, 24) : '';
+      const rot = document.getElementById('minirot-' + e.codigo);
+      if (rot) rot.textContent = v.length > 1 ? `${temV ? 'vazão' : 'cota'} em ${ROT_JANELA[dias] || dias + ' d'} · ` : '';
+    });
+  }
+
   function desenhar() {
     // rio: um ponto que chega e um que sai
     const tv = [];
@@ -298,6 +316,7 @@
         layoutBase({ showlegend: false, yaxis: { title: 'm³/s por hora', gridcolor: PAL.grade, tickformat: ',d' }, ...SA(lr) }), CONFIG_PLOT);
     }
     desenharChuva();
+    desenharMinis();
     document.querySelectorAll('.indice button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
   }
   document.querySelectorAll('.indice button[data-d]').forEach(b => b.addEventListener('click', () => { dias = +b.dataset.d; desenhar(); }));
