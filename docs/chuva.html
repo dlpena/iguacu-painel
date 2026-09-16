@@ -86,6 +86,10 @@
   const mapa = L.map('mapa', { zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
   mapa.setView([-25.7, -52.3], 7);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 14, opacity: .6 }).addTo(mapa);
+  // camadas em ordem fixa, independente de quando cada uma é redesenhada: células do MERGE embaixo (350),
+  // rios e pluviômetros no painel padrão (400), contorno da bacia por cima (450), usinas no topo (600)
+  mapa.createPane('merge').style.zIndex = 350;
+  const pContorno = mapa.createPane('contorno'); pContorno.style.zIndex = 450; pContorno.style.pointerEvents = 'none';
   let camadaCel = null, legenda = null;
   const G = C.grade;
   const escalaDe = k => { const vals = G ? G[k] : [], max = Math.max(1, ...vals.filter(v => v !== null)); return [k === 'd1' ? Math.max(10, Math.ceil(max / 10) * 10) : Math.max(20, Math.ceil(max / 20) * 20), max]; };
@@ -93,7 +97,7 @@
     if (!G) return;
     const [escala, max] = escalaDe(k), vals = G[k];
     if (camadaCel) camadaCel.remove();
-    camadaCel = L.layerGroup(G.lat.map((la, i) => L.rectangle([[la - .05, G.lon[i] - .05], [la + .05, G.lon[i] + .05]], { stroke: false, fillColor: corChuva(vals[i], escala), fillOpacity: .75, interactive: true })
+    camadaCel = L.layerGroup(G.lat.map((la, i) => L.rectangle([[la - .05, G.lon[i] - .05], [la + .05, G.lon[i] + .05]], { pane: 'merge', stroke: false, fillColor: corChuva(vals[i], escala), fillOpacity: .75, interactive: true })
       .bindTooltip(`${fmt(vals[i], 1)} mm`, { sticky: true }))).addTo(mapa);
     if (legenda) legenda.remove();
     legenda = L.control({ position: 'bottomleft' });
@@ -103,7 +107,7 @@
     document.querySelectorAll('.controles button[data-k]').forEach(b => b.classList.toggle('ativo', b.dataset.k === k));
     pintarPluviometros(k);
   }
-  try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { style: { color: PAL.escuro, weight: 2, fill: false } }).addTo(mapa); mapa.fitBounds(cam.getBounds(), { paddingBottomRight: [0, 10] }); } catch (e) {}
+  try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { pane: 'contorno', interactive: false, style: { color: PAL.escuro, weight: 2, fill: false } }).addTo(mapa); mapa.fitBounds(cam.getBounds(), { paddingBottomRight: [0, 10] }); } catch (e) {}
   const simbolos = L.control({ position: 'topright' });
   simbolos.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = `<i style="border-radius:50%;background:#fff;border:2px solid #294086"></i>pluviômetro da ANA<br>${LEGENDA_USINAS}<br>${LEGENDA_HIDRO}<br><span style="color:#6B7280">passe o mouse para nome e chuva medida</span>`; return d; };
   simbolos.addTo(mapa);
