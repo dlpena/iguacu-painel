@@ -37,7 +37,12 @@ def usinas() -> list[dict]:
 
 
 def regras() -> list[dict]:
-    return yaml.safe_load((CONFIG / "condicionantes.yaml").read_text(encoding="utf-8"))["regras"]
+    """Só as regras vigentes hoje: restrição com 'ate' no passado ou 'de' no futuro fica de fora.
+    Restrição declarada ao ONS costuma valer por uma quinzena; sem isso o painel mostraria limite vencido."""
+    todas = yaml.safe_load((CONFIG / "condicionantes.yaml").read_text(encoding="utf-8"))["regras"]
+    hoje = hoje_brt()
+    return [r for r in todas
+            if not (r.get("de") and hoje < r["de"]) and not (r.get("ate") and hoje > r["ate"])]
 
 
 def estacoes() -> pd.DataFrame:

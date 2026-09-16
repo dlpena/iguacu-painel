@@ -266,3 +266,117 @@ regras:
     titulo: Operação a fio d'água, com vazões defluentes, após a restituição da casa de força, iguais às vazões afluentes
     fonte: "Outorga ANA nº 254/2025, art. 1º, X"
     vigencia: permanente
+  # ================ FSAR-H declarados ao ONS pelas quatro usinas, formulários capturados em 16/09/2026
+  # (pasta FSAR-H da demanda). Taxas de variação: todas as quatro declaram a mesma tabela, 600 m³/s por hora
+  # até 2.000 m³/s de defluência e 1.000 m³/s por hora acima. Restrições temporárias trazem 'de'/'ate' e somem
+  # do painel quando vencem.
+  - id: fda-rampa-fsarh
+    usina: foz-do-areia
+    variavel: defluencia
+    tipo: texto
+    titulo: Taxa máxima de variação da defluência por tabela (600 m³/s por hora até 2.000 m³/s de defluência; 1.000 m³/s por hora acima), no aumento e na redução
+    fonte: "FSAR-H 10840/2026 (aumento, desde 20/08/2026) e 10841/2026 (redução, desde 29/08/2026), Copel"
+    vigencia: desde 20/08/2026
+  - id: fda-na-fsarh
+    usina: foz-do-areia
+    variavel: nivel_montante
+    tipo: maximo_declarado
+    valor: 739.00
+    unidade: m
+    titulo: Nível máximo de 739,00 m declarado ao ONS (não é condicionante da outorga)
+    fonte: "FSAR-H 11001/2026 (Copel), restrição temporária"
+    vigencia: 05/09/2026 a 18/09/2026
+    de: 2026-09-05
+    ate: 2026-09-18
+  - id: seg-rampa-fsarh
+    usina: segredo
+    variavel: defluencia
+    tipo: texto
+    titulo: Taxa máxima de variação da defluência por tabela (600 m³/s por hora até 2.000 m³/s de defluência; 1.000 m³/s por hora acima), no aumento e na redução
+    fonte: "FSAR-H 10842/2026 (aumento) e 10843/2026 (redução), Copel, desde 29/08/2026"
+    vigencia: desde 29/08/2026
+  - id: seg-na-fsarh
+    usina: segredo
+    variavel: nivel_montante
+    tipo: maximo_declarado
+    valor: 605.50
+    unidade: m
+    titulo: Nível máximo de 605,50 m declarado ao ONS (não é condicionante da outorga)
+    fonte: "FSAR-H 11004/2026 (Copel), restrição temporária"
+    vigencia: 05/09/2026 a 18/09/2026
+    de: 2026-09-05
+    ate: 2026-09-18
+  - id: ssa-rampa-fsarh
+    usina: salto-santiago
+    variavel: defluencia
+    tipo: texto
+    titulo: Taxa máxima de aumento da defluência por tabela (600 m³/s por hora até 2.000 m³/s; 1.000 m³/s por hora acima quando há vertimento)
+    fonte: "FSAR-H 791/2019 (desde 03/12/2019) e 10943/2026 (com vazão vertida maior que zero, desde 01/09/2026), ENGIE"
+    vigencia: desde 03/12/2019
+  - id: ssa-deplec
+    usina: salto-santiago
+    variavel: nivel_montante
+    tipo: texto
+    titulo: Taxa máxima de deplecionamento de 0,20 m em 24 h com o reservatório abaixo de 500,00 m (proteção da ictiofauna)
+    fonte: "FSAR-H 1428/2020 (ENGIE), desde 05/12/2020"
+    vigencia: desde 05/12/2020
+  - id: ssa-rebaixa
+    usina: salto-santiago
+    variavel: nivel_montante
+    tipo: texto
+    titulo: Rebaixamento dinâmico por previsão de afluência (506,00 m até 3.000 m³/s; 505,50 m até 6.000; 505,00 m até 9.000; 504,50 m até 12.000; 504,00 m até 15.000)
+    fonte: "FSAR-H 4740/2023 (ENGIE), desde 09/08/2023; proteção da ponte da BR-158"
+    vigencia: desde 09/08/2023
+  - id: ssa-vert-min
+    usina: salto-santiago
+    variavel: defluencia
+    tipo: texto
+    titulo: Vazão vertida mínima de 60 m³/s quando há vertimento; defluente máxima de 19.000 m³/s e vertida máxima de 17.000 m³/s
+    fonte: "FSAR-H 474/2018, 354/2018 e 472/2018 (ENGIE), desde 01/01/2018"
+    vigencia: desde 01/01/2018
+  - id: ssa-na-fsarh
+    usina: salto-santiago
+    variavel: nivel_montante
+    tipo: maximo_declarado
+    valor: 501.00
+    unidade: m
+    titulo: Nível máximo de 501,00 m declarado ao ONS (não é condicionante da outorga)
+    fonte: "FSAR-H 10991/2026 (ENGIE), restrição temporária; a FSAR-H 11013/2026 declara 502,00 m no mesmo período"
+    vigencia: 05/09/2026 a 18/09/2026
+    de: 2026-09-05
+    ate: 2026-09-18
+  - id: sos-qmin-fsarh
+    usina: salto-osorio
+    variavel: defluencia
+    tipo: minimo
+    valor: 200
+    unidade: m³/s
+    titulo: Vazão mínima defluente de 200 m³/s declarada ao ONS (preservação da ictiofauna)
+    fonte: "FSAR-H 747/2019 (ENGIE), permanente desde 23/07/2019; a outorga não fixa vazão mínima"
+    vigencia: desde 23/07/2019
+    tolerancia: 10
+  - id: sos-rampa-fsarh
+    usina: salto-osorio
+    variavel: defluencia
+    tipo: texto
+    titulo: Taxa máxima de aumento da defluência por tabela (600 m³/s por hora até 2.000 m³/s; 1.000 m³/s por hora acima quando há vertimento)
+    fonte: "FSAR-H 793/2019 (desde 03/12/2019) e 10948/2026 (com vazão vertida maior que zero, desde 01/09/2026), ENGIE"
+    vigencia: desde 03/12/2019
+  - id: sos-na-fsarh
+    usina: salto-osorio
+    variavel: nivel_montante
+    tipo: maximo_declarado
+    valor: 396.50
+    unidade: m
+    titulo: Nível máximo de 396,50 m declarado ao ONS (não é condicionante da outorga)
+    fonte: "FSAR-H 10989/2026 (ENGIE), restrição temporária"
+    vigencia: 05/09/2026 a 18/09/2026
+    de: 2026-09-05
+    ate: 2026-09-18
+  - id: sos-na-min-fsarh
+    usina: salto-osorio
+    variavel: nivel_montante
+    tipo: texto
+    titulo: Nível mínimo declarado ao ONS de 396,0 m (01/04 a 31/10 e 01/11 a 31/03, sazonal) e nível máximo declarado de 397,0 m
+    fonte: "FSAR-H 357/2018, 355/2018 e 356/2018 (ENGIE), desde 01/01/2018; proteção à ictiofauna e rendimento das unidades"
+    vigencia: permanente
