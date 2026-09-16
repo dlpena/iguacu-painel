@@ -52,7 +52,7 @@
 
   <section class="bloco" id="agora">
     <h2><small>1</small>Agora: como está o trecho</h2>
-    <p class="sub">Último dado de cada ponto, em ordem de rio, com a referência dos últimos 30 dias. Cor do ponto: verde até 2 h, amarelo até 24 h, cinza sem dado recente.</p>
+    <p class="sub">Último dado de cada ponto, em ordem de rio, com a referência dos últimos 30 dias. Cada cartão traz a hora do seu próprio dado: o ONS publica a usina com 1 a 2 h de atraso e as estações transmitem a cada 15 min a 1 h, então números de horas diferentes não se comparam diretamente. Cor do ponto: verde até 2 h, amarelo até 24 h, cinza sem dado recente.</p>
     <div class="grade" style="grid-template-columns: minmax(280px, 1fr) minmax(300px, 2fr)">
       <div class="mapa-caixa"><div id="mapa" style="height:100%;min-height:320px"></div><div id="situacao" class="situacao" title="situação na bacia"></div></div>
       <div id="pontos"></div>
@@ -146,7 +146,7 @@
     if (e.papel === 'barramento' && U) return; // a estação de barramento aparece dentro do bloco da usina
     cards.push(`<a class="ponto-trecho ${e.papel}" href="estacao.html?c=${e.codigo}">
       <div class="papel">${PAPEL[e.papel]}${e.rio_afluente ? ' · ' + e.rio_afluente : ''}${e.area_km2 ? ' · ' + fmt(e.area_km2) + ' km²' : ''}</div>
-      <div class="nome"><span class="ponto ${frescorClasse(e.frescor_h)}"></span>${e.curto} <small>${e.codigo}</small></div>
+      <div class="nome"><span class="ponto ${frescorClasse(e.frescor_h)}"></span>${e.curto} <small>${e.codigo}${e.ultimo_instante ? ' · ' + fmtInst(e.ultimo_instante) : ''}</small></div>
       <div class="valores">${e.vazao !== null && e.vazao !== undefined ? `<div><div class="var">vazão</div><b>${fmt(e.vazao)}</b> m³/s${tend(e.vazao_6h)}<div class="ref">${refTxt(e.vazao, (e.ref || {}).vazao_media_30d)}</div></div>` : ''}
         ${e.cota_m !== null && e.cota_m !== undefined ? `<div><div class="var">cota</div><b>${fmt(e.cota_m, 2)}</b> m<div class="ref">${(e.ref || {}).cota_media_30d ? 'média 30 d ' + fmt(e.ref.cota_media_30d, 2) + ' m' : 'sem referência'}</div></div>` : ''}
         ${(e.vazao === null || e.vazao === undefined) && (e.cota_m === null || e.cota_m === undefined) ? '<div class="ref">sem transmissão nos últimos 90 dias (cadastro diz "operando")</div>' : ''}
@@ -157,15 +157,28 @@
     const barr = R.estacoes.find(e => e.papel === 'barramento') || {};
     const nivelCtx = fx.min !== null && fx.min !== undefined ? `faixa da outorga ${fmt(fx.min, 1)} a ${fmt(fx.max, 1)} m${fx.declarado ? ' · máx. declarado ao ONS ' + fmt(fx.declarado, 2) : ''}` : `faixa 30 d ${fmt(rf.nivel_min_30d, 2)} a ${fmt(rf.nivel_max_30d, 2)} m · outorga não lida para o painel`;
     const qCtx = fx.q_min ? `mínimo declarado ${fmt(fx.q_min)} m³/s · ` : '';
+    // a estação de barramento mede a mesma vazão que o ONS publica como defluência: em vez de repetir o número,
+    // confere os dois no mesmo instante e mostra só a diferença (é o que pega zero espúrio e defasagem)
+    const sb = (T.estacoes.find(e => e.papel === 'barramento') || {}).serie;
+    let confere = '';
+    if (barr.codigo) {
+      const i = sb ? sb.instante.indexOf(a.instante) : -1;
+      const v = i >= 0 ? sb.vazao[i] : null;
+      const d = (v !== null && v !== undefined && a.defluencia !== null && a.defluencia !== undefined) ? v - a.defluencia : null;
+      const pct = (d !== null && a.defluencia) ? Math.abs(d) / a.defluencia * 100 : null;
+      const link = `<a href="estacao.html?c=${barr.codigo}">estação de barramento ${barr.codigo}</a>`;
+      confere = d === null ? `<div class="ref">${link} sem leitura nesta hora</div>`
+        : (pct !== null && pct < 1) ? `<div class="ref">bate com a ${link} na mesma hora</div>`
+        : `<div class="ref">${link} na mesma hora: ${fmt(v)} m³/s, ${d >= 0 ? '+' : '−'}${fmt(Math.abs(d))} m³/s${pct !== null ? ' (' + fmt(pct, 1) + '%)' : ''}</div>`;
+    }
     const bloco = `<div class="ponto-trecho usina">
       <div class="papel">usina · ${U.tipo === 'acumulacao' ? 'acumulação' : "fio d'água"} · ${U.agente}</div>
       <div class="nome"><span class="ponto ${frescorClasse(a.frescor_h)}"></span>${U.nome} <small>ONS ${fmtInst(a.instante)}</small></div>
       <div class="valores">
-        <div><div class="var">defluência</div><b>${fmt(a.defluencia)}</b> m³/s${tend(t.defluencia_6h)}<div class="ref">${qCtx}${refTxt(a.defluencia, rf.defluencia_media_30d)}</div></div>
+        <div><div class="var">defluência</div><b>${fmt(a.defluencia)}</b> m³/s${tend(t.defluencia_6h)}<div class="ref">${qCtx}${refTxt(a.defluencia, rf.defluencia_media_30d)}</div>${confere}</div>
         <div><div class="var">turbinada / vertida</div><b>${fmt(a.vazao_turbinada)}</b> / <b>${fmt(a.vazao_vertida)}</b> m³/s<div class="ref">ONS ${fmtInst(a.instante)}</div></div>
         <div><div class="var">nível montante</div><b>${fmt(a.nivel_montante, 2)}</b> m${tend(t.nivel_montante_6h, 2)}<div class="ref">${nivelCtx}</div></div>
         ${U.tipo === 'acumulacao' ? `<div><div class="var">volume útil</div><b>${fmt(a.pct_volume_util, 1)}</b> %<div class="ref">ONS ${fmtInst(a.instante)}</div></div>` : `<div><div class="var">nível jusante</div><b>${fmt(a.nivel_jusante, 2)}</b> m<div class="ref">ONS ${fmtInst(a.instante)}</div></div>`}
-        ${barr.codigo ? `<div><div class="var">estação de barramento ${barr.codigo}</div><b>${fmt(barr.vazao)}</b> m³/s<div class="ref">${barr.responsavel} ${fmtInst(barr.ultimo_instante)} · cota ${fmt(barr.cota_m, 2)} m · <a href="estacao.html?c=${barr.codigo}">abrir</a></div></div>` : ''}
       </div></div>`;
     const posJus = R.estacoes.filter(e => e.papel !== 'barramento').findIndex(e => e.papel === 'jusante');
     if (posJus >= 0) cards.splice(posJus, 0, bloco); else cards.push(bloco);
