@@ -196,8 +196,9 @@ function montarTopo(ativo, status) {
   const el = document.getElementById('topo');
   el.innerHTML = `<div class="interno"><a class="marca" href="index.html">${logo}<div>Painel Iguaçu<small>acompanhamento hidrológico da bacia</small></div></a><nav class="menu">${nav}</nav>${carimbo}</div>`;
   // a barra é fixa: o índice das seções gruda logo abaixo dela e as âncoras descontam a mesma altura
+  // altura fracionária (116,33 px, por exemplo) deixaria uma fresta entre as duas barras: 1 px de sobreposição
   const medir = () => document.documentElement.style.setProperty('--h-topo',
-    (getComputedStyle(el).position === 'sticky' ? el.offsetHeight : 0) + 'px');
+    (getComputedStyle(el).position === 'sticky' ? Math.max(0, el.getBoundingClientRect().height - 1) : 0) + 'px');
   medir();
   if (window.ResizeObserver) new ResizeObserver(medir).observe(el);
   else window.addEventListener('resize', medir);
