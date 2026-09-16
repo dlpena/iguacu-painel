@@ -1,7 +1,8 @@
-# Condicionantes e restrições declaradas VIGENTES em 14/09/2026, para exibição no painel.
-# Origem: verificação Baixo Iguaçu / Salto Caxias (set/2026), YAML validado contra o texto das outorgas
-# e os formulários FSAR-H lidos em 12/09/2026. Só há valores para as usinas cuja outorga foi lida;
-# as outras quatro ficam sem linha de limite até alguém ler a outorga (regra: só dados verificáveis).
+# Condicionantes e restrições declaradas VIGENTES, para exibição no painel.
+# Baixo Iguaçu e Salto Caxias: verificação de set/2026, contra o texto das outorgas e os formulários
+# FSAR-H lidos em 12/09/2026. Foz do Areia, Segredo, Salto Santiago e Salto Osório: outorgas vigentes
+# lidas em 16/09/2026 (atos 625/2025, 332/2025, 556/2025 e 254/2025); dessas quatro não foi lido nenhum
+# FSAR-H, então aqui só há condição de outorga (regra: só dados verificáveis).
 # O painel exibe a regra e o dado; não conclui descumprimento.
 regras:
   # ---------------- Baixo Iguaçu (Outorga ANA nº 2.382/2022, Geração Céu Azul S.A.)
@@ -114,3 +115,154 @@ regras:
     titulo: Taxa máxima de aumento da defluência por tabela (600 m³/s por hora até 2.000 m³/s de defluência; 1.000 m³/s por hora acima)
     fonte: "FSAR-H 10844/2026, desde 29/08/2026 (substituiu a FSAR-H 238/2018, de 800 m³/s por hora)"
     vigencia: desde 29/08/2026
+  # ---------------- Foz do Areia (Outorga ANA nº 625/2025, F.D.A. Geração de Energia Elétrica S.A.)
+  # Texto lido em 16/09/2026 no PDF do DOU (repositorio_usina, ato 625 de 21/03/2025, doc. 02500.007305/2025-01).
+  # A 625/2025 revogou a 424/2025 e vigora até 19/11/2054. Nenhuma vazão mínima defluente é fixada nas
+  # quatro outorgas abaixo: elas só dizem que a ANA poderá adicionar essa condição e que vale a vazão
+  # remanescente que o órgão ambiental vier a estabelecer. Rampa: nenhuma delas fixa.
+  - id: fda-na-max
+    usina: foz-do-areia
+    variavel: nivel_montante
+    tipo: maximo
+    valor: 742.0
+    unidade: m
+    titulo: Nível máximo normal a montante 742,0 m
+    fonte: "Outorga ANA nº 625/2025, art. 1º, IV"
+    vigencia: permanente
+  - id: fda-na-min
+    usina: foz-do-areia
+    variavel: nivel_montante
+    tipo: minimo
+    valor: 700.0
+    unidade: m
+    titulo: Nível mínimo normal a montante 700,0 m
+    fonte: "Outorga ANA nº 625/2025, art. 1º, VI"
+    vigencia: permanente
+  - id: fda-turb-max
+    usina: foz-do-areia
+    variavel: vazao_turbinada
+    tipo: maximo
+    valor: 1440
+    unidade: m³/s
+    titulo: Vazão máxima turbinada 1.440 m³/s
+    fonte: "Outorga ANA nº 625/2025, art. 1º, IX"
+    vigencia: permanente
+    condicional: true   # a própria outorga prevê limite maior após termo aditivo
+    nota: "Passa a 2.180 m³/s a partir da assinatura de termo aditivo ao contrato de concessão informado à ANA (art. 1º, § 1º); o painel mantém 1.440 até haver confirmação do aditivo"
+  - id: fda-na-cheia
+    usina: foz-do-areia
+    variavel: nivel_montante
+    tipo: texto
+    titulo: NA máximo do reservatório limitado pela cota em União da Vitória (de 741,58 m com cota 5,89 a 6,39 m até 737,57 m com cota 11,39 m)
+    fonte: "Outorga ANA nº 625/2025, art. 3º, tabela de operação do NA"
+    vigencia: permanente
+    nota: "Regra de encaminhamento de cheia: quanto maior a cota em União da Vitória (estação 65310001), menor o NA máximo permitido no reservatório"
+  # ---------------- Segredo (Outorga ANA nº 332/2025, Copel Geração e Transmissão S.A.)
+  - id: seg-na-max
+    usina: segredo
+    variavel: nivel_montante
+    tipo: maximo
+    valor: 607.0
+    unidade: m
+    titulo: Nível máximo normal a montante 607,00 m
+    fonte: "Outorga ANA nº 332/2025, art. 1º, IV"
+    vigencia: permanente
+  - id: seg-na-min
+    usina: segredo
+    variavel: nivel_montante
+    tipo: minimo
+    valor: 602.0
+    unidade: m
+    titulo: Nível mínimo normal a montante 602,00 m
+    fonte: "Outorga ANA nº 332/2025, art. 1º, VI"
+    vigencia: permanente
+  - id: seg-turb-max
+    usina: segredo
+    variavel: vazao_turbinada
+    tipo: maximo
+    valor: 1400
+    unidade: m³/s
+    titulo: Vazão máxima turbinada 1.400 m³/s
+    fonte: "Outorga ANA nº 332/2025, art. 1º, IX"
+    vigencia: permanente
+    condicional: true   # a própria outorga prevê limite maior após termo aditivo
+    nota: "Passa a 2.853 m³/s a partir da assinatura de termo aditivo ao contrato de concessão informado à ANA (art. 1º, § 2º)"
+  - id: seg-cascata
+    usina: segredo
+    variavel: defluencia
+    tipo: texto
+    titulo: Operar, junto aos demais agentes da cascata, de modo a não alterar a dinâmica a jusante de Salto Osório, no trecho até Baixo Iguaçu
+    fonte: "Outorga ANA nº 332/2025, art. 3º, § 1º"
+    vigencia: permanente
+  # ---------------- Salto Santiago (Outorga ANA nº 556/2025, ENGIE Brasil Energia S.A.)
+  - id: ssa-na-max
+    usina: salto-santiago
+    variavel: nivel_montante
+    tipo: maximo
+    valor: 506.0
+    unidade: m
+    titulo: Nível máximo normal a montante 506,00 m
+    fonte: "Outorga ANA nº 556/2025, art. 1º, IV"
+    vigencia: permanente
+  - id: ssa-na-min
+    usina: salto-santiago
+    variavel: nivel_montante
+    tipo: minimo
+    valor: 481.0
+    unidade: m
+    titulo: Nível mínimo normal a montante 481,00 m
+    fonte: "Outorga ANA nº 556/2025, art. 1º, VI"
+    vigencia: permanente
+  - id: ssa-turb-max
+    usina: salto-santiago
+    variavel: vazao_turbinada
+    tipo: maximo
+    valor: 1529.08
+    unidade: m³/s
+    titulo: Vazão máxima turbinada 1.529,08 m³/s
+    fonte: "Outorga ANA nº 556/2025, art. 1º, IX"
+    vigencia: permanente
+    condicional: true   # a própria outorga prevê limite maior após termo aditivo
+    nota: "Passa a 2.293,62 m³/s a partir da assinatura de termo aditivo ao contrato de concessão informado à ANA (art. 1º, § 2º)"
+  - id: ssa-cascata
+    usina: salto-santiago
+    variavel: defluencia
+    tipo: texto
+    titulo: Operar, junto aos demais agentes da cascata, de modo a não alterar a dinâmica a jusante de Salto Osório, no trecho até Baixo Iguaçu
+    fonte: "Outorga ANA nº 556/2025, art. 3º, § 1º"
+    vigencia: permanente
+  # ---------------- Salto Osório (Outorga ANA nº 254/2025, ENGIE Brasil Energia S.A.)
+  - id: sos-na-max
+    usina: salto-osorio
+    variavel: nivel_montante
+    tipo: maximo
+    valor: 397.0
+    unidade: m
+    titulo: Nível máximo normal a montante 397,00 m
+    fonte: "Outorga ANA nº 254/2025, art. 1º, IV"
+    vigencia: permanente
+  - id: sos-na-min
+    usina: salto-osorio
+    variavel: nivel_montante
+    tipo: minimo
+    valor: 389.0
+    unidade: m
+    titulo: Nível mínimo normal a montante 389,00 m
+    fonte: "Outorga ANA nº 254/2025, art. 1º, VI"
+    vigencia: permanente
+  - id: sos-turb-max
+    usina: salto-osorio
+    variavel: vazao_turbinada
+    tipo: maximo
+    valor: 1734.0
+    unidade: m³/s
+    titulo: Vazão máxima turbinada 1.734,00 m³/s
+    fonte: "Outorga ANA nº 254/2025, art. 1º, IX"
+    vigencia: permanente
+  - id: sos-fio
+    usina: salto-osorio
+    variavel: defluencia
+    tipo: texto
+    titulo: Operação a fio d'água, com vazões defluentes, após a restituição da casa de força, iguais às vazões afluentes
+    fonte: "Outorga ANA nº 254/2025, art. 1º, X"
+    vigencia: permanente

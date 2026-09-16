@@ -268,9 +268,13 @@ def monta_avisos(ho, di, est_json, agora, chuva, st, trecho_da_usina, trecho_da_
             acima = s > r["valor"]
             if acima.any():
                 rot = "declarado ao ONS" if r["tipo"] == "maximo_declarado" else "da outorga"
-                av.append({**base, "nivel": "atencao" if r["tipo"] == "maximo" else "info",
+                # limite que a própria outorga prevê elevar após termo aditivo ao contrato: ultrapassar não é
+                # por si indício, enquanto não se souber se o aditivo foi assinado
+                cond = r.get("condicional")
+                av.append({**base, "nivel": "info" if (cond or r["tipo"] == "maximo_declarado") else "atencao",
                            "quando": g.loc[acima, "din_instante"].max().strftime("%Y-%m-%dT%H:%M"),
-                           "texto": f"{int(acima.sum())} h com {var} acima de {r['valor']} {r['unidade']} ({rot}) nas últimas 24 h (máximo horário {s.max():.2f})."})
+                           "texto": f"{int(acima.sum())} h com {var} acima de {r['valor']} {r['unidade']} ({rot}) nas últimas 24 h (máximo horário {s.max():.2f})."
+                                    + (f" {r['nota']}." if cond and r.get("nota") else "")})
         elif r["tipo"] == "rampa":
             dif = s.diff().abs()
             acima = dif > r["valor"]
