@@ -227,14 +227,6 @@
   const regras = U ? U.regras || [] : [];
   const lim = (vars, tipos) => regras.filter(r => vars.includes(r.variavel) && tipos.includes(r.tipo) && r.valor !== null && r.valor !== undefined);
   const SA = rs => ({ shapes: rs.map(r => r.s), annotations: rs.map(r => r.a) });
-  // limite muito longe do dado (o mínimo de 700 m em Foz do Areia, com o reservatório operando perto de 740)
-  // esmagaria a curva: nesses casos a linha não é desenhada e o valor fica só na tabela de condicionantes
-  function perto(valor, serie) {
-    const v = serie.filter(x => x !== null && x !== undefined);
-    if (!v.length) return false;
-    const mn = Math.min(...v), mx = Math.max(...v), folga = Math.max((mx - mn) * 0.6, Math.abs(mx) * 0.02, 0.2);
-    return valor >= mn - folga && valor <= mx + folga;
-  }
   const estRio = T.estacoes.filter(e => !(e.papel === 'barramento' && U));
   const PCH = T.chega, PSAI = T.sai;
   const descr = x => x ? (x.tipo === 'usina' ? `a defluência de ${x.rotulo.replace(/^Defluência /, '')} (${x.fonte})` : `a vazão na estação ${x.rotulo} (${x.fonte}${x.area_km2 ? ', ' + fmt(x.area_km2) + ' km²' : ''})`) : 'sem medição';
@@ -301,9 +293,7 @@
       const lv = lim(['defluencia', 'vazao_turbinada'], ['minimo', 'maximo']).map(q => { const l = linhaLimite(q.valor, `${q.variavel === 'defluencia' ? 'defluência' : 'turbinada'} ${q.tipo === 'minimo' ? 'mín.' : 'máx.'} ${fmt(q.valor, Number.isInteger(+q.valor) ? 0 : 1)} m³/s`, PAL.limite); return { s: l.shape, a: l.ann }; });
       Plotly.react('g-vazoes', [traco(x, A.de, 'Defluência (total)', SERIES.defluencia, { line: { color: SERIES.defluencia, width: 2.2 } }), traco(x, A.tu, 'Turbinada', SERIES.vazao_turbinada), traco(x, A.ve, 'Vertida', SERIES.vazao_vertida)],
         layoutBase({ yaxis: { title: 'm³/s', gridcolor: PAL.grade, rangemode: 'tozero' }, ...SA(lv) }), CONFIG_PLOT);
-      const ln = lim(['nivel_montante'], ['minimo', 'maximo', 'maximo_declarado']).filter(q => perto(q.valor, A.nm)).map(q => { const l = linhaLimite(q.valor, `${q.tipo === 'maximo_declarado' ? 'FSAR-H' : 'outorga'} ${fmt(q.valor, 2)} m`, q.tipo === 'maximo_declarado' ? PAL.fsarh : PAL.limite); return { s: l.shape, a: l.ann }; });
-      const fora = lim(['nivel_montante'], ['minimo', 'maximo']).filter(q => !perto(q.valor, A.nm));
-      document.getElementById('e-niveis').textContent = txtNiveis + (fora.length ? ` Fora da escala do gráfico, na tabela do fim da seção: ${fora.map(q => `${q.tipo === 'minimo' ? 'mínimo' : 'máximo'} de ${fmt(q.valor, 2)} m`).join('; ')}.` : '');
+      const ln = lim(['nivel_montante'], ['minimo', 'maximo', 'maximo_declarado']).map(q => { const l = linhaLimite(q.valor, `${q.tipo === 'maximo_declarado' ? 'FSAR-H' : 'outorga'} ${fmt(q.valor, 2)} m`, q.tipo === 'maximo_declarado' ? PAL.fsarh : PAL.limite, 'dash', q.tipo === 'maximo_declarado' ? 'esquerda' : 'direita'); return { s: l.shape, a: l.ann }; });
       Plotly.react('g-niveis', [traco(x, A.nm, 'Nível montante', SERIES.nivel_montante)], layoutBase({ showlegend: false, yaxis: { title: 'm', gridcolor: PAL.grade, tickformat: ',.2f' }, ...SA(ln) }), CONFIG_PLOT);
       if (U.tipo === 'acumulacao' && A.vu && A.vu.some(v => v !== null)) {
         document.getElementById('bloco-vu').hidden = false;
