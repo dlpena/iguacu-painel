@@ -5,41 +5,17 @@
   "fim": "2026-09-18"
  },
  "estacoes": {
-  "65035001": {
-   "n": 175,
-   "ultimo": "2026-09-18T06:00:00"
-  },
-  "65060001": {
-   "n": 175,
-   "ultimo": "2026-09-18T06:00:00"
-  },
-  "65220001": {
-   "n": 174,
-   "ultimo": "2026-09-18T05:00:00"
-  },
-  "65310001": {
-   "n": 174,
-   "ultimo": "2026-09-18T05:00:00"
-  },
-  "65365801": {
-   "n": 174,
-   "ultimo": "2026-09-18T05:00:00"
-  },
-  "65774400": {
-   "n": 174,
-   "ultimo": "2026-09-18T05:00:00"
-  },
   "65803001": {
    "n": 175,
    "ultimo": "2026-09-18T06:00:00"
   },
   "65883051": {
-   "n": 173,
-   "ultimo": "2026-09-18T04:00:00"
+   "n": 174,
+   "ultimo": "2026-09-18T05:00:00"
   },
   "65894991": {
-   "n": 173,
-   "ultimo": "2026-09-18T04:00:00"
+   "n": 174,
+   "ultimo": "2026-09-18T05:00:00"
   },
   "65970700": {
    "n": 0,
@@ -54,12 +30,12 @@
    "ultimo": "2026-09-18T06:00:00"
   },
   "65983100": {
-   "n": 174,
-   "ultimo": "2026-09-18T05:00:00"
+   "n": 175,
+   "ultimo": "2026-09-18T06:00:00"
   },
   "65984000": {
-   "n": 697,
-   "ultimo": "2026-09-18T06:00:00"
+   "n": 699,
+   "ultimo": "2026-09-18T06:30:00"
   },
   "65987000": {
    "n": 175,
@@ -82,40 +58,40 @@
    "ultimo": null
   },
   "65980200": {
-   "n": 696,
-   "ultimo": "2026-09-18T05:45:00"
+   "n": 699,
+   "ultimo": "2026-09-18T06:30:00"
   },
   "65975300": {
-   "n": 697,
-   "ultimo": "2026-09-18T06:00:00"
+   "n": 700,
+   "ultimo": "2026-09-18T06:45:00"
   },
   "65960001": {
    "n": 175,
    "ultimo": "2026-09-18T06:00:00"
   },
   "65889700": {
-   "n": 173,
-   "ultimo": "2026-09-18T04:00:00"
+   "n": 174,
+   "ultimo": "2026-09-18T05:00:00"
   },
   "2552070": {
    "n": 0,
    "ultimo": null
   },
   "2551063": {
-   "n": 173,
-   "ultimo": "2026-09-18T04:00:00"
+   "n": 174,
+   "ultimo": "2026-09-18T05:00:00"
   },
   "2552030": {
-   "n": 173,
-   "ultimo": "2026-09-18T04:00:00"
+   "n": 174,
+   "ultimo": "2026-09-18T05:00:00"
   },
   "2552055": {
    "n": 0,
    "ultimo": null
   },
   "2551015": {
-   "n": 14,
-   "ultimo": "2026-09-18T04:00:00"
+   "n": 15,
+   "ultimo": "2026-09-18T05:00:00"
   },
   "2553071": {
    "n": 0,
@@ -138,8 +114,8 @@
    "ultimo": null
   },
   "2552009": {
-   "n": 173,
-   "ultimo": "2026-09-18T04:00:00"
+   "n": 174,
+   "ultimo": "2026-09-18T05:00:00"
   },
   "2553069": {
    "n": 0,
@@ -177,7 +153,14 @@
  "arquivos": [
   "2026-09.parquet"
  ],
- "erros": [],
+ "erros": [
+  "65035001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65035001&dataInicio=11%2F09%2F2026&dataFim=18%2F09%2F2026",
+  "65060001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65060001&dataInicio=11%2F09%2F2026&dataFim=18%2F09%2F2026",
+  "65220001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65220001&dataInicio=11%2F09%2F2026&dataFim=18%2F09%2F2026",
+  "65310001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65310001&dataInicio=11%2F09%2F2026&dataFim=18%2F09%2F2026",
+  "65365801: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65365801&dataInicio=11%2F09%2F2026&dataFim=18%2F09%2F2026",
+  "65774400: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65774400&dataInicio=11%2F09%2F2026&dataFim=18%2F09%2F2026"
+ ],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-09-18T06:33:49-03:00"
+ "atualizado_em": "2026-09-18T07:17:51-03:00"
 }
