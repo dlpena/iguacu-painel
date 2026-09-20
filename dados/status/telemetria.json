@@ -1,45 +1,45 @@
 {
- "ok": false,
+ "ok": true,
  "janela": {
   "inicio": "2026-09-13",
   "fim": "2026-09-20"
  },
  "estacoes": {
   "65035001": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65060001": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65220001": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65310001": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65365801": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65774400": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65803001": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65883051": {
-   "n": 0,
-   "ultimo": null
+   "n": 173,
+   "ultimo": "2026-09-20T04:00:00"
   },
   "65894991": {
-   "n": 0,
-   "ultimo": null
+   "n": 173,
+   "ultimo": "2026-09-20T04:00:00"
   },
   "65970700": {
    "n": 0,
@@ -50,70 +50,66 @@
    "ultimo": null
   },
   "65973501": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65983100": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65984000": {
-   "n": 0,
-   "ultimo": null
+   "n": 695,
+   "ultimo": "2026-09-20T05:30:00"
   },
   "65987000": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65987001": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65992500": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65992502": {
-   "n": 0,
-   "ultimo": null
+   "n": 170,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65993000": {
    "n": 0,
    "ultimo": null
   },
   "65980200": {
-   "n": 0,
-   "ultimo": null
+   "n": 695,
+   "ultimo": "2026-09-20T05:30:00"
   },
   "65975300": {
-   "n": 0,
-   "ultimo": null
+   "n": 695,
+   "ultimo": "2026-09-20T05:30:00"
   },
   "65960001": {
-   "n": 0,
-   "ultimo": null
+   "n": 174,
+   "ultimo": "2026-09-20T05:00:00"
   },
   "65889700": {
-   "n": 0,
-   "ultimo": null
+   "n": 173,
+   "ultimo": "2026-09-20T04:00:00"
   },
   "2552070": {
    "n": 0,
    "ultimo": null
   },
   "2551063": {
-   "n": 0,
-   "ultimo": null
+   "n": 173,
+   "ultimo": "2026-09-20T04:00:00"
   },
   "2552030": {
-   "n": 0,
-   "ultimo": null
+   "n": 173,
+   "ultimo": "2026-09-20T04:00:00"
   },
   "2552055": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2551015": {
    "n": 0,
    "ultimo": null
   },
@@ -134,10 +130,6 @@
    "ultimo": null
   },
   "2651054": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2552009": {
    "n": 0,
    "ultimo": null
   },
@@ -174,8 +166,13 @@
    "ultimo": null
   }
  },
- "arquivos": [],
- "erros": [],
+ "arquivos": [
+  "2026-09.parquet"
+ ],
+ "erros": [
+  "2551015: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2551015&dataInicio=13%2F09%2F2026&dataFim=20%2F09%2F2026",
+  "2552009: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2552009&dataInicio=13%2F09%2F2026&dataFim=20%2F09%2F2026"
+ ],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-09-20T05:11:29-03:00"
+ "atualizado_em": "2026-09-20T06:12:11-03:00"
 }
