@@ -1,15 +1,13 @@
 {
  "ok": true,
- "dias_novos": 7,
- "ultimo_dia": "2026-09-19",
- "falhas": [
-  "2026-09-20: ainda não publicado (404)"
- ],
+ "dias_novos": 8,
+ "ultimo_dia": "2026-09-20",
+ "falhas": [],
  "meta_grib": {
   "time": "2026-09-13T12:00:00.000000000",
   "step": "0 nanoseconds",
   "valid_time": "2026-09-13T12:00:00.000000000"
  },
  "citacao": "INPE/CPTEC, produto MERGE (precipitação diária em grade de 0,1°, satélite GPM combinado com pluviômetros), https://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/",
- "atualizado_em": "2026-09-20T13:12:25-03:00"
+ "atualizado_em": "2026-09-20T14:11:28-03:00"
 }
