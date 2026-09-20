@@ -1,15 +1,13 @@
 {
- "ok": false,
- "dias_novos": 7,
+ "ok": true,
+ "dias_novos": 8,
  "ultimo_dia": "2026-09-20",
- "falhas": [
-  "2026-09-19: ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
- ],
+ "falhas": [],
  "meta_grib": {
   "time": "2026-09-13T12:00:00.000000000",
   "step": "0 nanoseconds",
   "valid_time": "2026-09-13T12:00:00.000000000"
  },
  "citacao": "INPE/CPTEC, produto MERGE (precipitação diária em grade de 0,1°, satélite GPM combinado com pluviômetros), https://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/",
- "atualizado_em": "2026-09-20T19:11:26-03:00"
+ "atualizado_em": "2026-09-20T20:12:36-03:00"
 }
