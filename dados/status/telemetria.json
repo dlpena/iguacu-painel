@@ -5,10 +5,6 @@
   "fim": "2026-09-19"
  },
  "estacoes": {
-  "65035001": {
-   "n": 190,
-   "ultimo": "2026-09-19T21:00:00"
-  },
   "65060001": {
    "n": 190,
    "ultimo": "2026-09-19T21:00:00"
@@ -82,12 +78,12 @@
    "ultimo": null
   },
   "65980200": {
-   "n": 758,
-   "ultimo": "2026-09-19T21:15:00"
-  },
-  "65975300": {
    "n": 759,
    "ultimo": "2026-09-19T21:30:00"
+  },
+  "65975300": {
+   "n": 760,
+   "ultimo": "2026-09-19T21:45:00"
   },
   "65960001": {
    "n": 190,
@@ -177,7 +173,9 @@
  "arquivos": [
   "2026-09.parquet"
  ],
- "erros": [],
+ "erros": [
+  "65035001: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65035001&dataInicio=12%2F09%2F2026&dataFim=19%2F09%2F2026"
+ ],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-09-19T21:55:04-03:00"
+ "atualizado_em": "2026-09-19T22:12:00-03:00"
 }
