@@ -5,14 +5,17 @@
   Climatologia mensal 1998-2024: .../CLIMATOLOGY/MONTHLY_ACCUMULATED/MERGE_CPTEC_acum_{mes}.nc
 
 Grava:
-  dados/merge/mascara.npz              índices das células dentro do polígono (config/bacia_iguacu.geojson) + lat/lon
-  dados/merge/chuva_bacia_diaria.csv   data, chuva_mm (média das células), n_celulas
+  dados/merge/mascara.npz              células com peso na bacia (config/bacia_iguacu.geojson): índice, lat/lon, peso em km²
+  dados/merge/chuva_bacia_diaria.csv   data, chuva_mm (média ponderada por área), n_celulas, versao, metodo
   dados/merge/celulas.parquet          data, celula, mm  (valor por célula, últimos 120 dias, para o mapa)
-  dados/merge/mlt.json                 MLT mensal oficial na bacia (--mlt, uma vez)
+  dados/merge/mlt.json                 MLT mensal oficial na bacia, mesmo método (--mlt, uma vez)
+Média espacial "area-ponderada-1" (skill chuva-merge-bacias, 21/09/2026): peso de cada célula = fração da célula dentro
+do polígono (interseção exata) x área da célula no elipsoide WGS84. A soma dos pesos tem de bater com a área oficial
+do polígono (DME_AR_KM2 do SNIRH, tolerância 0,5%), senão o coletor para. Dias do CSV com outro método são refeitos.
 Uso: py coleta/merge.py [--desde AAAA-MM-DD] [--ate AAAA-MM-DD] [--mlt]
 Padrão: completa os dias faltantes dos últimos 10 dias. Retomável: dias já no CSV não são baixados de novo.
 Armadilha (skill chuva-merge-bacias): o cfgrib nomeia mal a variável; a chuva é identificada pelo código 0/15/5 (PREC no .ctl),
-e a longitude da grade diária vem em 240-340 (a da climatologia já vem em -180..180: máscara própria).
+e a longitude da grade diária vem em 240-340 (a da climatologia já vem em -180..180: pesos próprios).
 """
 from __future__ import annotations
 
@@ -29,7 +32,7 @@ import xarray as xr
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from comum import CONFIG, DADOS, gravar_status, hoje_brt, log  # noqa: E402
-from geo import mascara  # noqa: E402
+from geo import METODO, ler_poligono, pesos  # noqa: E402
 
 URL_DIA = "https://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/{a}/{m:02d}/MERGE_CPTEC_{a}{m:02d}{d:02d}.grib2"
 PREC = (0, 15, 5)  # disciplina, categoria, número da chuva, conforme o .ctl do INPE (conferido em 1998 e 2026)
@@ -41,6 +44,8 @@ CSV = PASTA / "chuva_bacia_diaria.csv"
 CELULAS = PASTA / "celulas.parquet"
 MASCARA = PASTA / "mascara.npz"
 DIAS_CELULAS = 120
+TOLERANCIA_AREA_PCT = 0.5
+MIN_AREA_COM_DADO = 0.999  # fração mínima da área da bacia com dado para aceitar o dia
 # O INPE reescreve o arquivo do dia: primeiro com IMERG-Early (~16 UTC do próprio dia), depois com IMERG-Late
 # (~02:40 UTC do dia seguinte) e de novo no fechamento do mês (dias 1 a 4 do mês seguinte). Por isso os dias
 # recentes são rebaixados a cada rodada, e o mês anterior é refeito no começo do mês.
@@ -67,30 +72,53 @@ def abrir_precip(caminho: Path):
     return ds, np.clip(v, 0, None)
 
 
+def pesos_conferidos(lat, lon) -> tuple[np.ndarray, dict]:
+    """Pesos da bacia na grade (lat, lon) e o resumo da conferência de área; para se a área destoar da oficial."""
+    geom, oficial = ler_poligono(GEOJSON)
+    W = pesos(lat, lon, geom)
+    area = float(W.sum())
+    if oficial is None:
+        raise RuntimeError(f"{GEOJSON.name} sem DME_AR_KM2: baixe do SNIRH com outFields=* para conferir a área")
+    dif = 100 * (area - oficial) / oficial
+    if abs(dif) > TOLERANCIA_AREA_PCT:
+        raise RuntimeError(f"área pelos pesos {area:.1f} km² difere {dif:.3f}% da oficial {oficial:.1f} km²")
+    return W, {"metodo": METODO, "celulas": int((W > 0).sum()), "area_pesos_km2": round(area, 1),
+               "area_oficial_km2": round(oficial, 1), "dif_area_pct": round(dif, 3)}
+
+
 def carregar_mascara(ds) -> dict:
     lat, lon = ds["latitude"].values, ds["longitude"].values
     if MASCARA.exists():
         z = np.load(MASCARA)
-        if tuple(z["shape"]) == (len(lat), len(lon)):
+        if "w" in z.files and str(z["metodo"]) == METODO and tuple(z["shape"]) == (len(lat), len(lon)):
             return {k: z[k] for k in z.files}
+    W, conf = pesos_conferidos(lat, lon)
     LO, LA = np.meshgrid(lon, lat)
-    m = mascara(LA, LO, GEOJSON)
-    idx = np.where(m.ravel())[0]
+    idx = np.where(W.ravel() > 0)[0]
     lon_c = ((LO.ravel()[idx] + 180) % 360) - 180
-    out = {"shape": np.array(m.shape), "idx": idx, "lat": LA.ravel()[idx], "lon": lon_c}
+    out = {"shape": np.array(W.shape), "idx": idx, "lat": LA.ravel()[idx], "lon": lon_c, "w": W.ravel()[idx],
+           "metodo": np.array(METODO), "conferencia": np.array(json.dumps(conf))}
     PASTA.mkdir(parents=True, exist_ok=True)
     np.savez(MASCARA, **out)
-    log(f"máscara: {len(idx)} células (~{len(idx) * 0.1 * 0.1 * 111 * 111:.0f} km²)")
+    log(f"pesos: {conf}")
     return out
+
+
+def media_ponderada(vals: np.ndarray, w: np.ndarray) -> float:
+    ok = np.isfinite(vals)
+    if w[ok].sum() < MIN_AREA_COM_DADO * w.sum():
+        raise RuntimeError(f"só {w[ok].sum() / w.sum():.1%} da área da bacia tem dado neste dia")
+    return float((w[ok] * vals[ok]).sum() / w[ok].sum())
 
 
 def ler_csv() -> pd.DataFrame:
     if CSV.exists():
         d = pd.read_csv(CSV, parse_dates=["data"])
-        if "versao" not in d.columns:
-            d["versao"] = None
+        for c in ("versao", "metodo"):
+            if c not in d.columns:
+                d[c] = None
         return d
-    return pd.DataFrame(columns=["data", "chuva_mm", "n_celulas", "versao"])
+    return pd.DataFrame(columns=["data", "chuva_mm", "n_celulas", "versao", "metodo"])
 
 
 def versao_do_dia(sess, d: date) -> str | None:
@@ -108,7 +136,8 @@ def versao_do_dia(sess, d: date) -> str | None:
 
 def processa_dias(dias: list[date]) -> tuple[int, list[str], dict]:
     serie = ler_csv()
-    feitos = set(serie["data"].dt.date) if len(serie) else set()
+    # dias calculados com outro método não contam como feitos: são refeitos, para a série não misturar métodos
+    feitos = set(serie.loc[serie["metodo"] == METODO, "data"].dt.date) if len(serie) else set()
     cel = pd.read_parquet(CELULAS) if CELULAS.exists() else pd.DataFrame(columns=["data", "celula", "mm"])
     sess = requests.Session()
     tmp = PASTA / "tmp.grib2"
@@ -131,8 +160,8 @@ def processa_dias(dias: list[date]) -> tuple[int, list[str], dict]:
                 m = carregar_mascara(ds)
                 meta = {k: str(ds[k].values) for k in ("time", "step", "valid_time") if k in ds.coords}
             vals = v.ravel()[m["idx"]]
-            novos.append({"data": pd.Timestamp(d), "chuva_mm": round(float(np.nanmean(vals)), 3), "n_celulas": int(len(vals)),
-                          "versao": versao_do_dia(sess, d)})
+            novos.append({"data": pd.Timestamp(d), "chuva_mm": round(media_ponderada(vals, m["w"]), 3),
+                          "n_celulas": int(len(vals)), "versao": versao_do_dia(sess, d), "metodo": METODO})
             if d >= hoje_brt() - timedelta(days=DIAS_CELULAS):
                 cel = pd.concat([cel, pd.DataFrame({"data": pd.Timestamp(d), "celula": np.arange(len(vals)), "mm": np.round(vals, 2)})])
         except Exception as e:  # noqa: BLE001
@@ -152,7 +181,7 @@ def processa_dias(dias: list[date]) -> tuple[int, list[str], dict]:
 def calcular_mlt() -> dict:
     cache = PASTA / "clim"
     cache.mkdir(parents=True, exist_ok=True)
-    m = None
+    W = conf = None
     mlt = {}
     for mes in MESES:
         arq = cache / f"acum_{mes}.nc"
@@ -161,14 +190,13 @@ def calcular_mlt() -> dict:
             r.raise_for_status()
             arq.write_bytes(r.content)
         ds = xr.open_dataset(arq, engine="h5netcdf")
-        if m is None:
-            LO, LA = np.meshgrid(ds["lon"].values, ds["lat"].values)
-            m = mascara(LA, LO, GEOJSON)
-            log(f"máscara da climatologia: {m.sum()} células")
-        v = np.asarray(ds["precacum"].values).squeeze()
-        mlt[mes] = round(float(np.nanmean(v[m])), 1)
+        if W is None:
+            W, conf = pesos_conferidos(ds["lat"].values, ds["lon"].values)
+            log(f"pesos da climatologia: {conf}")
+        v = np.asarray(ds["precacum"].squeeze().transpose("lat", "lon").values, dtype=float)
+        mlt[mes] = round(media_ponderada(v[W > 0], W[W > 0]), 1)
         log(f"MLT {mes}: {mlt[mes]} mm")
-    out = {"mlt_mm": mlt, "n_celulas": int(m.sum()), "periodo": "1998-2024",
+    out = {"mlt_mm": mlt, "n_celulas": conf["celulas"], "metodo": METODO, "conferencia_area": conf, "periodo": "1998-2024",
            "fonte": "INPE/CPTEC, climatologia mensal do MERGE (MERGE_CPTEC_acum_{mes}.nc), 1998-2024"}
     (PASTA / "mlt.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     return out
@@ -200,7 +228,9 @@ def main() -> int:
     reais = [f for f in falhas if "404" not in f]
     ok = len(serie) > 0 and not reais
     log(f"{n} dias novos; último dia {ultimo}; falhas: {falhas[:5]}")
-    gravar_status("merge", ok=ok, dias_novos=n, ultimo_dia=ultimo, falhas=falhas, meta_grib=meta, citacao=CITACAO)
+    conf = json.loads(str(np.load(MASCARA)["conferencia"])) if MASCARA.exists() and "conferencia" in np.load(MASCARA).files else None
+    gravar_status("merge", ok=ok, dias_novos=n, ultimo_dia=ultimo, falhas=falhas, meta_grib=meta, citacao=CITACAO,
+                  metodo=METODO, conferencia_area=conf)
     return 0 if ok else 1
 
 

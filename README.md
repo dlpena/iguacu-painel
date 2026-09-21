@@ -7,7 +7,7 @@ automaticamente a cada hora por GitHub Actions, só com fontes públicas e sem c
 |---|---|---|
 | Nível, defluência, turbinada, vertida, volume útil e vazão natural das 6 UHEs (G. B. Munhoz, Segredo, Salto Santiago, Salto Osório, Salto Caxias, Baixo Iguaçu) | ONS, Dados Abertos, parquets públicos no S3 (`dados_hidrologicos_ho` e `dados_hidrologicos_di`) | `coleta/ons.py` |
 | Cota, vazão e chuva de 42 estações da Resolução Conjunta ANEEL/ANA nº 3 | ANA, webservice de telemetria `telemetriaws1.ana.gov.br` | `coleta/telemetria.py` |
-| Chuva média da bacia e por célula (585 células de 0,1°), MLT 1998–2024 | INPE/CPTEC, produto MERGE (GRIB2 diário e climatologia NetCDF) | `coleta/merge.py` |
+| Chuva média da bacia (ponderada pela área de 696 células de 0,1°) e por célula, MLT 1998–2024 | INPE/CPTEC, produto MERGE (GRIB2 diário e climatologia NetCDF) | `coleta/merge.py` |
 
 `coleta/monta_site.py` transforma `dados/` nos JSON de `docs/data/`, lidos pelas páginas de `docs/`.
 

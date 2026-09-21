@@ -16,7 +16,7 @@
 <header id="topo" class="topo"></header>
 <main>
   <h1>Chuva na bacia do Iguaçu</h1>
-  <p class="sub">Duas fontes que se completam: o MERGE do INPE/CPTEC (estimativa do satélite GPM combinada com observações de pluviômetros, grade de 0,1°, 585 células na bacia) diz onde e quanto choveu em toda a área; os pluviômetros da telemetria da ANA dizem o que foi medido em cada ponto. A média de longo termo (MLT) é a climatologia oficial do MERGE, 1998–2024.</p>
+  <p class="sub">Duas fontes que se completam: o MERGE do INPE/CPTEC (estimativa do satélite GPM combinada com observações de pluviômetros, grade de 0,1°; 696 células tocam a bacia, cada uma pesando pela área que tem dentro dela) diz onde e quanto choveu em toda a área; os pluviômetros da telemetria da ANA dizem o que foi medido em cada ponto. A média de longo termo (MLT) é a climatologia oficial do MERGE, 1998–2024.</p>
 
   <nav class="indice">
     <a class="sec" href="#agora">Agora</a><a class="sec" href="#onde">Onde choveu</a><a class="sec" href="#tempo">Mês e ano</a><a class="sec" href="#chao">Pluviômetros</a><a class="sec" href="#dados">Dados</a>
@@ -40,7 +40,7 @@
 
   <section class="bloco" id="tempo">
     <h2><small>3</small>Como está o mês e o ano</h2>
-    <p class="sub">Chuva média da bacia inteira (média das 585 células), somada por mês e comparada à MLT do mesmo mês. Barras claras são meses ainda incompletos, com o número de dias somados.</p>
+    <p class="sub">Chuva média da bacia inteira (média das 696 células ponderada pela área de cada uma dentro da bacia), somada por mês e comparada à MLT do mesmo mês. Barras claras são meses ainda incompletos, com o número de dias somados.</p>
     <h3>Mensal contra a MLT</h3>
     <div id="g-mensal" class="grafico"></div>
     <h3>Dia a dia</h3>
@@ -152,7 +152,7 @@
   const c = (status && status.citacoes) || {};
   document.getElementById('fontes').innerHTML = [c.merge, c.mlt, c.telemetria].filter(Boolean).map(t => `<p>${t}, consulta em ${fmtData(status.gerado_em)}.</p>`).join('');
   const baixar = (nome, linhas) => { const blob = new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; a.click(); };
-  document.getElementById('csv-bacia').addEventListener('click', () => baixar('chuva_media_bacia_iguacu.csv', ['# Chuva média diária da bacia do Iguaçu (585 células de 0,1°) — ' + (c.merge || 'INPE/CPTEC, MERGE'), 'data;chuva_mm', ...D.data.map((d, i) => `${d};${D.mm[i] ?? ''}`)]));
+  document.getElementById('csv-bacia').addEventListener('click', () => baixar('chuva_media_bacia_iguacu.csv', ['# Chuva média diária da bacia do Iguaçu (média ponderada por área de 696 células de 0,1°) — ' + (c.merge || 'INPE/CPTEC, MERGE'), 'data;chuva_mm', ...D.data.map((d, i) => `${d};${D.mm[i] ?? ''}`)]));
   document.getElementById('csv-plu').addEventListener('click', () => baixar('pluviometros_chuva_medida.csv', ['# Chuva medida nos pluviômetros da telemetria da ANA na bacia do Iguaçu — ' + (c.telemetria || 'ANA, webservice de telemetria') + '; dado bruto', 'codigo;nome;tipo;trecho;chuva_24h_mm;chuva_7d_mm;chuva_30d_mm;ultimo_dado', ...(C.pluviometros || []).map(p => [p.codigo, p.nome, p.tipo, p.trecho, p.mm_24h, p.mm_7d, p.mm_30d, p.ultimo_instante].map(v => v === null || v === undefined ? '' : v).join(';'))]));
 })().catch(e => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<div class="alerta-fixo">Falha ao carregar os dados: ${e.message}</div>`); console.error(e); });
 </script>
