@@ -106,7 +106,25 @@
     document.getElementById('info-grade').textContent = `${G[k + '_dias']} dia(s) de MERGE somados · máximo na bacia ${fmt(max, 1)} mm`;
     document.querySelectorAll('.controles button[data-k]').forEach(b => b.classList.toggle('ativo', b.dataset.k === k));
     pintarPluviometros(k);
+    recortarMerge();
   }
+  // Recorte só visual: as células de 0,1° cuja média entra na bacia são as de centro dentro do polígono, e as
+  // da borda passam do contorno. O caminho do contorno vira clipPath do SVG das células. Os dois SVG do Leaflet
+  // usam o mesmo sistema de coordenadas de camada, então o caminho serve direto; refaz a cada zoom/mudança.
+  function recortarMerge() {
+    const NS = 'http://www.w3.org/2000/svg';
+    const caminhos = [...mapa.getPane('contorno').querySelectorAll('svg path')].map(p => p.getAttribute('d')).filter(Boolean);
+    const svg = mapa.getPane('merge').querySelector('svg');
+    if (!caminhos.length || !svg) return;
+    let defs = svg.querySelector('defs');
+    if (!defs) { defs = document.createElementNS(NS, 'defs'); svg.insertBefore(defs, svg.firstChild); }
+    let cp = defs.querySelector('#recorte-bacia');
+    if (!cp) { cp = document.createElementNS(NS, 'clipPath'); cp.setAttribute('id', 'recorte-bacia'); defs.appendChild(cp); }
+    cp.innerHTML = '';
+    const p = document.createElementNS(NS, 'path'); p.setAttribute('d', caminhos.join(' ')); p.setAttribute('clip-rule', 'evenodd'); cp.appendChild(p);
+    svg.querySelectorAll(':scope > g').forEach(g => g.setAttribute('clip-path', 'url(#recorte-bacia)'));
+  }
+  mapa.on('zoomend moveend viewreset resize', () => setTimeout(recortarMerge, 0));
   try { const b = await carregar('bacia.geojson'); const cam = L.geoJSON(b, { pane: 'contorno', interactive: false, style: { color: PAL.escuro, weight: 2, fill: false } }).addTo(mapa); mapa.fitBounds(cam.getBounds(), { paddingBottomRight: [0, 10] }); } catch (e) {}
   const simbolos = L.control({ position: 'topright' });
   simbolos.onAdd = () => { const d = L.DomUtil.create('div', 'legenda-mapa'); d.innerHTML = `<i style="border-radius:50%;background:#fff;border:2px solid #294086"></i>pluviômetro da ANA<br>${LEGENDA_USINAS}<br>${LEGENDA_HIDRO}<br><span style="color:#6B7280">passe o mouse para nome e chuva medida</span>`; return d; };
