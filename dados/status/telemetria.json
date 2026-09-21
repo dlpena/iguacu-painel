@@ -61,33 +61,13 @@
    "n": 751,
    "ultimo": "2026-09-21T19:30:00"
   },
-  "65987000": {
-   "n": 188,
-   "ultimo": "2026-09-21T19:00:00"
-  },
-  "65987001": {
-   "n": 188,
-   "ultimo": "2026-09-21T19:00:00"
-  },
-  "65992500": {
-   "n": 188,
-   "ultimo": "2026-09-21T19:00:00"
-  },
-  "65992502": {
-   "n": 184,
-   "ultimo": "2026-09-21T19:00:00"
-  },
   "65993000": {
    "n": 0,
    "ultimo": null
   },
-  "65980200": {
-   "n": 750,
-   "ultimo": "2026-09-21T19:15:00"
-  },
   "65975300": {
-   "n": 751,
-   "ultimo": "2026-09-21T19:30:00"
+   "n": 752,
+   "ultimo": "2026-09-21T19:45:00"
   },
   "65960001": {
    "n": 188,
@@ -177,7 +157,13 @@
  "arquivos": [
   "2026-09.parquet"
  ],
- "erros": [],
+ "erros": [
+  "65987000: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65987000&dataInicio=14%2F09%2F2026&dataFim=21%2F09%2F2026",
+  "65987001: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65987001&dataInicio=14%2F09%2F2026&dataFim=21%2F09%2F2026",
+  "65992500: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65992500&dataInicio=14%2F09%2F2026&dataFim=21%2F09%2F2026",
+  "65992502: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65992502&dataInicio=14%2F09%2F2026&dataFim=21%2F09%2F2026",
+  "65980200: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65980200&dataInicio=14%2F09%2F2026&dataFim=21%2F09%2F2026"
+ ],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-09-21T20:08:33-03:00"
+ "atualizado_em": "2026-09-21T20:13:55-03:00"
 }
