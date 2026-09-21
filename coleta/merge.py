@@ -11,7 +11,7 @@ Grava:
   dados/merge/mlt.json                 MLT mensal oficial na bacia (--mlt, uma vez)
 Uso: py coleta/merge.py [--desde AAAA-MM-DD] [--ate AAAA-MM-DD] [--mlt]
 Padrão: completa os dias faltantes dos últimos 10 dias. Retomável: dias já no CSV não são baixados de novo.
-Armadilha (skill chuva-merge-bacias): o cfgrib nomeia mal a variável; a chuva é identificada pelo intervalo de valores,
+Armadilha (skill chuva-merge-bacias): o cfgrib nomeia mal a variável; a chuva é identificada pela unidade (kg m**-2),
 e a longitude da grade diária vem em 240-340 (a da climatologia já vem em -180..180: máscara própria).
 """
 from __future__ import annotations
@@ -50,12 +50,17 @@ CITACAO = ("INPE/CPTEC, produto MERGE (precipitação diária em grade de 0,1°,
 
 
 def abrir_precip(caminho: Path):
+    """A chuva é a única variável em kg m**-2 (= mm); o nome não serve (cfgrib a chama de "rdp") e o intervalo de
+    valores também não (a outra variável, "prmsl", vai de 1 a ~40 e passaria num teste de 0 a 1000)."""
     ds = xr.open_dataset(str(caminho), engine="cfgrib", backend_kwargs={"indexpath": ""})
-    for nome in ds.data_vars:
-        v = np.asarray(ds[nome].values, dtype=float)
-        if v.ndim == 2 and np.nanmin(v) >= -0.01 and np.nanmax(v) < 1000:
-            return ds, np.clip(v, 0, None)
-    raise RuntimeError(f"variável de chuva não identificada: {list(ds.data_vars)}")
+    chuva = [n for n in ds.data_vars if ds[n].attrs.get("GRIB_units") == "kg m**-2"]
+    if len(chuva) != 1:
+        raise RuntimeError("variável de chuva não identificada pela unidade kg m**-2: "
+                           f"{[(n, ds[n].attrs.get('GRIB_units')) for n in ds.data_vars]}")
+    v = np.asarray(ds[chuva[0]].values, dtype=float)
+    if v.ndim != 2 or np.nanmin(v) < -0.01 or np.nanmax(v) >= 1000:
+        raise RuntimeError(f"chuva fora do esperado em {chuva[0]}: min {np.nanmin(v)}, max {np.nanmax(v)}, ndim {v.ndim}")
+    return ds, np.clip(v, 0, None)
 
 
 def carregar_mascara(ds) -> dict:
