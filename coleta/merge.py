@@ -67,8 +67,11 @@ def abrir_precip(caminho: Path):
     if len(chuva) != 1:
         raise RuntimeError(f"variável PREC (código {PREC}) não encontrada: {[(n, codigo(n)) for n in ds.data_vars]}")
     v = np.asarray(ds[chuva[0]].values, dtype=float)
-    if v.ndim != 2 or np.nanmin(v) < -0.01 or np.nanmax(v) >= 1000:
-        raise RuntimeError(f"chuva fora do esperado em {chuva[0]}: min {np.nanmin(v)}, max {np.nanmax(v)}, ndim {v.ndim}")
+    # Sanidade só do mínimo aqui; o máximo é conferido nas células da bacia (media_ponderada). A grade cobre o
+    # continente e o oceano, e há valores reais acima de 1.000 mm/dia fora do Brasil (15/09/2003: 1.260 mm no
+    # Atlântico Norte, perto de 23°N 67°W). Um teste global parava o dia sem motivo.
+    if v.ndim != 2 or np.nanmin(v) < -0.01:
+        raise RuntimeError(f"chuva fora do esperado em {chuva[0]}: min {np.nanmin(v)}, ndim {v.ndim}")
     return ds, np.clip(v, 0, None)
 
 
@@ -104,8 +107,11 @@ def carregar_mascara(ds) -> dict:
     return out
 
 
-def media_ponderada(vals: np.ndarray, w: np.ndarray) -> float:
+def media_ponderada(vals: np.ndarray, w: np.ndarray, limite=1000) -> float:
+    """limite: máximo aceito numa célula da bacia (mm/dia); None para a climatologia mensal."""
     ok = np.isfinite(vals)
+    if limite is not None and ok.any() and vals[ok].max() >= limite:
+        raise RuntimeError(f"célula da bacia com {vals[ok].max():.1f} mm (limite 1000): conferir antes de usar")
     if w[ok].sum() < MIN_AREA_COM_DADO * w.sum():
         raise RuntimeError(f"só {w[ok].sum() / w.sum():.1%} da área da bacia tem dado neste dia")
     return float((w[ok] * vals[ok]).sum() / w[ok].sum())
@@ -194,7 +200,7 @@ def calcular_mlt() -> dict:
             W, conf = pesos_conferidos(ds["lat"].values, ds["lon"].values)
             log(f"pesos da climatologia: {conf}")
         v = np.asarray(ds["precacum"].squeeze().transpose("lat", "lon").values, dtype=float)
-        mlt[mes] = round(media_ponderada(v[W > 0], W[W > 0]), 1)
+        mlt[mes] = round(media_ponderada(v[W > 0], W[W > 0], limite=None), 1)
         log(f"MLT {mes}: {mlt[mes]} mm")
     out = {"mlt_mm": mlt, "n_celulas": conf["celulas"], "metodo": METODO, "conferencia_area": conf, "periodo": "1998-2024",
            "fonte": "INPE/CPTEC, climatologia mensal do MERGE (MERGE_CPTEC_acum_{mes}.nc), 1998-2024"}
