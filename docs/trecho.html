@@ -30,6 +30,9 @@
   section.bloco > p.sub { margin-bottom: 12px; }
   section.bloco h3 { font-size: 15px; color: var(--azul-escuro); margin: 22px 0 2px; }
   section.bloco p.explica { font-size: 13px; color: var(--texto-suave); margin: 0 0 6px; max-width: 900px; }
+  /* gráficos lado a lado: o texto explicativo ocupa a sobra, e os dois gráficos começam na mesma altura */
+  .par-alinhado > div { display: flex; flex-direction: column; }
+  .par-alinhado > div > p.explica { flex: 1 1 auto; }
   @media (max-width: 700px) { .indice { margin: 14px -14px 0; padding: 8px 14px; }
                               .barra-trecho { position: static; margin: 0 -14px; padding: 6px 14px; } }
 </style>
@@ -79,7 +82,7 @@
     <p class="explica" id="e-vazoes"></p>
     <div id="g-vazoes" class="grafico"></div>
 
-    <div class="grade c2">
+    <div class="grade c2 par-alinhado">
       <div><h3>Nível de montante</h3><p class="explica" id="e-niveis"></p><div id="g-niveis" class="grafico baixo"></div></div>
       <div id="bloco-vu" hidden><h3>Volume útil</h3><p class="explica">Percentual do volume útil do reservatório, dado horário do ONS.</p><div id="g-vu" class="grafico baixo"></div></div>
     </div>
