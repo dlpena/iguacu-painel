@@ -5,21 +5,29 @@
   "fim": "2026-09-22"
  },
  "estacoes": {
+  "65035001": {
+   "n": 170,
+   "ultimo": "2026-09-22T01:00:00"
+  },
+  "65060001": {
+   "n": 170,
+   "ultimo": "2026-09-22T01:00:00"
+  },
   "65220001": {
-   "n": 169,
-   "ultimo": "2026-09-22T00:00:00"
+   "n": 170,
+   "ultimo": "2026-09-22T01:00:00"
   },
   "65310001": {
-   "n": 169,
-   "ultimo": "2026-09-22T00:00:00"
+   "n": 170,
+   "ultimo": "2026-09-22T01:00:00"
   },
   "65365801": {
    "n": 169,
    "ultimo": "2026-09-22T00:00:00"
   },
   "65774400": {
-   "n": 169,
-   "ultimo": "2026-09-22T00:00:00"
+   "n": 170,
+   "ultimo": "2026-09-22T01:00:00"
   },
   "65803001": {
    "n": 169,
@@ -42,48 +50,48 @@
    "ultimo": null
   },
   "65973501": {
-   "n": 169,
-   "ultimo": "2026-09-22T00:00:00"
+   "n": 170,
+   "ultimo": "2026-09-22T01:00:00"
   },
   "65983100": {
    "n": 168,
    "ultimo": "2026-09-21T23:00:00"
   },
   "65984000": {
-   "n": 675,
-   "ultimo": "2026-09-22T00:30:00"
+   "n": 677,
+   "ultimo": "2026-09-22T01:00:00"
   },
   "65987000": {
    "n": 169,
    "ultimo": "2026-09-22T00:00:00"
   },
   "65987001": {
-   "n": 169,
-   "ultimo": "2026-09-22T00:00:00"
+   "n": 170,
+   "ultimo": "2026-09-22T01:00:00"
   },
   "65992500": {
    "n": 168,
    "ultimo": "2026-09-21T23:00:00"
   },
   "65992502": {
-   "n": 165,
-   "ultimo": "2026-09-22T00:00:00"
+   "n": 166,
+   "ultimo": "2026-09-22T01:00:00"
   },
   "65993000": {
    "n": 0,
    "ultimo": null
   },
   "65980200": {
-   "n": 675,
-   "ultimo": "2026-09-22T00:30:00"
-  },
-  "65975300": {
    "n": 676,
    "ultimo": "2026-09-22T00:45:00"
   },
+  "65975300": {
+   "n": 677,
+   "ultimo": "2026-09-22T01:00:00"
+  },
   "65960001": {
-   "n": 169,
-   "ultimo": "2026-09-22T00:00:00"
+   "n": 170,
+   "ultimo": "2026-09-22T01:00:00"
   },
   "65889700": {
    "n": 168,
@@ -169,10 +177,7 @@
  "arquivos": [
   "2026-09.parquet"
  ],
- "erros": [
-  "65035001: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65035001&dataInicio=15%2F09%2F2026&dataFim=22%2F09%2F2026",
-  "65060001: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65060001&dataInicio=15%2F09%2F2026&dataFim=22%2F09%2F2026"
- ],
+ "erros": [],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-09-22T01:12:28-03:00"
+ "atualizado_em": "2026-09-22T01:25:04-03:00"
 }
