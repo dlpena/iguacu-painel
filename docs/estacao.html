@@ -140,7 +140,7 @@
     if (temC) tr.push(traco(r.x, r.arrays.c, 'Cota (m)', PAL.escuro));
     if (temV) tr.push(traco(r.x, r.arrays.v, 'Vazão (m³/s)', PAL.medio, { yaxis: temC ? 'y2' : 'y' }));
     if (!tr.length) document.getElementById('g-serie').innerHTML = '';
-    else Plotly.react('g-serie', tr, layoutBase({ yaxis: { title: temC ? 'cota (m)' : 'm³/s', gridcolor: PAL.grade, tickformat: temC ? ',.2f' : ',d' }, ...(temC && temV ? { yaxis2: { title: 'm³/s', overlaying: 'y', side: 'right', showgrid: false, rangemode: 'tozero' } } : {}) }), CONFIG_PLOT);
+    else Plotly.react('g-serie', tr, layoutBase({ yaxis: { title: temC ? 'cota (m)' : 'm³/s', gridcolor: PAL.grade, tickformat: temC ? ',.2f' : ',d' }, ...(temC && temV ? { yaxis2: { title: 'm³/s', overlaying: 'y', side: 'right', showgrid: false, autorange: true, rangemode: 'nonnegative' } } : {}) }), CONFIG_PLOT);
     desenharChuva();
     document.querySelectorAll('.indice button[data-d]').forEach(b => b.classList.toggle('ativo', +b.dataset.d === dias));
   }
