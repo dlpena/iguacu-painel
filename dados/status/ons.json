@@ -7,14 +7,14 @@
  ],
  "erros": [],
  "ultimo_instante": {
-  "BAIXO IGUACU": "2026-09-25T12:00:00",
+  "BAIXO IGUACU": "2026-09-25T13:00:00",
   "G. B. MUNHOZ": "2026-09-25T13:00:00",
   "SALTO CAXIAS": "2026-09-25T13:00:00",
-  "SALTO OSORIO": "2026-09-25T13:00:00",
-  "SALTO SANTIAGO": "2026-09-25T13:00:00",
+  "SALTO OSORIO": "2026-09-25T14:00:00",
+  "SALTO SANTIAGO": "2026-09-25T14:00:00",
   "SEGREDO": "2026-09-25T13:00:00"
  },
  "citacao_ho": "ONS, Dados Abertos, conjunto \"Dados Hidráulicos por Reservatório – Base horária\" (https://dados.ons.org.br/dataset/dados_hidrologicos_ho)",
  "citacao_di": "ONS, Dados Abertos, conjunto \"Dados Hidráulicos por Reservatório – Base diária\" (https://dados.ons.org.br/dataset/dados-hidrologicos-res)",
- "atualizado_em": "2026-09-25T14:10:46-03:00"
+ "atualizado_em": "2026-09-25T15:10:35-03:00"
 }
