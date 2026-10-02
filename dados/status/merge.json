@@ -1,9 +1,8 @@
 {
- "ok": false,
- "dias_novos": 6,
+ "ok": true,
+ "dias_novos": 7,
  "ultimo_dia": "2026-10-01",
  "falhas": [
-  "2026-09-28: ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-02: ainda não publicado (404)"
  ],
  "meta_grib": {
@@ -20,5 +19,5 @@
   "area_oficial_km2": 65740.9,
   "dif_area_pct": -0.0
  },
- "atualizado_em": "2026-10-02T07:11:34-03:00"
+ "atualizado_em": "2026-10-02T08:13:02-03:00"
 }
