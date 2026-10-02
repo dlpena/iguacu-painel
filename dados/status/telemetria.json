@@ -5,25 +5,33 @@
   "fim": "2026-10-01"
  },
  "estacoes": {
+  "65035001": {
+   "n": 191,
+   "ultimo": "2026-10-01T22:00:00"
+  },
+  "65060001": {
+   "n": 191,
+   "ultimo": "2026-10-01T22:00:00"
+  },
   "65220001": {
-   "n": 190,
-   "ultimo": "2026-10-01T21:00:00"
+   "n": 191,
+   "ultimo": "2026-10-01T22:00:00"
   },
   "65310001": {
-   "n": 190,
-   "ultimo": "2026-10-01T21:00:00"
+   "n": 191,
+   "ultimo": "2026-10-01T22:00:00"
   },
   "65365801": {
-   "n": 189,
-   "ultimo": "2026-10-01T21:00:00"
+   "n": 190,
+   "ultimo": "2026-10-01T22:00:00"
   },
   "65774400": {
-   "n": 190,
-   "ultimo": "2026-10-01T21:00:00"
+   "n": 191,
+   "ultimo": "2026-10-01T22:00:00"
   },
   "65803001": {
-   "n": 92,
-   "ultimo": "2026-10-01T20:00:00"
+   "n": 94,
+   "ultimo": "2026-10-01T22:00:00"
   },
   "65883051": {
    "n": 189,
@@ -42,8 +50,8 @@
    "ultimo": null
   },
   "65973501": {
-   "n": 190,
-   "ultimo": "2026-10-01T21:00:00"
+   "n": 191,
+   "ultimo": "2026-10-01T22:00:00"
   },
   "65983100": {
    "n": 190,
@@ -58,32 +66,32 @@
    "ultimo": "2026-10-01T21:00:00"
   },
   "65987001": {
-   "n": 190,
-   "ultimo": "2026-10-01T21:00:00"
+   "n": 191,
+   "ultimo": "2026-10-01T22:00:00"
   },
   "65992500": {
    "n": 190,
    "ultimo": "2026-10-01T21:00:00"
   },
   "65992502": {
-   "n": 188,
-   "ultimo": "2026-10-01T21:00:00"
+   "n": 189,
+   "ultimo": "2026-10-01T22:00:00"
   },
   "65993000": {
    "n": 0,
    "ultimo": null
   },
   "65980200": {
-   "n": 758,
-   "ultimo": "2026-10-01T21:30:00"
-  },
-  "65975300": {
-   "n": 760,
+   "n": 759,
    "ultimo": "2026-10-01T21:45:00"
   },
+  "65975300": {
+   "n": 761,
+   "ultimo": "2026-10-01T22:00:00"
+  },
   "65960001": {
-   "n": 190,
-   "ultimo": "2026-10-01T21:00:00"
+   "n": 191,
+   "ultimo": "2026-10-01T22:00:00"
   },
   "65889700": {
    "n": 189,
@@ -170,10 +178,7 @@
   "2026-09.parquet",
   "2026-10.parquet"
  ],
- "erros": [
-  "65035001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65035001&dataInicio=24%2F09%2F2026&dataFim=01%2F10%2F2026",
-  "65060001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65060001&dataInicio=24%2F09%2F2026&dataFim=01%2F10%2F2026"
- ],
+ "erros": [],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-10-01T22:13:24-03:00"
+ "atualizado_em": "2026-10-01T22:30:36-03:00"
 }
