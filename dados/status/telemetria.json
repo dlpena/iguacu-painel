@@ -5,6 +5,46 @@
   "fim": "2026-10-08"
  },
  "estacoes": {
+  "65035001": {
+   "n": 174,
+   "ultimo": "2026-10-08T05:00:00"
+  },
+  "65060001": {
+   "n": 174,
+   "ultimo": "2026-10-08T05:00:00"
+  },
+  "65220001": {
+   "n": 174,
+   "ultimo": "2026-10-08T05:00:00"
+  },
+  "65310001": {
+   "n": 172,
+   "ultimo": "2026-10-08T05:00:00"
+  },
+  "65365801": {
+   "n": 173,
+   "ultimo": "2026-10-08T05:00:00"
+  },
+  "65774400": {
+   "n": 174,
+   "ultimo": "2026-10-08T05:00:00"
+  },
+  "65803001": {
+   "n": 174,
+   "ultimo": "2026-10-08T05:00:00"
+  },
+  "65883051": {
+   "n": 173,
+   "ultimo": "2026-10-08T04:00:00"
+  },
+  "65894991": {
+   "n": 173,
+   "ultimo": "2026-10-08T04:00:00"
+  },
+  "65970700": {
+   "n": 0,
+   "ultimo": null
+  },
   "65971500": {
    "n": 0,
    "ultimo": null
@@ -42,12 +82,12 @@
    "ultimo": null
   },
   "65980200": {
-   "n": 694,
-   "ultimo": "2026-10-08T05:15:00"
-  },
-  "65975300": {
    "n": 695,
    "ultimo": "2026-10-08T05:30:00"
+  },
+  "65975300": {
+   "n": 696,
+   "ultimo": "2026-10-08T05:45:00"
   },
   "65960001": {
    "n": 174,
@@ -137,18 +177,7 @@
  "arquivos": [
   "2026-10.parquet"
  ],
- "erros": [
-  "65035001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65035001&dataInicio=01%2F10%2F2026&dataFim=08%2F10%2F2026",
-  "65060001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65060001&dataInicio=01%2F10%2F2026&dataFim=08%2F10%2F2026",
-  "65220001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65220001&dataInicio=01%2F10%2F2026&dataFim=08%2F10%2F2026",
-  "65310001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65310001&dataInicio=01%2F10%2F2026&dataFim=08%2F10%2F2026",
-  "65365801: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65365801&dataInicio=01%2F10%2F2026&dataFim=08%2F10%2F2026",
-  "65774400: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65774400&dataInicio=01%2F10%2F2026&dataFim=08%2F10%2F2026",
-  "65803001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65803001&dataInicio=01%2F10%2F2026&dataFim=08%2F10%2F2026",
-  "65883051: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65883051&dataInicio=01%2F10%2F2026&dataFim=08%2F10%2F2026",
-  "65894991: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65894991&dataInicio=01%2F10%2F2026&dataFim=08%2F10%2F2026",
-  "65970700: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65970700&dataInicio=01%2F10%2F2026&dataFim=08%2F10%2F2026"
- ],
+ "erros": [],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-10-08T05:55:26-03:00"
+ "atualizado_em": "2026-10-08T06:12:22-03:00"
 }
