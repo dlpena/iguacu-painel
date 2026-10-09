@@ -82,12 +82,12 @@
    "ultimo": null
   },
   "65980200": {
-   "n": 693,
-   "ultimo": "2026-10-09T05:00:00"
-  },
-  "65975300": {
    "n": 694,
    "ultimo": "2026-10-09T05:15:00"
+  },
+  "65975300": {
+   "n": 695,
+   "ultimo": "2026-10-09T05:30:00"
   },
   "65960001": {
    "n": 174,
@@ -179,5 +179,5 @@
  ],
  "erros": [],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-10-09T05:48:41-03:00"
+ "atualizado_em": "2026-10-09T06:11:16-03:00"
 }
