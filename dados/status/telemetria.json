@@ -6,28 +6,28 @@
  },
  "estacoes": {
   "65035001": {
-   "n": 189,
-   "ultimo": "2026-10-09T20:00:00"
+   "n": 190,
+   "ultimo": "2026-10-09T21:00:00"
   },
   "65060001": {
-   "n": 189,
-   "ultimo": "2026-10-09T20:00:00"
+   "n": 190,
+   "ultimo": "2026-10-09T21:00:00"
   },
   "65220001": {
-   "n": 189,
-   "ultimo": "2026-10-09T20:00:00"
+   "n": 190,
+   "ultimo": "2026-10-09T21:00:00"
   },
   "65310001": {
-   "n": 187,
-   "ultimo": "2026-10-09T20:00:00"
+   "n": 188,
+   "ultimo": "2026-10-09T21:00:00"
   },
   "65365801": {
-   "n": 188,
-   "ultimo": "2026-10-09T20:00:00"
+   "n": 189,
+   "ultimo": "2026-10-09T21:00:00"
   },
   "65774400": {
-   "n": 189,
-   "ultimo": "2026-10-09T20:00:00"
+   "n": 190,
+   "ultimo": "2026-10-09T21:00:00"
   },
   "65803001": {
    "n": 189,
@@ -50,8 +50,8 @@
    "ultimo": null
   },
   "65973501": {
-   "n": 189,
-   "ultimo": "2026-10-09T20:00:00"
+   "n": 190,
+   "ultimo": "2026-10-09T21:00:00"
   },
   "65983100": {
    "n": 189,
@@ -62,28 +62,36 @@
    "ultimo": null
   },
   "65987000": {
-   "n": 189,
-   "ultimo": "2026-10-09T20:00:00"
+   "n": 190,
+   "ultimo": "2026-10-09T21:00:00"
   },
   "65987001": {
-   "n": 189,
-   "ultimo": "2026-10-09T20:00:00"
+   "n": 190,
+   "ultimo": "2026-10-09T21:00:00"
   },
   "65992500": {
-   "n": 189,
-   "ultimo": "2026-10-09T20:00:00"
+   "n": 190,
+   "ultimo": "2026-10-09T21:00:00"
+  },
+  "65992502": {
+   "n": 190,
+   "ultimo": "2026-10-09T21:00:00"
+  },
+  "65993000": {
+   "n": 0,
+   "ultimo": null
   },
   "65980200": {
-   "n": 755,
-   "ultimo": "2026-10-09T20:30:00"
-  },
-  "65975300": {
    "n": 756,
    "ultimo": "2026-10-09T20:45:00"
   },
+  "65975300": {
+   "n": 757,
+   "ultimo": "2026-10-09T21:00:00"
+  },
   "65960001": {
-   "n": 189,
-   "ultimo": "2026-10-09T20:00:00"
+   "n": 190,
+   "ultimo": "2026-10-09T21:00:00"
   },
   "65889700": {
    "n": 188,
@@ -169,10 +177,7 @@
  "arquivos": [
   "2026-10.parquet"
  ],
- "erros": [
-  "65992502: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65992502&dataInicio=02%2F10%2F2026&dataFim=09%2F10%2F2026",
-  "65993000: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65993000&dataInicio=02%2F10%2F2026&dataFim=09%2F10%2F2026"
- ],
+ "erros": [],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-10-09T21:12:15-03:00"
+ "atualizado_em": "2026-10-09T21:40:25-03:00"
 }
