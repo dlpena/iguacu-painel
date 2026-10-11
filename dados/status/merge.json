@@ -1,13 +1,18 @@
 {
- "ok": true,
- "dias_novos": 8,
+ "ok": false,
+ "dias_novos": 0,
  "ultimo_dia": "2026-10-11",
- "falhas": [],
- "meta_grib": {
-  "time": "2026-10-04T12:00:00.000000000",
-  "step": "0 nanoseconds",
-  "valid_time": "2026-10-04T12:00:00.000000000"
- },
+ "falhas": [
+  "2026-10-04: ConnectionError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/10/MERGE_CPTEC_20261004.grib2 (Caused by NewConnectionError(\"HTTPSConnection(host='ftp.cptec.inpe.br', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+  "2026-10-05: ConnectionError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/10/MERGE_CPTEC_20261005.grib2 (Caused by NewConnectionError(\"HTTPSConnection(host='ftp.cptec.inpe.br', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+  "2026-10-06: ConnectionError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/10/MERGE_CPTEC_20261006.grib2 (Caused by NewConnectionError(\"HTTPSConnection(host='ftp.cptec.inpe.br', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+  "2026-10-07: ConnectionError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/10/MERGE_CPTEC_20261007.grib2 (Caused by NewConnectionError(\"HTTPSConnection(host='ftp.cptec.inpe.br', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+  "2026-10-08: ConnectionError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/10/MERGE_CPTEC_20261008.grib2 (Caused by NewConnectionError(\"HTTPSConnection(host='ftp.cptec.inpe.br', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+  "2026-10-09: ConnectionError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/10/MERGE_CPTEC_20261009.grib2 (Caused by NewConnectionError(\"HTTPSConnection(host='ftp.cptec.inpe.br', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+  "2026-10-10: ConnectionError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/10/MERGE_CPTEC_20261010.grib2 (Caused by NewConnectionError(\"HTTPSConnection(host='ftp.cptec.inpe.br', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+  "2026-10-11: ConnectionError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/10/MERGE_CPTEC_20261011.grib2 (Caused by NewConnectionError(\"HTTPSConnection(host='ftp.cptec.inpe.br', port=443): Failed to establish a new connection: [Errno 111] Connection refused\"))"
+ ],
+ "meta_grib": {},
  "citacao": "INPE/CPTEC, produto MERGE (precipitação diária em grade de 0,1°, satélite GPM combinado com pluviômetros), https://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/",
  "metodo": "area-ponderada-1",
  "conferencia_area": {
@@ -17,5 +22,5 @@
   "area_oficial_km2": 65740.9,
   "dif_area_pct": -0.0
  },
- "atualizado_em": "2026-10-11T18:11:23-03:00"
+ "atualizado_em": "2026-10-11T19:12:04-03:00"
 }
