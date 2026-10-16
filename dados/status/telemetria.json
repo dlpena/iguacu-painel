@@ -61,6 +61,14 @@
    "n": 0,
    "ultimo": null
   },
+  "65987000": {
+   "n": 189,
+   "ultimo": "2026-10-15T20:00:00"
+  },
+  "65987001": {
+   "n": 189,
+   "ultimo": "2026-10-15T20:00:00"
+  },
   "65992500": {
    "n": 188,
    "ultimo": "2026-10-15T20:00:00"
@@ -169,10 +177,7 @@
  "arquivos": [
   "2026-10.parquet"
  ],
- "erros": [
-  "65987000: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65987000&dataInicio=08%2F10%2F2026&dataFim=15%2F10%2F2026",
-  "65987001: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65987001&dataInicio=08%2F10%2F2026&dataFim=15%2F10%2F2026"
- ],
+ "erros": [],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-10-15T21:12:39-03:00"
+ "atualizado_em": "2026-10-15T21:17:21-03:00"
 }
