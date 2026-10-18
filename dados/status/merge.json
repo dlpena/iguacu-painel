@@ -1,10 +1,8 @@
 {
  "ok": true,
- "dias_novos": 7,
- "ultimo_dia": "2026-10-17",
- "falhas": [
-  "2026-10-18: ainda não publicado (404)"
- ],
+ "dias_novos": 8,
+ "ultimo_dia": "2026-10-18",
+ "falhas": [],
  "meta_grib": {
   "time": "2026-10-11T12:00:00.000000000",
   "step": "0 nanoseconds",
@@ -19,5 +17,5 @@
   "area_oficial_km2": 65740.9,
   "dif_area_pct": -0.0
  },
- "atualizado_em": "2026-10-18T13:11:59-03:00"
+ "atualizado_em": "2026-10-18T14:13:41-03:00"
 }
