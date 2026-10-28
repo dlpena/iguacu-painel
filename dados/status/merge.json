@@ -1,11 +1,9 @@
 {
- "ok": false,
- "dias_novos": 5,
+ "ok": true,
+ "dias_novos": 7,
  "ultimo_dia": "2026-10-27",
  "falhas": [
-  "2026-10-24: ReadTimeout: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Read timed out. (read timeout=10)",
-  "2026-10-26: ReadTimeout: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Read timed out. (read timeout=10)",
-  "2026-10-28: ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+  "2026-10-28: ainda não publicado (404)"
  ],
  "meta_grib": {
   "time": "2026-10-21T12:00:00.000000000",
@@ -21,5 +19,5 @@
   "area_oficial_km2": 65740.9,
   "dif_area_pct": -0.0
  },
- "atualizado_em": "2026-10-28T01:12:29-03:00"
+ "atualizado_em": "2026-10-28T02:09:51-03:00"
 }
