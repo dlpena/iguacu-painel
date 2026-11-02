@@ -65,10 +65,6 @@
    "n": 183,
    "ultimo": "2026-11-02T14:00:00"
   },
-  "65987001": {
-   "n": 183,
-   "ultimo": "2026-11-02T14:00:00"
-  },
   "65992500": {
    "n": 180,
    "ultimo": "2026-11-02T14:00:00"
@@ -178,7 +174,9 @@
   "2026-10.parquet",
   "2026-11.parquet"
  ],
- "erros": [],
+ "erros": [
+  "65987001: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65987001&dataInicio=26%2F10%2F2026&dataFim=02%2F11%2F2026"
+ ],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-11-02T15:07:11-03:00"
+ "atualizado_em": "2026-11-02T15:12:32-03:00"
 }
