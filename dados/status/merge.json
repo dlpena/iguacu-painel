@@ -1,15 +1,18 @@
 {
- "ok": true,
- "dias_novos": 7,
+ "ok": false,
+ "dias_novos": 0,
  "ultimo_dia": "2026-11-04",
  "falhas": [
-  "2026-11-05: ainda não publicado (404)"
+  "2026-10-29: ConnectTimeout: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/10/MERGE_CPTEC_20261029.grib2 (Caused by ConnectTimeoutError(<HTTPSConnection(host='ftp.cptec.inpe.br', port=443) at 0x7ae908dcb5c0>, 'Connection to ftp.cptec.inpe.br timed out. (connect timeout=10)'))",
+  "2026-10-30: ConnectTimeout: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/10/MERGE_CPTEC_20261030.grib2 (Caused by ConnectTimeoutError(<HTTPSConnection(host='ftp.cptec.inpe.br', port=443) at 0x7ae908bbec90>, 'Connection to ftp.cptec.inpe.br timed out. (connect timeout=10)'))",
+  "2026-10-31: ConnectTimeout: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/10/MERGE_CPTEC_20261031.grib2 (Caused by ConnectTimeoutError(<HTTPSConnection(host='ftp.cptec.inpe.br', port=443) at 0x7ae908bbeff0>, 'Connection to ftp.cptec.inpe.br timed out. (connect timeout=10)'))",
+  "2026-11-01: ConnectTimeout: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261101.grib2 (Caused by ConnectTimeoutError(<HTTPSConnection(host='ftp.cptec.inpe.br', port=443) at 0x7ae908bbeae0>, 'Connection to ftp.cptec.inpe.br timed out. (connect timeout=10)'))",
+  "2026-11-02: ConnectTimeout: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261102.grib2 (Caused by ConnectTimeoutError(<HTTPSConnection(host='ftp.cptec.inpe.br', port=443) at 0x7ae908bbf110>, 'Connection to ftp.cptec.inpe.br timed out. (connect timeout=10)'))",
+  "2026-11-03: ConnectTimeout: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261103.grib2 (Caused by ConnectTimeoutError(<HTTPSConnection(host='ftp.cptec.inpe.br', port=443) at 0x7ae908bbf440>, 'Connection to ftp.cptec.inpe.br timed out. (connect timeout=10)'))",
+  "2026-11-04: ConnectTimeout: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261104.grib2 (Caused by ConnectTimeoutError(<HTTPSConnection(host='ftp.cptec.inpe.br', port=443) at 0x7ae908bbf7a0>, 'Connection to ftp.cptec.inpe.br timed out. (connect timeout=10)'))",
+  "2026-11-05: ConnectTimeout: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261105.grib2 (Caused by ConnectTimeoutError(<HTTPSConnection(host='ftp.cptec.inpe.br', port=443) at 0x7ae908bbfb90>, 'Connection to ftp.cptec.inpe.br timed out. (connect timeout=10)'))"
  ],
- "meta_grib": {
-  "time": "2026-10-29T12:00:00.000000000",
-  "step": "0 nanoseconds",
-  "valid_time": "2026-10-29T12:00:00.000000000"
- },
+ "meta_grib": {},
  "citacao": "INPE/CPTEC, produto MERGE (precipitação diária em grade de 0,1°, satélite GPM combinado com pluviômetros), https://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/",
  "metodo": "area-ponderada-1",
  "conferencia_area": {
@@ -19,5 +22,5 @@
   "area_oficial_km2": 65740.9,
   "dif_area_pct": -0.0
  },
- "atualizado_em": "2026-11-05T04:12:54-03:00"
+ "atualizado_em": "2026-11-05T05:24:29-03:00"
 }
