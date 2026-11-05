@@ -305,7 +305,7 @@ data,chuva_mm,n_celulas,versao,metodo
 2026-10-29,0.043,696,late,area-ponderada-1
 2026-10-30,7.754,696,late,area-ponderada-1
 2026-10-31,1.033,696,late,area-ponderada-1
-2026-11-01,0.568,696,late,area-ponderada-1
+2026-11-01,0.568,696,,area-ponderada-1
 2026-11-02,18.996,696,late,area-ponderada-1
 2026-11-03,0.605,696,late,area-ponderada-1
 2026-11-04,1.178,696,late,area-ponderada-1
