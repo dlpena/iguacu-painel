@@ -61,13 +61,49 @@
    "n": 0,
    "ultimo": null
   },
+  "65987000": {
+   "n": 186,
+   "ultimo": "2026-11-06T17:00:00"
+  },
+  "65987001": {
+   "n": 184,
+   "ultimo": "2026-11-06T15:00:00"
+  },
+  "65992500": {
+   "n": 186,
+   "ultimo": "2026-11-06T17:00:00"
+  },
+  "65992502": {
+   "n": 184,
+   "ultimo": "2026-11-06T15:00:00"
+  },
   "65993000": {
    "n": 0,
    "ultimo": null
   },
+  "65980200": {
+   "n": 743,
+   "ultimo": "2026-11-06T17:30:00"
+  },
+  "65975300": {
+   "n": 735,
+   "ultimo": "2026-11-06T15:45:00"
+  },
+  "65960001": {
+   "n": 184,
+   "ultimo": "2026-11-06T15:00:00"
+  },
+  "65889700": {
+   "n": 185,
+   "ultimo": "2026-11-06T16:00:00"
+  },
   "2552070": {
    "n": 0,
    "ultimo": null
+  },
+  "2551063": {
+   "n": 185,
+   "ultimo": "2026-11-06T16:00:00"
   },
   "2552030": {
    "n": 0,
@@ -142,17 +178,7 @@
   "2026-10.parquet",
   "2026-11.parquet"
  ],
- "erros": [
-  "65987000: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65987000&dataInicio=30%2F10%2F2026&dataFim=06%2F11%2F2026",
-  "65987001: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65987001&dataInicio=30%2F10%2F2026&dataFim=06%2F11%2F2026",
-  "65992500: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65992500&dataInicio=30%2F10%2F2026&dataFim=06%2F11%2F2026",
-  "65992502: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65992502&dataInicio=30%2F10%2F2026&dataFim=06%2F11%2F2026",
-  "65980200: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65980200&dataInicio=30%2F10%2F2026&dataFim=06%2F11%2F2026",
-  "65975300: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65975300&dataInicio=30%2F10%2F2026&dataFim=06%2F11%2F2026",
-  "65960001: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65960001&dataInicio=30%2F10%2F2026&dataFim=06%2F11%2F2026",
-  "65889700: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65889700&dataInicio=30%2F10%2F2026&dataFim=06%2F11%2F2026",
-  "2551063: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2551063&dataInicio=30%2F10%2F2026&dataFim=06%2F11%2F2026"
- ],
+ "erros": [],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-11-06T18:15:43-03:00"
+ "atualizado_em": "2026-11-06T18:25:52-03:00"
 }
