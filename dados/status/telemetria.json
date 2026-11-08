@@ -5,6 +5,18 @@
   "fim": "2026-11-07"
  },
  "estacoes": {
+  "65035001": {
+   "n": 181,
+   "ultimo": "2026-11-07T12:00:00"
+  },
+  "65365801": {
+   "n": 189,
+   "ultimo": "2026-11-07T20:00:00"
+  },
+  "65774400": {
+   "n": 189,
+   "ultimo": "2026-11-07T20:00:00"
+  },
   "65803001": {
    "n": 189,
    "ultimo": "2026-11-07T20:00:00"
@@ -58,11 +70,11 @@
    "ultimo": null
   },
   "65980200": {
-   "n": 752,
-   "ultimo": "2026-11-07T19:45:00"
+   "n": 754,
+   "ultimo": "2026-11-07T20:15:00"
   },
   "65975300": {
-   "n": 749,
+   "n": 751,
    "ultimo": "2026-11-07T20:00:00"
   },
   "65960001": {
@@ -155,13 +167,10 @@
   "2026-11.parquet"
  ],
  "erros": [
-  "65035001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65035001&dataInicio=31%2F10%2F2026&dataFim=07%2F11%2F2026",
-  "65060001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65060001&dataInicio=31%2F10%2F2026&dataFim=07%2F11%2F2026",
-  "65220001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65220001&dataInicio=31%2F10%2F2026&dataFim=07%2F11%2F2026",
-  "65310001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65310001&dataInicio=31%2F10%2F2026&dataFim=07%2F11%2F2026",
-  "65365801: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65365801&dataInicio=31%2F10%2F2026&dataFim=07%2F11%2F2026",
-  "65774400: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65774400&dataInicio=31%2F10%2F2026&dataFim=07%2F11%2F2026"
+  "65060001: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65060001&dataInicio=31%2F10%2F2026&dataFim=07%2F11%2F2026",
+  "65220001: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65220001&dataInicio=31%2F10%2F2026&dataFim=07%2F11%2F2026",
+  "65310001: HTTPError: 500 Server Error: Internal Server Error for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65310001&dataInicio=31%2F10%2F2026&dataFim=07%2F11%2F2026"
  ],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-11-07T20:44:15-03:00"
+ "atualizado_em": "2026-11-07T21:13:09-03:00"
 }
