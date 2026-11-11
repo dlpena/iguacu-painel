@@ -1,11 +1,8 @@
 {
- "ok": false,
- "dias_novos": 6,
- "ultimo_dia": "2026-11-10",
- "falhas": [
-  "2026-11-05: ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
-  "2026-11-11: ainda não publicado (404)"
- ],
+ "ok": true,
+ "dias_novos": 8,
+ "ultimo_dia": "2026-11-11",
+ "falhas": [],
  "meta_grib": {
   "time": "2026-11-04T12:00:00.000000000",
   "step": "0 nanoseconds",
@@ -20,5 +17,5 @@
   "area_oficial_km2": 65740.9,
   "dif_area_pct": -0.0
  },
- "atualizado_em": "2026-11-11T13:12:51-03:00"
+ "atualizado_em": "2026-11-11T14:11:36-03:00"
 }
