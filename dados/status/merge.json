@@ -1,18 +1,15 @@
 {
- "ok": false,
- "dias_novos": 0,
- "ultimo_dia": "2026-11-16",
+ "ok": true,
+ "dias_novos": 7,
+ "ultimo_dia": "2026-11-18",
  "falhas": [
-  "2026-11-12: SSLError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261112.grib2 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1011)')))",
-  "2026-11-13: SSLError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261113.grib2 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1011)')))",
-  "2026-11-14: SSLError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261114.grib2 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1011)')))",
-  "2026-11-15: SSLError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261115.grib2 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1011)')))",
-  "2026-11-16: SSLError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261116.grib2 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1011)')))",
-  "2026-11-17: SSLError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261117.grib2 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1011)')))",
-  "2026-11-18: SSLError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261118.grib2 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1011)')))",
-  "2026-11-19: SSLError: HTTPSConnectionPool(host='ftp.cptec.inpe.br', port=443): Max retries exceeded with url: /modelos/tempo/MERGE/GPM/DAILY/2026/11/MERGE_CPTEC_20261119.grib2 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1011)')))"
+  "2026-11-19: ainda não publicado (404)"
  ],
- "meta_grib": {},
+ "meta_grib": {
+  "time": "2026-11-12T12:00:00.000000000",
+  "step": "0 nanoseconds",
+  "valid_time": "2026-11-12T12:00:00.000000000"
+ },
  "citacao": "INPE/CPTEC, produto MERGE (precipitação diária em grade de 0,1°, satélite GPM combinado com pluviômetros), https://ftp.cptec.inpe.br/modelos/tempo/MERGE/GPM/DAILY/",
  "metodo": "area-ponderada-1",
  "conferencia_area": {
@@ -22,5 +19,5 @@
   "area_oficial_km2": 65740.9,
   "dif_area_pct": -0.0
  },
- "atualizado_em": "2026-11-19T10:12:55-03:00"
+ "atualizado_em": "2026-11-19T11:14:50-03:00"
 }
