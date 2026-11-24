@@ -321,10 +321,11 @@ data,chuva_mm,n_celulas,versao,metodo
 2026-11-14,0.48,696,late,area-ponderada-1
 2026-11-15,3.192,696,late,area-ponderada-1
 2026-11-16,11.985,696,late,area-ponderada-1
-2026-11-17,0.489,696,late,area-ponderada-1
-2026-11-18,13.279,696,late,area-ponderada-1
-2026-11-19,1.514,696,late,area-ponderada-1
-2026-11-20,0.653,696,late,area-ponderada-1
+2026-11-17,0.502,696,early,area-ponderada-1
+2026-11-18,13.181,696,early,area-ponderada-1
+2026-11-19,1.544,696,early,area-ponderada-1
+2026-11-20,0.671,696,early,area-ponderada-1
 2026-11-21,21.4,696,early,area-ponderada-1
-2026-11-22,4.101,696,late,area-ponderada-1
-2026-11-23,15.165,696,late,area-ponderada-1
+2026-11-22,4.129,696,early,area-ponderada-1
+2026-11-23,15.156,696,early,area-ponderada-1
+2026-11-24,3.253,696,early,area-ponderada-1
