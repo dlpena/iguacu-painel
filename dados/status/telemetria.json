@@ -5,10 +5,6 @@
   "fim": "2026-11-26"
  },
  "estacoes": {
-  "65035001": {
-   "n": 180,
-   "ultimo": "2026-11-26T11:00:00"
-  },
   "65060001": {
    "n": 180,
    "ultimo": "2026-11-26T11:00:00"
@@ -82,12 +78,12 @@
    "ultimo": null
   },
   "65980200": {
-   "n": 719,
-   "ultimo": "2026-11-26T11:30:00"
+   "n": 720,
+   "ultimo": "2026-11-26T11:45:00"
   },
   "65975300": {
-   "n": 710,
-   "ultimo": "2026-11-26T09:15:00"
+   "n": 711,
+   "ultimo": "2026-11-26T09:30:00"
   },
   "65960001": {
    "n": 180,
@@ -118,14 +114,6 @@
    "ultimo": null
   },
   "2553071": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2553073": {
-   "n": 0,
-   "ultimo": null
-  },
-  "2651058": {
    "n": 0,
    "ultimo": null
   },
@@ -177,7 +165,11 @@
  "arquivos": [
   "2026-11.parquet"
  ],
- "erros": [],
+ "erros": [
+  "65035001: HTTPError: 504 Server Error: Gateway Time-out for url: https://telemetriaws1.ana.gov.br/ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=65035001&dataInicio=19%2F11%2F2026&dataFim=26%2F11%2F2026",
+  "2553073: ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2651058: SSLError: HTTPSConnectionPool(host='telemetriaws1.ana.gov.br', port=443): Max retries exceeded with url: /ServiceANA.asmx/DadosHidrometeorologicos?codEstacao=2651058&dataInicio=19%2F11%2F2026&dataFim=26%2F11%2F2026 (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1011)')))"
+ ],
  "citacao": "ANA, webservice de telemetria (https://telemetriaws1.ana.gov.br/ServiceANA.asmx), método DadosHidrometeorologicos, dados brutos sem consistência",
- "atualizado_em": "2026-11-26T11:57:15-03:00"
+ "atualizado_em": "2026-11-26T12:18:01-03:00"
 }
